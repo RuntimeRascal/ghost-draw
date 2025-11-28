@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using GhostDraw.Services;
 using Microsoft.Extensions.Logging;
 using WpfCursors = System.Windows.Input.Cursors;
 

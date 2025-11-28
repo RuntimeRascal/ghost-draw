@@ -1,3 +1,4 @@
+using GhostDraw.Services;
 using Serilog.Events;
 
 namespace GhostDraw

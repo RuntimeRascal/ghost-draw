@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Windows;
+using GhostDraw.Services;
 using Microsoft.Extensions.Logging;
 
 namespace GhostDraw

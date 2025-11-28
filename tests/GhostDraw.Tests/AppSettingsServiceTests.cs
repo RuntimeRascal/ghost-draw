@@ -4,6 +4,7 @@ using Xunit;
 using System.IO;
 using System;
 using System.Text.Json;
+using GhostDraw.Services;
 
 namespace GhostDraw.Tests
 {

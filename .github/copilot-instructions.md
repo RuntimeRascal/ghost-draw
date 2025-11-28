@@ -270,12 +270,29 @@ When suggesting new features, consider:
 - **Accessibility** (screen readers, high contrast mode)
 - **Localization** (internationalization support)
 
+## Settings Architecture
+
+**IMPORTANT**: Before modifying any settings-related code, read the comprehensive settings architecture documentation:
+
+📄 **[Settings Architecture Guide](../docs/settings-architecture.md)**
+
+This document covers:
+- Settings data flow and persistence
+- The critical **nesting level pattern** (prevents recursion bugs)
+- Event handling best practices
+- Common pitfalls and solutions
+- How to add new settings correctly
+- Testing considerations
+
+**Key Rule**: When updating UI from events or calling settings service methods, ALWAYS use the nesting level pattern to prevent infinite recursion.
+
 ## Resources
 
 - [Low-Level Keyboard Hook Documentation](https://learn.microsoft.com/en-us/windows/win32/winmsg/lowlevelkeyboardproc)
 - [WPF Transparent Windows Best Practices](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/windows/)
 - [Serilog Best Practices](https://github.com/serilog/serilog/wiki/Writing-Log-Events)
 - [Microsoft.Extensions.Logging Documentation](https://learn.microsoft.com/en-us/dotnet/core/extensions/logging)
+- [Settings Architecture Guide](../docs/settings-architecture.md) - Internal architecture documentation
 
 ---
 
