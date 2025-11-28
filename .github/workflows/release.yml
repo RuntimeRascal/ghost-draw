@@ -1,0 +1,139 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v1.2.3, etc.
+
+permissions:
+  contents: write  # Required for creating releases
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for proper versioning
+
+      - name: Extract version from tag
+        id: get_version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag -replace '^v', ''
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          echo "Version: $version"
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install WiX Toolset
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 4.0.5
+          dotnet --version
+          wix --version
+
+      - name: Restore dependencies
+        run: dotnet restore src/GhostDraw.csproj
+
+      - name: Build and publish application
+        shell: pwsh
+        run: |
+          dotnet publish src/GhostDraw.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=false `
+            -p:Version=${{ steps.get_version.outputs.VERSION }}
+
+      - name: Generate WiX component list
+        shell: pwsh
+        working-directory: installer
+        run: |
+          .\Generate-FileList.ps1 `
+            -PublishPath "..\src\bin\Release\net8.0-windows\win-x64\publish" `
+            -OutputFile "HarvestedFiles.wxs"
+
+      - name: Build installer MSI
+        shell: pwsh
+        working-directory: installer
+        run: |
+          dotnet build GhostDraw.Installer.wixproj `
+            -c Release `
+            -p:Version=${{ steps.get_version.outputs.VERSION }} `
+            -p:PublishDir="..\src\bin\Release\net8.0-windows\win-x64\publish\"
+
+      - name: Verify installer created
+        shell: pwsh
+        run: |
+          $msiPath = "installer\bin\x64\Release\GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi"
+          if (Test-Path $msiPath) {
+            $size = (Get-Item $msiPath).Length / 1MB
+            Write-Host "✓ Installer created: $msiPath"
+            Write-Host "  Size: $([math]::Round($size, 2)) MB"
+          } else {
+            Write-Error "Installer not found at: $msiPath"
+            exit 1
+          }
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: GhostDraw ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## GhostDraw v${{ steps.get_version.outputs.VERSION }}
+
+            ### Installation
+
+            Download `GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi` and run it.
+
+            **Requirements:** Windows 10/11 (64-bit) - No additional dependencies needed
+
+            ### Features
+
+            - Press and hold **Ctrl+Alt+D**, then click and drag to draw on screen
+            - Release **Ctrl+Alt+D** to clear the drawing
+            - Press **ESC** to force clear if needed
+            - Runs in system tray
+            - Configurable hotkeys, colors, and brush thickness
+
+            ### What's Changed
+
+            See commit history for detailed changes.
+
+            ---
+
+            🤖 Generated with [GitHub Actions](https://github.com/${{ github.repository }}/actions)
+          draft: false
+          prerelease: false
+
+      - name: Upload MSI to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./installer/bin/x64/Release/GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi
+          asset_name: GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi
+          asset_content_type: application/x-msi
+
+      - name: Build summary
+        shell: pwsh
+        run: |
+          Write-Host "=====================================" -ForegroundColor Cyan
+          Write-Host " Release Build Complete! " -ForegroundColor Green
+          Write-Host "=====================================" -ForegroundColor Cyan
+          Write-Host ""
+          Write-Host "Version: ${{ steps.get_version.outputs.VERSION }}" -ForegroundColor White
+          Write-Host "Installer: GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi" -ForegroundColor White
+          Write-Host "Release: ${{ steps.create_release.outputs.html_url }}" -ForegroundColor White

@@ -1,0 +1,91 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install WiX Toolset
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 4.0.5
+          wix --version
+
+      - name: Restore dependencies
+        run: dotnet restore src/GhostDraw.csproj
+
+      - name: Build application
+        run: dotnet build src/GhostDraw.csproj -c Release --no-restore
+
+      - name: Run tests
+        run: dotnet test src/GhostDraw.sln -c Release --no-build --verbosity normal
+
+      - name: Publish application
+        shell: pwsh
+        run: |
+          dotnet publish src/GhostDraw.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=false `
+            -p:Version=0.0.0-ci
+
+      - name: Generate WiX component list
+        shell: pwsh
+        working-directory: installer
+        run: |
+          .\Generate-FileList.ps1 `
+            -PublishPath "..\src\bin\Release\net8.0-windows\win-x64\publish" `
+            -OutputFile "HarvestedFiles.wxs"
+
+      - name: Build installer MSI
+        shell: pwsh
+        working-directory: installer
+        run: |
+          dotnet build GhostDraw.Installer.wixproj `
+            -c Release `
+            -p:Version=0.0.0-ci `
+            -p:PublishDir="..\src\bin\Release\net8.0-windows\win-x64\publish\"
+
+      - name: Verify build outputs
+        shell: pwsh
+        run: |
+          $exePath = "src\bin\Release\net8.0-windows\win-x64\publish\GhostDraw.exe"
+          $msiPath = "installer\bin\x64\Release\GhostDrawSetup-0.0.0-ci.msi"
+
+          if (Test-Path $exePath) {
+            Write-Host "✓ Application EXE built successfully" -ForegroundColor Green
+          } else {
+            Write-Error "Application EXE not found"
+            exit 1
+          }
+
+          if (Test-Path $msiPath) {
+            $size = (Get-Item $msiPath).Length / 1MB
+            Write-Host "✓ Installer MSI built successfully" -ForegroundColor Green
+            Write-Host "  Size: $([math]::Round($size, 2)) MB" -ForegroundColor Gray
+          } else {
+            Write-Error "Installer MSI not found"
+            exit 1
+          }
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GhostDrawSetup-CI-${{ github.sha }}
+          path: installer/bin/x64/Release/GhostDrawSetup-0.0.0-ci.msi
+          retention-days: 7
