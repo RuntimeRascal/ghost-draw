@@ -144,10 +144,25 @@ namespace GhostDraw.Helpers
             var names = virtualKeys
                 .Select(GetFriendlyName)
                 .Distinct()
-                .OrderBy(name => IsModifierName(name) ? 0 : 1)  // Modifiers first
+                .OrderBy(name => GetModifierOrder(name))  // Modifiers in standard order
                 .ThenBy(name => name);
             
             return string.Join(" + ", names);
+        }
+        
+        /// <summary>
+        /// Gets the sort order for a key name (modifiers first in standard order, then others)
+        /// </summary>
+        private static int GetModifierOrder(string name)
+        {
+            return name switch
+            {
+                "Ctrl" => 0,
+                "Alt" => 1,
+                "Shift" => 2,
+                "Win" => 3,
+                _ => 100  // Non-modifiers last
+            };
         }
         
         /// <summary>
