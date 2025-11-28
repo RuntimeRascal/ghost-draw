@@ -1,10 +1,14 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog.Events;
 using WpfColor = System.Windows.Media.Color;
 using WpfBrush = System.Windows.Media.Brushes;
 using WpfColorConverter = System.Windows.Media.ColorConverter;
+using WpfMessageBox = System.Windows.MessageBox;
 
 namespace GhostDraw
 {
@@ -12,12 +16,23 @@ namespace GhostDraw
     {
         private readonly LoggingSettingsService _loggingSettings;
         private readonly AppSettingsService _appSettings;
+        private readonly ILogger<SettingsWindow> _logger;
+        private readonly ILoggerFactory _loggerFactory;
+        private bool _isUpdatingFromEvent = false; // Prevent recursive updates
+        
+        // Hotkey recording state
+        private bool _isRecording = false;
+        private HashSet<int> _recordedKeys = new();
+        private GlobalKeyboardHook? _recorderHook;
+
         private int _updateNestingLevel = 0; // Track nesting depth of updates to prevent recursion
 
-        public SettingsWindow(LoggingSettingsService loggingSettings, AppSettingsService appSettings)
+        public SettingsWindow(LoggingSettingsService loggingSettings, AppSettingsService appSettings, ILogger<SettingsWindow> logger, ILoggerFactory loggerFactory)
         {
             _loggingSettings = loggingSettings;
             _appSettings = appSettings;
+            _logger = logger;
+            _loggerFactory = loggerFactory;
             InitializeComponent();
 
             // Load settings BEFORE subscribing to events
@@ -190,7 +205,7 @@ namespace GhostDraw
                 System.Diagnostics.Debug.WriteLine($"Slider set: Min={ThicknessSlider.Minimum}, Max={ThicknessSlider.Maximum}, Value={ThicknessSlider.Value}");
 
                 // Load hotkey display
-                CurrentHotkeyText.Text = $"{settings.HotkeyModifier1} + {settings.HotkeyModifier2} + {settings.HotkeyKey}";
+                CurrentHotkeyText.Text = settings.HotkeyDisplayName;
 
                 // Load lock mode
                 LockModeCheckBox.IsChecked = settings.LockDrawingMode;
@@ -536,6 +551,219 @@ namespace GhostDraw
             public string DisplayName { get; set; } = string.Empty;
 
             public override string ToString() => DisplayName;
+        }
+
+        // ====================
+        // Hotkey Recording
+        // ====================
+
+        private void RecordButton_Click(object sender, RoutedEventArgs e)
+        {
+            StartRecording();
+        }
+
+        private void StartRecording()
+        {
+            _isRecording = true;
+            _recordedKeys.Clear();
+            
+            // Show recorder UI
+            RecorderBox.Visibility = Visibility.Visible;
+            RecordButton.Visibility = Visibility.Collapsed;
+            CancelRecordButton.Visibility = Visibility.Visible;
+            RecorderStatusText.Foreground = new SolidColorBrush((WpfColor)WpfColorConverter.ConvertFromString("#FF0080"));
+            RecorderStatusText.Text = "?? RECORDING... Press your hotkey combination";
+            RecorderPreviewText.Text = "Waiting for keys...";
+            
+            // Create temporary hook for recording
+            var hookLogger = _loggerFactory.CreateLogger<GlobalKeyboardHook>();
+            _recorderHook = new GlobalKeyboardHook(hookLogger);
+            _recorderHook.KeyPressed += OnRecorderKeyPressed;
+            _recorderHook.KeyReleased += OnRecorderKeyReleased;
+            _recorderHook.EscapePressed += OnRecorderEscape;
+            _recorderHook.Start();
+            
+            _logger.LogInformation("Started hotkey recording");
+        }
+
+        private void OnRecorderKeyPressed(object? sender, GlobalKeyboardHook.KeyEventArgs e)
+        {
+            _recordedKeys.Add(e.VirtualKeyCode);
+            RecorderPreviewText.Text = Helpers.VirtualKeyHelper.GetCombinationDisplayName(_recordedKeys.ToList());
+            _logger.LogDebug("Recorded key: VK {VK} ({Name})", e.VirtualKeyCode, Helpers.VirtualKeyHelper.GetFriendlyName(e.VirtualKeyCode));
+        }
+
+        private async void OnRecorderKeyReleased(object? sender, GlobalKeyboardHook.KeyEventArgs e)
+        {
+            // When user releases ALL keys, we have the complete combination
+            _logger.LogDebug("Key released: VK {VK}, Recorded keys count: {Count}", e.VirtualKeyCode, _recordedKeys.Count);
+            
+            if (_recordedKeys.Count > 0)
+            {
+                // Small delay to allow OS to update key states
+                await Task.Delay(50);
+                
+                if (!IsAnyKeyPressed())
+                {
+                    _logger.LogInformation("All keys released, stopping recording with {Count} keys", _recordedKeys.Count);
+                    StopRecording(accepted: true);
+                }
+            }
+        }
+
+        private void OnRecorderEscape(object? sender, EventArgs e)
+        {
+            StopRecording(accepted: false);
+        }
+
+        private void StopRecording(bool accepted)
+        {
+            _isRecording = false;
+            
+            // Cleanup recorder hook
+            _recorderHook?.Stop();
+            _recorderHook?.Dispose();
+            _recorderHook = null;
+            
+            if (accepted && ValidateRecordedKeys())
+            {
+                // Show success state - keep recorder visible with success message
+                RecorderStatusText.Text = "? Hotkey captured! Click APPLY to save";
+                RecorderStatusText.Foreground = new SolidColorBrush((WpfColor)WpfColorConverter.ConvertFromString("#00FF00"));
+                
+                // Update buttons - hide cancel, show record again and apply
+                CancelRecordButton.Visibility = Visibility.Collapsed;
+                RecordButton.Visibility = Visibility.Visible;
+                RecordButton.Content = "?? RECORD AGAIN";
+                ApplyHotkeyButton.Visibility = Visibility.Visible;
+                
+                _logger.LogInformation("Hotkey recorded successfully: {Hotkey}", Helpers.VirtualKeyHelper.GetCombinationDisplayName(_recordedKeys.ToList()));
+            }
+            else
+            {
+                // Cancel - hide recorder completely
+                RecorderBox.Visibility = Visibility.Collapsed;
+                RecordButton.Visibility = Visibility.Visible;
+                RecordButton.Content = "?? RECORD NEW HOTKEY";
+                CancelRecordButton.Visibility = Visibility.Collapsed;
+                ApplyHotkeyButton.Visibility = Visibility.Collapsed;
+                
+                _logger.LogInformation("Hotkey recording cancelled");
+            }
+        }
+
+        private bool ValidateRecordedKeys()
+        {
+            // Must have at least 2 keys
+            if (_recordedKeys.Count < 2)
+            {
+                WpfMessageBox.Show(
+                    "Hotkey must include at least one modifier (Ctrl, Alt, Shift, Win) and one regular key.",
+                    "Invalid Hotkey", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Warning);
+                return false;
+            }
+            
+            // Must have at least one modifier
+            if (!_recordedKeys.Any(vk => Helpers.VirtualKeyHelper.IsModifierKey(vk)))
+            {
+                WpfMessageBox.Show(
+                    "Hotkey must include at least one modifier key (Ctrl, Alt, Shift, Win).",
+                    "Invalid Hotkey", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Warning);
+                return false;
+            }
+            
+            // Check for reserved combinations
+            if (IsReservedCombo(_recordedKeys.ToList()))
+            {
+                var result = WpfMessageBox.Show(
+                    $"?? {Helpers.VirtualKeyHelper.GetCombinationDisplayName(_recordedKeys.ToList())} is a system hotkey that may not work reliably.\n\nDo you want to use it anyway?",
+                    "System Hotkey Warning", 
+                    MessageBoxButton.YesNo, 
+                    MessageBoxImage.Warning);
+                
+                return result == MessageBoxResult.Yes;
+            }
+            
+            return true;
+        }
+
+        private bool IsReservedCombo(List<int> vks)
+        {
+            // Check common reserved combinations
+            var hasCtrl = vks.Any(vk => vk is 0xA2 or 0xA3);
+            var hasAlt = vks.Any(vk => vk is 0xA4 or 0xA5);
+            var hasWin = vks.Any(vk => vk is 0x5B or 0x5C);
+            
+            // Ctrl+Alt+Delete
+            if (hasCtrl && hasAlt && vks.Contains(0x2E))
+                return true;
+            
+            // Win+L
+            if (hasWin && vks.Contains(0x4C))
+                return true;
+            
+            // Alt+F4
+            if (hasAlt && vks.Contains(0x73))
+                return true;
+            
+            // Alt+Tab
+            if (hasAlt && vks.Contains(0x09))
+                return true;
+            
+            return false;
+        }
+
+        private bool IsAnyKeyPressed()
+        {
+            foreach (var vk in _recordedKeys)
+            {
+                short keyState = GetAsyncKeyState(vk);
+                bool isPressed = (keyState & 0x8000) != 0;
+                _logger.LogTrace("VK {VK} state: {State} (raw: {Raw})", vk, isPressed ? "PRESSED" : "released", keyState);
+                
+                if (isPressed)
+                {
+                    _logger.LogDebug("Key VK {VK} is still pressed", vk);
+                    return true;
+                }
+            }
+            _logger.LogDebug("All keys released");
+            return false;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int vKey);
+
+        private void ApplyHotkey_Click(object sender, RoutedEventArgs e)
+        {
+            // Save to settings
+            _appSettings.SetHotkey(_recordedKeys.ToList());
+            
+            // Update display
+            CurrentHotkeyText.Text = RecorderPreviewText.Text;
+            
+            // Reset UI
+            RecorderBox.Visibility = Visibility.Collapsed;
+            RecordButton.Visibility = Visibility.Visible;
+            RecordButton.Content = "?? RECORD NEW HOTKEY";
+            ApplyHotkeyButton.Visibility = Visibility.Collapsed;
+            
+            WpfMessageBox.Show(
+                "? Hotkey updated successfully!\n\nChanges take effect immediately.",
+                "Success", 
+                MessageBoxButton.OK, 
+                MessageBoxImage.Information);
+            
+            _logger.LogInformation("Hotkey updated to: {Hotkey}", _appSettings.CurrentSettings.HotkeyDisplayName);
+        }
+
+        private void CancelRecord_Click(object sender, RoutedEventArgs e)
+        {
+            StopRecording(accepted: false);
         }
     }
 }

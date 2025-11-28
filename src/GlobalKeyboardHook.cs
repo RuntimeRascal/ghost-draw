@@ -10,12 +10,7 @@ namespace GhostDraw
         private const int WM_KEYDOWN = 0x0100;
         private const int WM_KEYUP = 0x0101;
 
-        // Virtual Key Codes
-        private const int VK_LCONTROL = 0xA2;  // 162
-        private const int VK_RCONTROL = 0xA3;  // 163
-        private const int VK_LMENU = 0xA4;     // 164 (Alt)
-        private const int VK_RMENU = 0xA5;     // 165 (Alt)
-        private const int VK_D = 0x44;         // 68
+        // Only keep VK_ESCAPE constant (emergency exit)
         private const int VK_ESCAPE = 0x1B;    // 27
 
         private readonly ILogger<GlobalKeyboardHook> _logger;
@@ -24,13 +19,18 @@ namespace GhostDraw
         private bool _disposed = false;
         private readonly object _disposeLock = new object();
 
+        // Events
         public event EventHandler? HotkeyPressed;
         public event EventHandler? HotkeyReleased;
         public event EventHandler? EscapePressed;
+        
+        // NEW: Raw key events for recorder
+        public event EventHandler<KeyEventArgs>? KeyPressed;
+        public event EventHandler<KeyEventArgs>? KeyReleased;
 
-        private bool _isCtrlPressed = false;
-        private bool _isAltPressed = false;
-        private bool _isDPressed = false;
+        // NEW: Configurable hotkey VKs
+        private List<int> _hotkeyVKs = new() { 0xA2, 0xA4, 0x44 };  // Default: Ctrl+Alt+D
+        private Dictionary<int, bool> _keyStates = new();
         private bool _wasHotkeyActive = false;
 
         public GlobalKeyboardHook(ILogger<GlobalKeyboardHook> logger)
@@ -38,6 +38,39 @@ namespace GhostDraw
             _logger = logger;
             _logger.LogDebug("GlobalKeyboardHook constructor called");
             _proc = HookCallback;
+            
+            // Initialize key states
+            foreach (var vk in _hotkeyVKs)
+                _keyStates[vk] = false;
+        }
+
+        /// <summary>
+        /// Configures the hotkey combination
+        /// </summary>
+        /// <param name="virtualKeys">List of virtual key codes</param>
+        public void Configure(List<int> virtualKeys)
+        {
+            _hotkeyVKs = new List<int>(virtualKeys);
+            _keyStates.Clear();
+            
+            foreach (var vk in virtualKeys)
+                _keyStates[vk] = false;
+            
+            _logger.LogInformation("Hotkey reconfigured to: {DisplayName}", 
+                Helpers.VirtualKeyHelper.GetCombinationDisplayName(virtualKeys));
+        }
+
+        /// <summary>
+        /// Event args for key events
+        /// </summary>
+        public class KeyEventArgs : EventArgs
+        {
+            public int VirtualKeyCode { get; }
+            
+            public KeyEventArgs(int vkCode)
+            {
+                VirtualKeyCode = vkCode;
+            }
         }
 
         public void Start()
@@ -135,57 +168,43 @@ namespace GhostDraw
                     int vkCode = Marshal.ReadInt32(lParam);
                     bool isKeyDown = wParam == (IntPtr)WM_KEYDOWN;
                     
-                    string keyName = GetKeyName(vkCode);
+                    // Fire raw key events (for recorder)
+                    if (isKeyDown)
+                        KeyPressed?.Invoke(this, new KeyEventArgs(vkCode));
+                    else
+                        KeyReleased?.Invoke(this, new KeyEventArgs(vkCode));
                     
                     // Check for ESC key press (emergency exit)
                     if (vkCode == VK_ESCAPE && isKeyDown)
                     {
-                        _logger.LogInformation("? ESC pressed - emergency exit");
+                        _logger.LogInformation("?? ESC pressed - emergency exit");
                         EscapePressed?.Invoke(this, EventArgs.Empty);
                     }
                     
-                    // Only log hotkey-related keys
-                    bool isHotkeyKey = vkCode == VK_LCONTROL || vkCode == VK_RCONTROL || 
-                                       vkCode == VK_LMENU || vkCode == VK_RMENU || vkCode == VK_D || vkCode == VK_ESCAPE;
-                    
-                    if (isHotkeyKey)
+                    // Track hotkey state
+                    if (_hotkeyVKs.Contains(vkCode))
                     {
-                        _logger.LogDebug("Key {KeyName} (VK:{VkCode}) {State}", keyName, vkCode, isKeyDown ? "DOWN" : "UP");
+                        _keyStates[vkCode] = isKeyDown;
+                        
+                        _logger.LogDebug("Key VK:{VkCode} {State}", vkCode, isKeyDown ? "DOWN" : "UP");
+                        
+                        // Check if ALL hotkey keys are pressed
+                        bool allPressed = _hotkeyVKs.All(vk => _keyStates[vk]);
+                        
+                        // Fire events on state changes
+                        if (allPressed && !_wasHotkeyActive)
+                        {
+                            _logger.LogInformation("?? HOTKEY PRESSED");
+                            HotkeyPressed?.Invoke(this, EventArgs.Empty);
+                        }
+                        else if (!allPressed && _wasHotkeyActive)
+                        {
+                            _logger.LogInformation("?? HOTKEY RELEASED");
+                            HotkeyReleased?.Invoke(this, EventArgs.Empty);
+                        }
+                        
+                        _wasHotkeyActive = allPressed;
                     }
-
-                    // Track modifier keys using actual virtual key codes
-                    if (vkCode == VK_LCONTROL || vkCode == VK_RCONTROL)
-                    {
-                        _isCtrlPressed = isKeyDown;
-                        _logger.LogDebug("Ctrl state ? {State}", _isCtrlPressed);
-                    }
-                    else if (vkCode == VK_LMENU || vkCode == VK_RMENU)
-                    {
-                        _isAltPressed = isKeyDown;
-                        _logger.LogDebug("Alt state ? {State}", _isAltPressed);
-                    }
-                    else if (vkCode == VK_D)
-                    {
-                        _isDPressed = isKeyDown;
-                        _logger.LogDebug("D state ? {State}", _isDPressed);
-                    }
-
-                    // Check if hotkey combination is active
-                    bool isHotkeyActive = _isCtrlPressed && _isAltPressed && _isDPressed;
-
-                    // Fire events on state changes
-                    if (isHotkeyActive && !_wasHotkeyActive)
-                    {
-                        _logger.LogInformation("? HOTKEY PRESSED - Ctrl+Alt+D active");
-                        HotkeyPressed?.Invoke(this, EventArgs.Empty);
-                    }
-                    else if (!isHotkeyActive && _wasHotkeyActive)
-                    {
-                        _logger.LogInformation("? HOTKEY RELEASED - Ctrl+Alt+D released");
-                        HotkeyReleased?.Invoke(this, EventArgs.Empty);
-                    }
-
-                    _wasHotkeyActive = isHotkeyActive;
                 }
             }
             catch (Exception ex)
@@ -200,16 +219,7 @@ namespace GhostDraw
 
         private string GetKeyName(int vkCode)
         {
-            return vkCode switch
-            {
-                VK_LCONTROL => "LeftCtrl",
-                VK_RCONTROL => "RightCtrl",
-                VK_LMENU => "LeftAlt",
-                VK_RMENU => "RightAlt",
-                VK_D => "D",
-                VK_ESCAPE => "ESC",
-                _ => $"VK_{vkCode}"
-            };
+            return Helpers.VirtualKeyHelper.GetFriendlyName(vkCode);
         }
 
         public void Dispose()

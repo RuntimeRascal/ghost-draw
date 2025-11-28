@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Threading;
+using System.Windows;
 using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,9 +19,26 @@ namespace GhostDraw
         private LoggingSettingsService? _loggingSettings;
         private AppSettingsService? _appSettings;
         private GlobalExceptionHandler? _exceptionHandler;
+        private static Mutex? _singleInstanceMutex;
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Check for single instance
+            const string mutexName = "GhostDraw_SingleInstance_Mutex_3F4A5B6C";
+            _singleInstanceMutex = new Mutex(true, mutexName, out bool createdNew);
+
+            if (!createdNew)
+            {
+                // Another instance is already running
+                System.Windows.MessageBox.Show(
+                    "GhostDraw is already running.\n\nCheck the system tray for the GhostDraw icon.",
+                    "GhostDraw",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                Shutdown();
+                return;
+            }
+
             base.OnStartup(e);
 
             try
@@ -42,7 +60,7 @@ namespace GhostDraw
                 var settings = _appSettings.CurrentSettings;
                 _logger.LogInformation("Loaded settings - Color: {Color}, Thickness: {Thickness}, Hotkey: {Hotkey}, LockMode: {LockMode}",
                     settings.BrushColor, settings.BrushThickness, 
-                    $"{settings.HotkeyModifier1}+{settings.HotkeyModifier2}+{settings.HotkeyKey}",
+                    settings.HotkeyDisplayName,
                     settings.LockDrawingMode);
 
                 // Get services from DI container
@@ -96,7 +114,9 @@ namespace GhostDraw
                     try
                     {
                         _logger?.LogDebug("Opening settings window");
-                        var settingsWindow = new SettingsWindow(_loggingSettings!, _appSettings!);
+                        var logger = _serviceProvider!.GetRequiredService<ILogger<SettingsWindow>>();
+                        var loggerFactory = _serviceProvider!.GetRequiredService<ILoggerFactory>();
+                        var settingsWindow = new SettingsWindow(_loggingSettings!, _appSettings!, logger, loggerFactory);
                         settingsWindow.ShowDialog();
                     }
                     catch (Exception ex)
@@ -214,23 +234,27 @@ namespace GhostDraw
         protected override void OnExit(ExitEventArgs e)
         {
             _logger?.LogInformation("Application exiting");
-            
+
             try
             {
                 // Unregister exception handlers first
                 _exceptionHandler?.UnregisterHandlers();
-                
+
                 // Cleanup in proper order
                 _keyboardHook?.Dispose();
                 _notifyIcon?.Dispose();
                 ServiceConfiguration.Shutdown();
                 _serviceProvider?.Dispose();
+
+                // Release single instance mutex
+                _singleInstanceMutex?.ReleaseMutex();
+                _singleInstanceMutex?.Dispose();
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error during application exit");
             }
-            
+
             base.OnExit(e);
         }
     }

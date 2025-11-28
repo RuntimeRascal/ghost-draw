@@ -5,6 +5,7 @@ using System.IO;
 using System;
 using System.Text.Json;
 using GhostDraw.Services;
+using System.Collections.Generic;
 
 namespace GhostDraw.Tests
 {
@@ -224,22 +225,21 @@ namespace GhostDraw.Tests
         }
 
         [Theory]
-        [InlineData("Control", "Alt", "D")]
-        [InlineData("Control", "Shift", "F")]
-        [InlineData("Alt", "Shift", "X")]
-        public void SetHotkey_ShouldUpdateHotkeyConfiguration(string mod1, string mod2, string key)
+        [InlineData(new int[] { 0xA2, 0xA4, 0x44 })]  // Ctrl + Alt + D
+        [InlineData(new int[] { 0xA2, 0xA0, 0x46 })]  // Ctrl + Shift + F
+        [InlineData(new int[] { 0xA4, 0xA0, 0x58 })]  // Alt + Shift + X
+        public void SetHotkey_ShouldUpdateHotkeyConfiguration(int[] vkArray)
         {
             // Arrange
             var service = CreateService();
+            var vks = new List<int>(vkArray);
 
             // Act
-            service.SetHotkey(mod1, mod2, key);
+            service.SetHotkey(vks);
 
             // Assert
             var settings = service.CurrentSettings;
-            Assert.Equal(mod1, settings.HotkeyModifier1);
-            Assert.Equal(mod2, settings.HotkeyModifier2);
-            Assert.Equal(key, settings.HotkeyKey);
+            Assert.Equal(vks, settings.HotkeyVirtualKeys);
         }
 
         [Theory]
@@ -420,6 +420,24 @@ namespace GhostDraw.Tests
 
             // Assert - Should default to first color (index -1 + 1 = 0)
             Assert.Equal(palette[0], nextColor);
+        }
+
+        [Fact]
+        public void SetHotkey_ShouldPersistHotkeyConfiguration()
+        {
+            // Arrange
+            var service = new AppSettingsService(_mockLogger.Object);
+            var vks = new List<int> { 0xA0, 0x46 };  // Shift + F
+            
+            // Act
+            service.SetHotkey(vks);
+            
+            // Assert - values should be set in memory
+            Assert.Equal(vks, service.CurrentSettings.HotkeyVirtualKeys);
+            
+            // Create a new service instance to verify persistence
+            var newService = new AppSettingsService(_mockLogger.Object);
+            Assert.Equal(vks, newService.CurrentSettings.HotkeyVirtualKeys);
         }
     }
 }

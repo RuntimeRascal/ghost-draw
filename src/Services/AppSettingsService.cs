@@ -18,6 +18,7 @@ namespace GhostDraw
         public event EventHandler<double>? BrushThicknessChanged;
         public event EventHandler<bool>? LockDrawingModeChanged;
         public event EventHandler<(double min, double max)>? BrushThicknessRangeChanged;
+        public event EventHandler<List<int>>? HotkeyChanged;
 
         public AppSettingsService(ILogger<AppSettingsService> logger)
         {
@@ -57,8 +58,7 @@ namespace GhostDraw
                     {
                         _logger.LogInformation("Settings loaded successfully");
                         _logger.LogDebug("Brush Color: {Color}, Thickness: {Thickness}, Hotkey: {Hotkey}", 
-                            settings.BrushColor, settings.BrushThickness, 
-                            $"{settings.HotkeyModifier1}+{settings.HotkeyModifier2}+{settings.HotkeyKey}");
+                            settings.BrushColor, settings.BrushThickness, settings.HotkeyDisplayName);
                         return settings;
                     }
                 }
@@ -131,18 +131,6 @@ namespace GhostDraw
         }
 
         /// <summary>
-        /// Updates hotkey combination and persists to disk
-        /// </summary>
-        public void SetHotkey(string modifier1, string modifier2, string key)
-        {
-            _logger.LogInformation("Setting hotkey to {Modifier1}+{Modifier2}+{Key}", modifier1, modifier2, key);
-            _currentSettings.HotkeyModifier1 = modifier1;
-            _currentSettings.HotkeyModifier2 = modifier2;
-            _currentSettings.HotkeyKey = key;
-            SaveSettings(_currentSettings);
-        }
-
-        /// <summary>
         /// Updates drawing mode lock setting and persists to disk
         /// </summary>
         public void SetLockDrawingMode(bool lockMode)
@@ -184,6 +172,24 @@ namespace GhostDraw
         }
 
         /// <summary>
+        /// Updates the hotkey combination and persists to disk
+        /// </summary>
+        /// <param name="virtualKeys">List of virtual key codes for the hotkey combination</param>
+        public void SetHotkey(List<int> virtualKeys)
+        {
+            _logger.LogInformation("Setting hotkey to VKs: {VKs} ({DisplayName})", 
+                string.Join(", ", virtualKeys),
+                Helpers.VirtualKeyHelper.GetCombinationDisplayName(virtualKeys));
+            
+            _currentSettings.HotkeyVirtualKeys = new List<int>(virtualKeys);
+            
+            SaveSettings(_currentSettings);
+            
+            // Raise event to notify listeners (GlobalKeyboardHook)
+            HotkeyChanged?.Invoke(this, virtualKeys);
+        }
+
+        /// <summary>
         /// Gets the next color in the palette (for right-click cycling)
         /// </summary>
         public string GetNextColor()
@@ -210,11 +216,11 @@ namespace GhostDraw
         }
 
         /// <summary>
-        /// Resets all settings to defaults
+        /// Resets all settings to default values
         /// </summary>
         public void ResetToDefaults()
         {
-            _logger.LogWarning("Resetting all settings to defaults");
+            _logger.LogInformation("Resetting all settings to defaults");
             _currentSettings = new AppSettings();
             SaveSettings(_currentSettings);
         }

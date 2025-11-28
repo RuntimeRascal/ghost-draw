@@ -67,11 +67,23 @@ namespace GhostDraw
                 _levelSwitch.MinimumLevel = savedLevel;
             }
             
+            // Configure hotkey from settings
+            var keyboardHook = _serviceProvider.GetRequiredService<GlobalKeyboardHook>();
+            keyboardHook.Configure(appSettings.CurrentSettings.HotkeyVirtualKeys);
+            
+            // Subscribe to hotkey changes for real-time reconfiguration
+            appSettings.HotkeyChanged += (sender, vks) =>
+            {
+                _configLogger?.LogInformation("Hotkey configuration changed, reconfiguring hook");
+                keyboardHook.Configure(vks);
+            };
+            
             // Get logger for configuration logging
             _configLogger = _serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Configuration");
             _configLogger.LogInformation("=== GhostDraw Started at {StartTime} ===", DateTime.Now);
             _configLogger.LogInformation("Log directory: {LogDirectory}", logDirectory);
             _configLogger.LogInformation("Current log level: {LogLevel}", _levelSwitch.MinimumLevel);
+            _configLogger.LogInformation("Hotkey: {Hotkey}", appSettings.CurrentSettings.HotkeyDisplayName);
 
             return _serviceProvider;
         }

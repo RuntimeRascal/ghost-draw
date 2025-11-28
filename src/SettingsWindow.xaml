@@ -1,9 +1,9 @@
-<Window x:Class="GhostDraw.SettingsWindow"
+﻿<Window x:Class="GhostDraw.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="GhostDraw Settings" 
-        Height="700" 
-        Width="640"
+        Height="800" 
+        Width="740"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -346,519 +346,610 @@
         
     </Window.Resources>
 
-    <!-- Cyberpunk Main Container -->
-    <Border CornerRadius="0" 
-            BorderThickness="2">
-        <Border.BorderBrush>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#FF0080" Offset="0"/>
-                <GradientStop Color="#00FFFF" Offset="0.5"/>
-                <GradientStop Color="#FF0080" Offset="1"/>
-            </LinearGradientBrush>
-        </Border.BorderBrush>
-        <Border.Effect>
-            <DropShadowEffect Color="#FF0080" 
-                            Opacity="0.7" 
-                            BlurRadius="30" 
-                            ShadowDepth="0"/>
-        </Border.Effect>
-        <Border.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#0A0E27" Offset="0.0"/>
-                <GradientStop Color="#16213E" Offset="0.5"/>
-                <GradientStop Color="#0A0E27" Offset="1.0"/>
-            </LinearGradientBrush>
-        </Border.Background>
+    <!-- Main container -->
+    <Grid Margin="30">
+        <!-- Blurred background border for subtle glow effect - positioned to overlap the main border -->
+        <Border CornerRadius="0" 
+                BorderThickness="10"
+                Opacity="0.9">
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FF0080" Offset="0"/>
+                    <GradientStop Color="#00FFFF" Offset="0.5"/>
+                    <GradientStop Color="#FF0080" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <Border.Effect>
+                <BlurEffect Radius="20"/>
+            </Border.Effect>
+        </Border>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- Main window content -->
+        <Border CornerRadius="0" 
+                BorderThickness="2">
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FF0080" Offset="0"/>
+                    <GradientStop Color="#00FFFF" Offset="0.5"/>
+                    <GradientStop Color="#FF0080" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#0A0E27" Offset="0.0"/>
+                    <GradientStop Color="#16213E" Offset="0.5"/>
+                    <GradientStop Color="#0A0E27" Offset="1.0"/>
+                </LinearGradientBrush>
+            </Border.Background>
 
-            <!-- Cyberpunk Title Bar -->
-            <Border Grid.Row="0" 
-                    Height="70"
-                    BorderThickness="0,0,0,2"
-                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                <Border.BorderBrush>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop Color="#FF0080" Offset="0"/>
-                        <GradientStop Color="#00FFFF" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.BorderBrush>
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0" Opacity="0.3">
-                        <GradientStop Color="#FF0080" Offset="0"/>
-                        <GradientStop Color="#00FFFF" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-                
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                    <!-- Logo and Cyberpunk Title -->
-                    <StackPanel Grid.Column="0" 
-                               Orientation="Horizontal" 
-                               Margin="24,0,0,0" 
-                               VerticalAlignment="Center">
-                        <Image Source="Assets/ghost-draw-icon.png" 
-                               Width="48"
-                               Height="48"
-                               Margin="0,0,12,0"
-                               RenderOptions.BitmapScalingMode="HighQuality"/>
-                        <StackPanel>
-                            <TextBlock FontSize="20" 
-                                       FontWeight="Bold" 
-                                       FontFamily="Segoe UI">
-                                <Run Text="GHOST" Foreground="#FF0080"/>
-                                <Run Text="DRAW" Foreground="#00FFFF"/>
-                            </TextBlock>
-                            <TextBlock Text="// SETTINGS //" 
-                                       FontSize="10" 
-                                       Foreground="#808080"
-                                       FontFamily="Consolas"
-                                       Margin="0,-4,0,0"
-                                       FontWeight="Bold"/>
+                <!-- Cyberpunk Title Bar -->
+                <Border Grid.Row="0" 
+                        Height="70"
+                        BorderThickness="0,0,0,2"
+                        MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#FF0080" Offset="0"/>
+                            <GradientStop Color="#00FFFF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0" Opacity="0.3">
+                            <GradientStop Color="#FF0080" Offset="0"/>
+                            <GradientStop Color="#00FFFF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Logo and Cyberpunk Title -->
+                        <StackPanel Grid.Column="0" 
+                                   Orientation="Horizontal" 
+                                   Margin="24,0,0,0" 
+                                   VerticalAlignment="Center">
+                            <Image Source="Assets/ghost-draw-icon.png" 
+                                   Width="48"
+                                   Height="48"
+                                   Margin="0,0,12,0"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <StackPanel>
+                                <TextBlock FontSize="20" 
+                                           FontWeight="Bold" 
+                                           FontFamily="Segoe UI">
+                                    <Run Text="GHOST" Foreground="#FF0080"/>
+                                    <Run Text="DRAW" Foreground="#00FFFF"/>
+                                </TextBlock>
+                                <TextBlock Text="// SETTINGS //" 
+                                           FontSize="10" 
+                                           Foreground="#808080"
+                                           FontFamily="Consolas"
+                                           Margin="0,-4,0,0"
+                                           FontWeight="Bold"/>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
 
-                    <!-- Neon Close Button -->
-                    <Button Grid.Column="2" 
-                            Content="X" 
-                            Style="{StaticResource CloseButton}"
-                            Click="CloseButton_Click"
-                            Margin="0,0,16,0"
-                            ToolTip="Close"/>
-                </Grid>
-            </Border>
+                        <!-- Neon Close Button -->
+                        <Button Grid.Column="2" 
+                                Content="X" 
+                                Style="{StaticResource CloseButton}"
+                                Click="CloseButton_Click"
+                                Margin="0,0,16,0"
+                                ToolTip="Close"/>
+                    </Grid>
+                </Border>
 
-            <!-- Content Area -->
-            <ScrollViewer Grid.Row="1" 
-                         VerticalScrollBarVisibility="Auto"
-                         Margin="28,12,20,28">
-                <ScrollViewer.Resources>
-                    <Style TargetType="ScrollViewer">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ScrollViewer">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ScrollContentPresenter Grid.Column="0"/>
-                                        <ScrollBar Grid.Column="1" 
-                                                  x:Name="PART_VerticalScrollBar"
-                                                  Style="{StaticResource CyberScrollBar}"
-                                                  Value="{TemplateBinding VerticalOffset}"
-                                                  Maximum="{TemplateBinding ScrollableHeight}"
-                                                  ViewportSize="{TemplateBinding ViewportHeight}"
-                                                  Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
-                                                  Margin="10,0,0,0"/>
-                                    </Grid>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ScrollViewer.Resources>
+                <!-- Content Area -->
+                <ScrollViewer Grid.Row="1" 
+                             VerticalScrollBarVisibility="Auto"
+                             Margin="28,12,20,28">
+                    <ScrollViewer.Resources>
+                        <Style TargetType="ScrollViewer">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ScrollViewer">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ScrollContentPresenter Grid.Column="0"/>
+                                            <ScrollBar Grid.Column="1" 
+                                                      x:Name="PART_VerticalScrollBar"
+                                                      Style="{StaticResource CyberScrollBar}"
+                                                      Value="{TemplateBinding VerticalOffset}"
+                                                      Maximum="{TemplateBinding ScrollableHeight}"
+                                                      ViewportSize="{TemplateBinding ViewportHeight}"
+                                                      Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                                      Margin="10,0,0,0"/>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ScrollViewer.Resources>
 
-                <StackPanel Margin="0,15,15,0">
-                    <!-- Drawing Settings -->
-                    <GroupBox Header="// DRAWING">
-                        <StackPanel>
-                            <!-- Brush Color -->
-                            <Grid Margin="0,0,0,20">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="140"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                          Text="BRUSH COLOR" 
-                                          Foreground="#00FFFF" 
-                                          FontWeight="Bold"
-                                          FontSize="11"
-                                          FontFamily="Consolas"
-                                          VerticalAlignment="Center"/>
-                                <StackPanel Grid.Column="1" 
-                                           Orientation="Horizontal">
-                                    <Border x:Name="ColorPreview" 
-                                           Width="48" 
-                                           Height="48"
-                                           BorderBrush="#00FFFF"
-                                           BorderThickness="2"
-                                           Margin="0,0,16,0">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="#00FFFF" 
-                                                            Opacity="0.6" 
-                                                            BlurRadius="12" 
-                                                            ShadowDepth="0"/>
-                                        </Border.Effect>
-                                    </Border>
-                                    <Button x:Name="ChooseColorButton"
-                                           Content="SELECT"
-                                           Style="{StaticResource ModernButton}"
-                                           Click="ChooseColorButton_Click"
-                                           VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Grid>
+                    <StackPanel Margin="0,15,15,0">
+                        <!-- Drawing Settings -->
+                        <GroupBox Header="// DRAWING">
+                            <StackPanel>
+                                <!-- Brush Color -->
+                                <Grid Margin="0,0,0,20">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                              Text="BRUSH COLOR" 
+                                              Foreground="#00FFFF" 
+                                              FontWeight="Bold"
+                                              FontSize="11"
+                                              FontFamily="Consolas"
+                                              VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" 
+                                               Orientation="Horizontal">
+                                        <Border x:Name="ColorPreview" 
+                                               Width="48" 
+                                               Height="48"
+                                               BorderBrush="#00FFFF"
+                                               BorderThickness="2"
+                                               Margin="0,0,16,0">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="#00FFFF" 
+                                                                Opacity="0.6" 
+                                                                BlurRadius="12" 
+                                                                ShadowDepth="0"/>
+                                            </Border.Effect>
+                                        </Border>
+                                        <Button x:Name="ChooseColorButton"
+                                               Content="SELECT"
+                                               Style="{StaticResource ModernButton}"
+                                               Click="ChooseColorButton_Click"
+                                               VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
 
-                            <!-- Brush Thickness -->
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="140"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                          Text="THICKNESS" 
-                                          Foreground="#00FFFF" 
-                                          FontWeight="Bold"
-                                          FontSize="11"
-                                          FontFamily="Consolas"
-                                          VerticalAlignment="Center"/>
-                                <StackPanel Grid.Column="1" 
-                                           Orientation="Horizontal">
-                                    <Slider x:Name="ThicknessSlider"
-                                           Width="300"
-                                           Minimum="1"
-                                           Maximum="20"
-                                           TickFrequency="1"
-                                           IsSnapToTickEnabled="True"
-                                           ValueChanged="ThicknessSlider_ValueChanged"
-                                           Foreground="#FF0080"
-                                           VerticalAlignment="Center"/>
-                                    <Border Background="#FF0080"
-                                           BorderBrush="#FF1493"
-                                           BorderThickness="1"
-                                           Padding="12,6"
-                                           Margin="16,0,0,0">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="#FF0080" 
-                                                            Opacity="0.7" 
-                                                            BlurRadius="10" 
-                                                            ShadowDepth="0"/>
-                                        </Border.Effect>
-                                        <TextBlock x:Name="ThicknessValueText"
-                                                  Text="3 px"
-                                                  Foreground="White"
-                                                  FontWeight="Bold"
+                                <!-- Brush Thickness -->
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                              Text="THICKNESS" 
+                                              Foreground="#00FFFF" 
+                                              FontWeight="Bold"
+                                              FontSize="11"
+                                              FontFamily="Consolas"
+                                              VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" 
+                                               Orientation="Horizontal">
+                                        <Slider x:Name="ThicknessSlider"
+                                               Width="300"
+                                               Minimum="1"
+                                               Maximum="20"
+                                               TickFrequency="1"
+                                               IsSnapToTickEnabled="True"
+                                               ValueChanged="ThicknessSlider_ValueChanged"
+                                               Foreground="#FF0080"
+                                               VerticalAlignment="Center"/>
+                                        <Border Background="#FF0080"
+                                               BorderBrush="#FF1493"
+                                               BorderThickness="1"
+                                               Padding="12,6"
+                                               Margin="16,0,0,0">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="#FF0080" 
+                                                                Opacity="0.7" 
+                                                                BlurRadius="10" 
+                                                                ShadowDepth="0"/>
+                                            </Border.Effect>
+                                            <TextBlock x:Name="ThicknessValueText"
+                                                      Text="3 px"
+                                                      Foreground="White"
+                                                      FontWeight="Bold"
+                                                      FontFamily="Consolas"
+                                                      FontSize="12"
+                                                      MinWidth="45"
+                                                      TextAlignment="Center"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <!-- Min/Max Thickness Range -->
+                                <Grid Margin="0,16,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                              Text="RANGE" 
+                                              Foreground="#00FFFF" 
+                                              FontWeight="Bold"
+                                              FontSize="11"
+                                              FontFamily="Consolas"
+                                              VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" 
+                                               Orientation="Horizontal">
+                                        <!-- MIN Control -->
+                                        <TextBlock Text="MIN:"
+                                                  Foreground="#808080"
                                                   FontFamily="Consolas"
-                                                  FontSize="12"
-                                                  MinWidth="45"
-                                                  TextAlignment="Center"/>
-                                    </Border>
-                                </StackPanel>
-                            </Grid>
-                            
-                            <!-- Min/Max Thickness Range -->
-                            <Grid Margin="0,16,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="140"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                          Text="RANGE" 
-                                          Foreground="#00FFFF" 
-                                          FontWeight="Bold"
-                                          FontSize="11"
+                                                  FontSize="11"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0,0,8,0"/>
+                                        <Border BorderBrush="#00FFFF"
+                                               BorderThickness="1"
+                                               Background="#1A1A2E">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="50"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox x:Name="MinThicknessTextBox"
+                                                        Grid.Column="0"
+                                                        Background="Transparent"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        FontFamily="Consolas"
+                                                        FontSize="12"
+                                                        VerticalAlignment="Center"
+                                                        TextAlignment="Center"
+                                                        Height="32"
+                                                        PreviewTextInput="NumericTextBox_PreviewTextInput"
+                                                        TextChanged="MinThicknessTextBox_TextChanged"/>
+                                                <StackPanel Grid.Column="1" 
+                                                           Width="20"
+                                                           Background="#0D111D">
+                                                    <Button x:Name="MinUpButton"
+                                                           Content="+"
+                                                           Click="MinUpButton_Click"
+                                                           Height="16"
+                                                           Padding="0"
+                                                           FontSize="10"
+                                                           FontWeight="Bold"
+                                                           FontFamily="Consolas"
+                                                           Background="#1A1A2E"
+                                                           Foreground="#00FFFF"
+                                                           BorderThickness="0"
+                                                           Cursor="Hand"/>
+                                                    <Button x:Name="MinDownButton"
+                                                           Content="-"
+                                                           Click="MinDownButton_Click"
+                                                           Height="16"
+                                                           Padding="0"
+                                                           FontSize="10"
+                                                           FontWeight="Bold"
+                                                           FontFamily="Consolas"
+                                                           Background="#1A1A2E"
+                                                           Foreground="#00FFFF"
+                                                           BorderThickness="0"
+                                                           Cursor="Hand"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- MAX Control -->
+                                        <TextBlock Text="MAX:"
+                                                  Foreground="#808080"
+                                                  FontFamily="Consolas"
+                                                  FontSize="11"
+                                                  VerticalAlignment="Center"
+                                                  Margin="16,0,8,0"/>
+                                        <Border BorderBrush="#00FFFF"
+                                               BorderThickness="1"
+                                               Background="#1A1A2E">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="50"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox x:Name="MaxThicknessTextBox"
+                                                        Grid.Column="0"
+                                                        Background="Transparent"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        FontFamily="Consolas"
+                                                        FontSize="12"
+                                                        VerticalAlignment="Center"
+                                                        TextAlignment="Center"
+                                                        Height="32"
+                                                        PreviewTextInput="NumericTextBox_PreviewTextInput"
+                                                        TextChanged="MaxThicknessTextBox_TextChanged"/>
+                                                <StackPanel Grid.Column="1" 
+                                                           Width="20"
+                                                           Background="#0D111D">
+                                                    <Button x:Name="MaxUpButton"
+                                                           Content="+"
+                                                           Click="MaxUpButton_Click"
+                                                           Height="16"
+                                                           Padding="0"
+                                                           FontSize="10"
+                                                           FontWeight="Bold"
+                                                           FontFamily="Consolas"
+                                                           Background="#1A1A2E"
+                                                           Foreground="#00FFFF"
+                                                           BorderThickness="0"
+                                                           Cursor="Hand"/>
+                                                    <Button x:Name="MaxDownButton"
+                                                           Content="-"
+                                                           Click="MaxDownButton_Click"
+                                                           Height="16"
+                                                           Padding="0"
+                                                           FontSize="10"
+                                                           FontWeight="Bold"
+                                                           FontFamily="Consolas"
+                                                           Background="#1A1A2E"
+                                                           Foreground="#00FFFF"
+                                                           BorderThickness="0"
+                                                           Cursor="Hand"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <TextBlock Text="// Use mouse wheel while drawing"
+                                          Foreground="#606060"
+                                          FontSize="10"
                                           FontFamily="Consolas"
-                                          VerticalAlignment="Center"/>
-                                <StackPanel Grid.Column="1" 
-                                           Orientation="Horizontal">
-                                    <!-- MIN Control -->
-                                    <TextBlock Text="MIN:"
-                                              Foreground="#808080"
-                                              FontFamily="Consolas"
-                                              FontSize="11"
-                                              VerticalAlignment="Center"
-                                              Margin="0,0,8,0"/>
-                                    <Border BorderBrush="#00FFFF"
-                                           BorderThickness="1"
-                                           Background="#1A1A2E">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="50"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBox x:Name="MinThicknessTextBox"
-                                                    Grid.Column="0"
-                                                    Background="Transparent"
-                                                    Foreground="White"
-                                                    BorderThickness="0"
-                                                    FontFamily="Consolas"
-                                                    FontSize="12"
-                                                    VerticalAlignment="Center"
-                                                    TextAlignment="Center"
-                                                    Height="32"
-                                                    PreviewTextInput="NumericTextBox_PreviewTextInput"
-                                                    TextChanged="MinThicknessTextBox_TextChanged"/>
-                                            <StackPanel Grid.Column="1" 
-                                                       Width="20"
-                                                       Background="#0D111D">
-                                                <Button x:Name="MinUpButton"
-                                                       Content="+"
-                                                       Click="MinUpButton_Click"
-                                                       Height="16"
-                                                       Padding="0"
-                                                       FontSize="10"
-                                                       FontWeight="Bold"
-                                                       FontFamily="Consolas"
-                                                       Background="#1A1A2E"
-                                                       Foreground="#00FFFF"
-                                                       BorderThickness="0"
-                                                       Cursor="Hand"/>
-                                                <Button x:Name="MinDownButton"
-                                                       Content="-"
-                                                       Click="MinDownButton_Click"
-                                                       Height="16"
-                                                       Padding="0"
-                                                       FontSize="10"
-                                                       FontWeight="Bold"
-                                                       FontFamily="Consolas"
-                                                       Background="#1A1A2E"
-                                                       Foreground="#00FFFF"
-                                                       BorderThickness="0"
-                                                       Cursor="Hand"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                    
-                                    <!-- MAX Control -->
-                                    <TextBlock Text="MAX:"
-                                              Foreground="#808080"
-                                              FontFamily="Consolas"
-                                              FontSize="11"
-                                              VerticalAlignment="Center"
-                                              Margin="16,0,8,0"/>
-                                    <Border BorderBrush="#00FFFF"
-                                           BorderThickness="1"
-                                           Background="#1A1A2E">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="50"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBox x:Name="MaxThicknessTextBox"
-                                                    Grid.Column="0"
-                                                    Background="Transparent"
-                                                    Foreground="White"
-                                                    BorderThickness="0"
-                                                    FontFamily="Consolas"
-                                                    FontSize="12"
-                                                    VerticalAlignment="Center"
-                                                    TextAlignment="Center"
-                                                    Height="32"
-                                                    PreviewTextInput="NumericTextBox_PreviewTextInput"
-                                                    TextChanged="MaxThicknessTextBox_TextChanged"/>
-                                            <StackPanel Grid.Column="1" 
-                                                       Width="20"
-                                                       Background="#0D111D">
-                                                <Button x:Name="MaxUpButton"
-                                                       Content="+"
-                                                       Click="MaxUpButton_Click"
-                                                       Height="16"
-                                                       Padding="0"
-                                                       FontSize="10"
-                                                       FontWeight="Bold"
-                                                       FontFamily="Consolas"
-                                                       Background="#1A1A2E"
-                                                       Foreground="#00FFFF"
-                                                       BorderThickness="0"
-                                                       Cursor="Hand"/>
-                                                <Button x:Name="MaxDownButton"
-                                                       Content="-"
-                                                       Click="MaxDownButton_Click"
-                                                       Height="16"
-                                                       Padding="0"
-                                                       FontSize="10"
-                                                       FontWeight="Bold"
-                                                       FontFamily="Consolas"
-                                                       Background="#1A1A2E"
-                                                       Foreground="#00FFFF"
-                                                       BorderThickness="0"
-                                                       Cursor="Hand"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </StackPanel>
-                            </Grid>
-                            
-                            <TextBlock Text="// Use mouse wheel while drawing"
-                                      Foreground="#606060"
-                                      FontSize="10"
-                                      FontFamily="Consolas"
-                                      Margin="140,4,0,0"/>
-                        </StackPanel>
-                    </GroupBox>
+                                          Margin="140,4,0,0"/>
+                            </StackPanel>
+                        </GroupBox>
 
-                    <!-- Hotkey Settings -->
-                    <GroupBox Header="// HOTKEY">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="140"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0"
-                                      Text="COMBO" 
-                                      Foreground="#00FFFF" 
-                                      FontWeight="Bold"
-                                      FontSize="11"
-                                      FontFamily="Consolas"
-                                      VerticalAlignment="Center"/>
-                            <StackPanel Grid.Column="1">
+                        <!-- Hotkey Settings -->
+                        <GroupBox Header="// HOTKEY">
+                            <StackPanel>
+                                <!-- Current Hotkey Display -->
                                 <Border Background="#1A1A2E"
                                        BorderBrush="#00FFFF"
                                        BorderThickness="2"
-                                       Padding="16,10"
-                                       HorizontalAlignment="Left">
+                                       Padding="16,12"
+                                       Margin="0,0,0,16">
                                     <Border.Effect>
                                         <DropShadowEffect Color="#00FFFF" 
                                                         Opacity="0.5" 
                                                         BlurRadius="12" 
                                                         ShadowDepth="0"/>
                                     </Border.Effect>
-                                    <TextBlock x:Name="CurrentHotkeyText"
-                                              Text="Ctrl + Alt + D"
-                                              Foreground="#00FFFF"
-                                              FontSize="16"
-                                              FontWeight="Bold"
-                                              FontFamily="Consolas"/>
+                                    <StackPanel>
+                                        <TextBlock Text="CURRENT HOTKEY:"
+                                                  Foreground="#808080"
+                                                  FontSize="10"
+                                                  FontFamily="Consolas"
+                                                  Margin="0,0,0,4"/>
+                                        <TextBlock x:Name="CurrentHotkeyText"
+                                                  Text="Ctrl + Alt + D"
+                                                  Foreground="#00FFFF"
+                                                  FontSize="16"
+                                                  FontWeight="Bold"
+                                                  FontFamily="Consolas"/>
+                                    </StackPanel>
                                 </Border>
-                                <TextBlock Text="// Customization coming soon"
-                                          Foreground="#606060"
-                                          FontSize="10"
-                                          FontFamily="Consolas"
-                                          Margin="0,8,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </GroupBox>
-
-                    <!-- Drawing Mode -->
-                    <GroupBox Header="// MODE">
-                        <StackPanel>
-                            <CheckBox x:Name="LockModeCheckBox"
-                                     Content="LOCK DRAWING MODE"
-                                     Foreground="#FF0080"
-                                     FontWeight="Bold"
-                                     FontFamily="Consolas"
-                                     FontSize="12"
-                                     Checked="LockModeCheckBox_Changed"
-                                     Unchecked="LockModeCheckBox_Changed"
-                                     Margin="0,0,0,16"/>
-                            <Border Background="#0A0E27"
-                                   BorderBrush="#404040"
-                                   BorderThickness="1"
-                                   Padding="16">
-                                <StackPanel>
-                                    <TextBlock Foreground="#B0B0B0"
-                                              FontSize="11"
-                                              FontFamily="Consolas"
-                                              TextWrapping="Wrap"
-                                              Margin="0,0,0,8"
-                                              LineHeight="16">
-                                        <Run Text="[ON]" Foreground="#00FF00" FontWeight="Bold"/>
-                                        <Run Text=" Press once to lock, press again to unlock"/>
-                                    </TextBlock>
-                                    <TextBlock Foreground="#B0B0B0"
-                                              FontSize="11"
-                                              FontFamily="Consolas"
-                                              TextWrapping="Wrap"
-                                              LineHeight="16">
-                                        <Run Text="[OFF]" Foreground="#FF6B6B" FontWeight="Bold"/>
-                                        <Run Text=" Hold to draw, release to clear"/>
-                                    </TextBlock>
+                                
+                                <!-- Recorder Box (hidden by default) -->
+                                <Border x:Name="RecorderBox"
+                                       Background="#0A0E27"
+                                       BorderBrush="#FF0080"
+                                       BorderThickness="2"
+                                       Padding="20"
+                                       Margin="0,0,0,16"
+                                       Visibility="Collapsed">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#FF0080" 
+                                                        Opacity="0.8" 
+                                                        BlurRadius="20" 
+                                                        ShadowDepth="0"/>
+                                    </Border.Effect>
+                                    <StackPanel>
+                                        <TextBlock x:Name="RecorderStatusText"
+                                                  Text="🎤 RECORDING... Press your hotkey combination"
+                                                  Foreground="#FF0080"
+                                                  FontSize="14"
+                                                  FontWeight="Bold"
+                                                  FontFamily="Consolas"
+                                                  TextAlignment="Center"
+                                                  Margin="0,0,0,12"/>
+                                        <TextBlock x:Name="RecorderPreviewText"
+                                                  Text="Waiting for keys..."
+                                                  Foreground="#00FFFF"
+                                                  FontSize="18"
+                                                  FontWeight="Bold"
+                                                  FontFamily="Consolas"
+                                                  TextAlignment="Center"
+                                                  MinHeight="30"/>
+                                        <TextBlock Text="// Press ESC to cancel"
+                                                  Foreground="#606060"
+                                                  FontSize="10"
+                                                  FontFamily="Consolas"
+                                                  TextAlignment="Center"
+                                                  Margin="0,8,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Buttons -->
+                                <StackPanel Orientation="Horizontal" 
+                                           HorizontalAlignment="Center">
+                                    <Button x:Name="RecordButton"
+                                           Content="🎤 RECORD NEW HOTKEY"
+                                           Style="{StaticResource ModernButton}"
+                                           Click="RecordButton_Click"
+                                           Margin="0,0,12,0"/>
+                                    <Button x:Name="CancelRecordButton"
+                                           Content="CANCEL"
+                                           Visibility="Collapsed"
+                                           Click="CancelRecord_Click"
+                                           Background="#1A2A6D"
+                                           Foreground="#808080"
+                                           BorderBrush="#404040"
+                                           BorderThickness="1"
+                                           Padding="20,12"
+                                           FontSize="12"
+                                           FontWeight="Bold"
+                                           FontFamily="Consolas"
+                                           Cursor="Hand"
+                                           Margin="0,0,12,0">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="border"
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                    VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="border" Property="BorderBrush" Value="#808080"/>
+                                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                    <Button x:Name="ApplyHotkeyButton"
+                                           Content="✓ APPLY"
+                                           Visibility="Collapsed"
+                                           Click="ApplyHotkey_Click"
+                                           Style="{StaticResource ModernButton}"/>
                                 </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </GroupBox>
+                            </StackPanel>
+                        </GroupBox>
 
-                    <!-- Logging -->
-                    <GroupBox Header="// LOGS">
-                        <StackPanel>
-                            <Grid Margin="0,0,0,16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="140"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                          Text="LOG LEVEL" 
-                                          Foreground="#00FFFF"
-                                          FontWeight="Bold"
+                        <!-- Drawing Mode -->
+                        <GroupBox Header="// MODE">
+                            <StackPanel>
+                                <CheckBox x:Name="LockModeCheckBox"
+                                         Content="LOCK DRAWING MODE"
+                                         Foreground="#FF0080"
+                                         FontWeight="Bold"
+                                         FontFamily="Consolas"
+                                         FontSize="12"
+                                         Checked="LockModeCheckBox_Changed"
+                                         Unchecked="LockModeCheckBox_Changed"
+                                         Margin="0,0,0,16"/>
+                                <Border Background="#0A0E27"
+                                       BorderBrush="#404040"
+                                       BorderThickness="1"
+                                       Padding="16">
+                                    <StackPanel>
+                                        <TextBlock Foreground="#B0B0B0"
+                                                  FontSize="11"
+                                                  FontFamily="Consolas"
+                                                  TextWrapping="Wrap"
+                                                  Margin="0,0,0,8"
+                                                  LineHeight="16">
+                                            <Run Text="[ON]" Foreground="#00FF00" FontWeight="Bold"/>
+                                            <Run Text=" Press once to lock, press again to unlock"/>
+                                        </TextBlock>
+                                        <TextBlock Foreground="#B0B0B0"
+                                                  FontSize="11"
+                                                  FontFamily="Consolas"
+                                                  TextWrapping="Wrap"
+                                                  LineHeight="16">
+                                            <Run Text="[OFF]" Foreground="#FF6B6B" FontWeight="Bold"/>
+                                            <Run Text=" Hold to draw, release to clear"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Logging -->
+                        <GroupBox Header="// LOGS">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                              Text="LOG LEVEL" 
+                                              Foreground="#00FFFF"
+                                              FontWeight="Bold"
+                                              FontSize="11"
+                                              FontFamily="Consolas"
+                                              VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1"
+                                             x:Name="LogLevelComboBox" 
+                                             SelectionChanged="LogLevelComboBox_SelectionChanged"
+                                             Height="40"/>
+                                </Grid>
+                                <TextBlock x:Name="LogLevelDescription" 
+                                          Margin="0,0,0,16" 
+                                          TextWrapping="Wrap"
+                                          Foreground="#808080"
                                           FontSize="11"
                                           FontFamily="Consolas"
-                                          VerticalAlignment="Center"/>
-                                <ComboBox Grid.Column="1"
-                                         x:Name="LogLevelComboBox" 
-                                         SelectionChanged="LogLevelComboBox_SelectionChanged"
-                                         Height="40"/>
-                            </Grid>
-                            <TextBlock x:Name="LogLevelDescription" 
-                                      Margin="0,0,0,16" 
-                                      TextWrapping="Wrap"
-                                      Foreground="#808080"
-                                      FontSize="11"
-                                      FontFamily="Consolas"
-                                      LineHeight="16"/>
-                            <Button x:Name="OpenLogFolderButton" 
-                                   Content="OPEN FOLDER" 
-                                   Click="OpenLogFolderButton_Click"
-                                   Style="{StaticResource ModernButton}"
-                                   HorizontalAlignment="Left"/>
-                        </StackPanel>
-                    </GroupBox>
+                                          LineHeight="16"/>
+                                <Button x:Name="OpenLogFolderButton" 
+                                       Content="OPEN FOLDER" 
+                                       Click="OpenLogFolderButton_Click"
+                                       Style="{StaticResource ModernButton}"
+                                       HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </GroupBox>
 
-                    <!-- Cyberpunk Action Buttons -->
-                    <Grid Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <Button Grid.Column="1"
-                               Content="RESET"
-                               Click="ResetButton_Click"
-                               Margin="0,0,12,0"
-                               Padding="20,12"
-                               Background="#1A1A2E"
-                               Foreground="#808080"
-                               BorderBrush="#404040"
-                               BorderThickness="1"
-                               FontSize="12"
-                               FontWeight="Bold"
-                               FontFamily="Consolas"
-                               Cursor="Hand">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="border"
-                                            Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                            Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center" 
-                                                        VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="border" Property="BorderBrush" Value="#808080"/>
-                                            <Setter Property="Foreground" Value="#FFFFFF"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                        
-                        <Button Grid.Column="2"
-                               Content="DONE"
-                               Click="CloseButton_Click"
-                               Style="{StaticResource ModernButton}"/>
-                    </Grid>
-                </StackPanel>
-            </ScrollViewer>
-        </Grid>
-    </Border>
+                        <!-- Cyberpunk Action Buttons -->
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Button Grid.Column="1"
+                                   Content="RESET"
+                                   Click="ResetButton_Click"
+                                   Margin="0,0,12,0"
+                                   Padding="20,12"
+                                   Background="#1A1A2E"
+                                   Foreground="#808080"
+                                   BorderBrush="#404040"
+                                   BorderThickness="1"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   FontFamily="Consolas"
+                                   Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#808080"/>
+                                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            
+                            <Button Grid.Column="2"
+                                   Content="DONE"
+                                   Click="CloseButton_Click"
+                                   Style="{StaticResource ModernButton}"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

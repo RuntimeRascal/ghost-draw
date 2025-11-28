@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet publish:*)",
+      "Bash(powershell -Command \"msiexec /i ''C:\\code\\github\\ghost-draw\\installer\\bin\\x64\\Release\\GhostDrawSetup.msi'' /l*v ''install.log'' /qb\")",
+      "WebSearch",
+      "Bash(powershell:*)",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File Generate-FileList.ps1)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

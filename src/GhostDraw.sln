@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{611A7057-6
 	ProjectSection(SolutionItems) = preProject
 		..\docs\EXCEPTION_HANDLING.md = ..\docs\EXCEPTION_HANDLING.md
 		..\docs\GLOBAL_EXCEPTION_HANDLER_SUMMARY.md = ..\docs\GLOBAL_EXCEPTION_HANDLER_SUMMARY.md
+		..\docs\hotkey-configuration-implementation.md = ..\docs\hotkey-configuration-implementation.md
 		..\docs\settings-architecture.md = ..\docs\settings-architecture.md
 		..\docs\TESTING_EXCEPTION_HANDLER.md = ..\docs\TESTING_EXCEPTION_HANDLER.md
 		..\docs\TODO.md = ..\docs\TODO.md

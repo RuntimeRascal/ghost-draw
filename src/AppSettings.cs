@@ -32,22 +32,17 @@ namespace GhostDraw
         public double MaxBrushThickness { get; set; } = 20.0;
 
         /// <summary>
-        /// Primary hotkey modifier (e.g., "Control", "Alt", "Shift")
+        /// Virtual key codes for the hotkey combination
         /// </summary>
-        [JsonPropertyName("hotkeyModifier1")]
-        public string HotkeyModifier1 { get; set; } = "Control";
+        [JsonPropertyName("hotkeyVirtualKeys")]
+        public List<int> HotkeyVirtualKeys { get; set; } = new() { 0xA2, 0xA4, 0x44 }; // Default: Ctrl+Alt+D
 
         /// <summary>
-        /// Secondary hotkey modifier
+        /// Gets the user-friendly display name of the hotkey combination
+        /// (Computed property - not serialized)
         /// </summary>
-        [JsonPropertyName("hotkeyModifier2")]
-        public string HotkeyModifier2 { get; set; } = "Alt";
-
-        /// <summary>
-        /// Hotkey key (e.g., "D")
-        /// </summary>
-        [JsonPropertyName("hotkeyKey")]
-        public string HotkeyKey { get; set; } = "D";
+        [JsonIgnore]
+        public string HotkeyDisplayName => Helpers.VirtualKeyHelper.GetCombinationDisplayName(HotkeyVirtualKeys);
 
         /// <summary>
         /// If true, drawing mode locks on first hotkey press and unlocks on second press
@@ -91,9 +86,7 @@ namespace GhostDraw
                 BrushThickness = this.BrushThickness,
                 MinBrushThickness = this.MinBrushThickness,
                 MaxBrushThickness = this.MaxBrushThickness,
-                HotkeyModifier1 = this.HotkeyModifier1,
-                HotkeyModifier2 = this.HotkeyModifier2,
-                HotkeyKey = this.HotkeyKey,
+                HotkeyVirtualKeys = new List<int>(this.HotkeyVirtualKeys),
                 LockDrawingMode = this.LockDrawingMode,
                 LogLevel = this.LogLevel,
                 ColorPalette = new List<string>(this.ColorPalette)
