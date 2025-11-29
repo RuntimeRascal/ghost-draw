@@ -1,0 +1,46 @@
+{
+    "name": "ghost-draw",
+    "version": "1.0.1",
+    "description": "Draw directly on your screen with a transparent overlay",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/RuntimeRascal/ghost-draw.git"
+    },
+    "author": "RuntimeRascal",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "build": "dotnet build GhostDraw.sln",
+        "build:release": "dotnet build GhostDraw.sln -c Release",
+        "test": "dotnet test GhostDraw.sln --verbosity normal",
+        "test:watch": "dotnet watch test Tests/GhostDraw.Tests/GhostDraw.Tests.csproj",
+        "clean": "dotnet clean GhostDraw.sln && npm run clean:installer",
+        "clean:installer": "powershell -Command \"if (Test-Path Installer/bin) { Remove-Item -Recurse -Force Installer/bin }; if (Test-Path Installer/obj) { Remove-Item -Recurse -Force Installer/obj }\"",
+        "restore": "dotnet restore GhostDraw.sln",
+        "publish": "dotnet publish Src/GhostDraw/GhostDraw.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false",
+        "publish:ver": "dotnet publish Src/GhostDraw/GhostDraw.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:Version=%VER%",
+        "installer": "cd Installer && powershell.exe -NoProfile -ExecutionPolicy Bypass -File build.ps1",
+        "installer:ver": "cd Installer && powershell.exe -NoProfile -ExecutionPolicy Bypass -File build.ps1 -Version %VER%",
+        "installer:generate": "cd Installer && powershell.exe -NoProfile -ExecutionPolicy Bypass -File Generate-FileList.ps1",
+        "release": "npm run clean && npm run test && npm run installer",
+        "release:ver": "npm run clean && npm run test && npm run installer:ver",
+        "dev": "dotnet build Src/GhostDraw/GhostDraw.csproj && dotnet run --project Src/GhostDraw/GhostDraw.csproj",
+        "dev:watch": "dotnet watch run --project Src/GhostDraw/GhostDraw.csproj",
+        "format": "dotnet format GhostDraw.sln",
+        "format:check": "dotnet format GhostDraw.sln --verify-no-changes",
+        "version:update": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1",
+        "version:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -DryRun"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+    },
+    "keywords": [
+        "drawing",
+        "overlay",
+        "screen-draw",
+        "windows",
+        "wpf",
+        "dotnet"
+    ]
+}

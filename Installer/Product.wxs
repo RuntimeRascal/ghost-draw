@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <?define ProductVersion="1.0.0" ?>
   <?define ProductName="GhostDraw" ?>
   <?define Manufacturer="RuntimeRascal" ?>
   <?define UpgradeCode="A8B9C0D1-2E3F-4A5B-6C7D-8E9F0A1B2C3D" ?>

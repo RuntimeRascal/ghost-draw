@@ -7,10 +7,9 @@
     <InstallerPlatform>x64</InstallerPlatform>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <PublishDir>..\Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish\</PublishDir>
-    <DefineConstants>PublishDir=$(PublishDir)</DefineConstants>
+    <DefineConstants>PublishDir=$(PublishDir);ProductVersion=$(Version)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="HarvestedFiles.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
