@@ -1,0 +1,64 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36717.8
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GhostDraw", "Src\GhostDraw\GhostDraw.csproj", "{CBCB2CF7-BFD4-47C3-8B42-73A37A8CD15F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GhostDraw.Tests", "Tests\GhostDraw.Tests\GhostDraw.Tests.csproj", "{2C665F98-F0C5-0A3F-9461-BB8A1A593CE2}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "GhostDraw.Installer", "Installer\GhostDraw.Installer.wixproj", "{E1C8B89D-3F4E-4A6F-9C8E-5D7A8B9C0D1E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		.github\copilot-instructions.md = .github\copilot-instructions.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{611A7057-6E33-46CA-BF31-21DA1B6765CF}"
+	ProjectSection(SolutionItems) = preProject
+		docs\TODO.md = docs\TODO.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{7AF654A3-1C2E-4A05-84A9-2856178DD40C}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\README.md = .github\workflows\README.md
+		.github\workflows\release.yml = .github\workflows\release.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBCB2CF7-BFD4-47C3-8B42-73A37A8CD15F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBCB2CF7-BFD4-47C3-8B42-73A37A8CD15F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBCB2CF7-BFD4-47C3-8B42-73A37A8CD15F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBCB2CF7-BFD4-47C3-8B42-73A37A8CD15F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C665F98-F0C5-0A3F-9461-BB8A1A593CE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C665F98-F0C5-0A3F-9461-BB8A1A593CE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C665F98-F0C5-0A3F-9461-BB8A1A593CE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C665F98-F0C5-0A3F-9461-BB8A1A593CE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1C8B89D-3F4E-4A6F-9C8E-5D7A8B9C0D1E}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{E1C8B89D-3F4E-4A6F-9C8E-5D7A8B9C0D1E}.Debug|Any CPU.Build.0 = Debug|x64
+		{E1C8B89D-3F4E-4A6F-9C8E-5D7A8B9C0D1E}.Release|Any CPU.ActiveCfg = Release|x64
+		{E1C8B89D-3F4E-4A6F-9C8E-5D7A8B9C0D1E}.Release|Any CPU.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7AF654A3-1C2E-4A05-84A9-2856178DD40C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0EB2DE71-C30A-4329-A32A-E0E9A6F68F65}
+	EndGlobalSection
+EndGlobal

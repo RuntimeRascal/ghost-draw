@@ -40,12 +40,12 @@ jobs:
           wix --version
 
       - name: Restore dependencies
-        run: dotnet restore src/GhostDraw.csproj
+        run: dotnet restore Src/GhostDraw/GhostDraw.csproj
 
       - name: Build and publish application
         shell: pwsh
         run: |
-          dotnet publish src/GhostDraw.csproj `
+          dotnet publish Src/GhostDraw/GhostDraw.csproj `
             -c Release `
             -r win-x64 `
             --self-contained true `
@@ -54,25 +54,25 @@ jobs:
 
       - name: Generate WiX component list
         shell: pwsh
-        working-directory: installer
+        working-directory: Installer
         run: |
           .\Generate-FileList.ps1 `
-            -PublishPath "..\src\bin\Release\net8.0-windows\win-x64\publish" `
+            -PublishPath "..\Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish" `
             -OutputFile "HarvestedFiles.wxs"
 
       - name: Build installer MSI
         shell: pwsh
-        working-directory: installer
+        working-directory: Installer
         run: |
           dotnet build GhostDraw.Installer.wixproj `
             -c Release `
             -p:Version=${{ steps.get_version.outputs.VERSION }} `
-            -p:PublishDir="..\src\bin\Release\net8.0-windows\win-x64\publish\"
+            -p:PublishDir="..\Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish\"
 
       - name: Verify installer created
         shell: pwsh
         run: |
-          $msiPath = "installer\bin\x64\Release\GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi"
+          $msiPath = "Installer\bin\x64\Release\GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi"
           if (Test-Path $msiPath) {
             $size = (Get-Item $msiPath).Length / 1MB
             Write-Host "✓ Installer created: $msiPath"
@@ -123,7 +123,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./installer/bin/x64/Release/GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi
+          asset_path: ./Installer/bin/x64/Release/GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi
           asset_name: GhostDrawSetup-${{ steps.get_version.outputs.VERSION }}.msi
           asset_content_type: application/x-msi
 

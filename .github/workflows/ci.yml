@@ -26,18 +26,18 @@ jobs:
                   wix --version
 
             - name: Restore dependencies
-              run: dotnet restore src/GhostDraw.sln
+              run: dotnet restore GhostDraw.sln
 
             - name: Build application and tests
-              run: dotnet build src/GhostDraw.sln -c Release --no-restore
+              run: dotnet build GhostDraw.sln -c Release --no-restore
 
             - name: Run tests
-              run: dotnet test src/GhostDraw.sln -c Release --no-build --verbosity normal
+              run: dotnet test GhostDraw.sln -c Release --no-build --verbosity normal
 
             - name: Publish application
               shell: pwsh
               run: |
-                  dotnet publish src/GhostDraw.csproj `
+                  dotnet publish Src/GhostDraw/GhostDraw.csproj `
                     -c Release `
                     -r win-x64 `
                     --self-contained true `
@@ -46,26 +46,26 @@ jobs:
 
             - name: Generate WiX component list
               shell: pwsh
-              working-directory: installer
+              working-directory: Installer
               run: |
                   .\Generate-FileList.ps1 `
-                    -PublishPath "..\src\bin\Release\net8.0-windows\win-x64\publish" `
+                    -PublishPath "..\Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish" `
                     -OutputFile "HarvestedFiles.wxs"
 
             - name: Build installer MSI
               shell: pwsh
-              working-directory: installer
+              working-directory: Installer
               run: |
                   dotnet build GhostDraw.Installer.wixproj `
                     -c Release `
                     -p:Version=0.0.0-ci `
-                    -p:PublishDir="..\src\bin\Release\net8.0-windows\win-x64\publish\"
+                    -p:PublishDir="..\Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish\"
 
             - name: Verify build outputs
               shell: pwsh
               run: |
-                  $exePath = "src\bin\Release\net8.0-windows\win-x64\publish\GhostDraw.exe"
-                  $msiPath = "installer\bin\x64\Release\GhostDrawSetup-0.0.0-ci.msi"
+                  $exePath = "Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish\GhostDraw.exe"
+                  $msiPath = "Installer\bin\x64\Release\GhostDrawSetup-0.0.0-ci.msi"
 
                   if (Test-Path $exePath) {
                     Write-Host "✓ Application EXE built successfully" -ForegroundColor Green
@@ -87,5 +87,5 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: GhostDrawSetup-CI-${{ github.sha }}
-                  path: installer/bin/x64/Release/GhostDrawSetup-0.0.0-ci.msi
+                  path: Installer/bin/x64/Release/GhostDrawSetup-0.0.0-ci.msi
                   retention-days: 7
