@@ -26,13 +26,17 @@ jobs:
                   wix --version
 
             - name: Restore dependencies
-              run: dotnet restore GhostDraw.sln
+              run: |
+                  dotnet restore Src/GhostDraw/GhostDraw.csproj
+                  dotnet restore Tests/GhostDraw.Tests/GhostDraw.Tests.csproj
 
             - name: Build application and tests
-              run: dotnet build GhostDraw.sln -c Release --no-restore
+              run: |
+                  dotnet build Src/GhostDraw/GhostDraw.csproj -c Release --no-restore
+                  dotnet build Tests/GhostDraw.Tests/GhostDraw.Tests.csproj -c Release --no-restore
 
             - name: Run tests
-              run: dotnet test GhostDraw.sln -c Release --no-build --verbosity normal
+              run: dotnet test Tests/GhostDraw.Tests/GhostDraw.Tests.csproj -c Release --no-build --verbosity normal
 
             - name: Publish application
               shell: pwsh

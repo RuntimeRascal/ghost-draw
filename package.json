@@ -1,6 +1,6 @@
 {
     "name": "ghost-draw",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Draw directly on your screen with a transparent overlay",
     "repository": {
         "type": "git",

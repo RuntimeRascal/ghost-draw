@@ -47,10 +47,11 @@ function Get-LatestGitTag {
         Write-Host "Fetching latest tags from remote..." -ForegroundColor Yellow
         git fetch --tags 2>&1 | Out-Null
         
-        # Get the latest tag (sorted by version)
-        $latestTag = git describe --tags --abbrev=0 2>&1
+        # Get the latest tag sorted by version number (descending)
+        # Using -v:refname ensures proper semantic version sorting
+        $latestTag = git tag -l --sort=-v:refname | Select-Object -First 1
         
-        if ($LASTEXITCODE -ne 0) {
+        if (-not $latestTag) {
             throw "No git tags found in repository"
         }
         
@@ -115,7 +116,7 @@ function Update-PackageJson {
     return $true
 }
 
-# Function to update .csproj file
+# Function to update .csproj file (simple <Version> element)
 function Update-CsprojFile {
     param(
         [string]$FilePath,
@@ -157,6 +158,49 @@ function Update-CsprojFile {
     return $true
 }
 
+# Function to update WiX project file (conditional <Version> element)
+function Update-WixProjFile {
+    param(
+        [string]$FilePath,
+        [string]$NewVersion,
+        [switch]$DryRun
+    )
+    
+    if (-not (Test-Path $FilePath)) {
+        Write-Warning "File not found: $FilePath"
+        return $false
+    }
+    
+    $content = Get-Content $FilePath -Raw
+    $fileName = Split-Path $FilePath -Leaf
+    
+    # Match Version element with Condition attribute (WiX default version pattern)
+    # Pattern: <Version Condition="'$(Version)' == ''">X.Y.Z</Version>
+    if ($content -notmatch '<Version\s+Condition="[^"]*">([^<]*)</Version>') {
+        Write-Warning "  $fileName`: No conditional <Version> element found"
+        return $false
+    }
+    
+    $oldVersion = $Matches[1]
+    
+    if ($oldVersion -eq $NewVersion) {
+        Write-Host "  $fileName`: Already at version $NewVersion" -ForegroundColor Green
+        return $true
+    }
+    
+    if ($DryRun) {
+        Write-Host "  $fileName`: Would update $oldVersion -> $NewVersion" -ForegroundColor Yellow
+        return $true
+    }
+    
+    # Update version while preserving the Condition attribute
+    $updatedContent = $content -replace '(<Version\s+Condition="[^"]*">)[^<]*(</Version>)', "`${1}$NewVersion`${2}"
+    
+    Set-Content -Path $FilePath -Value $updatedContent -NoNewline
+    Write-Host "  $fileName`: Updated $oldVersion -> $NewVersion" -ForegroundColor Green
+    return $true
+}
+
 # Main execution
 try {
     Write-Host ""
@@ -192,6 +236,10 @@ try {
         @{
             Path = Join-Path $RepoRoot "Src\GhostDraw\GhostDraw.csproj"
             Type = "Csproj"
+        },
+        @{
+            Path = Join-Path $RepoRoot "Installer\GhostDraw.Installer.wixproj"
+            Type = "WixProj"
         }
     )
     
@@ -205,6 +253,9 @@ try {
             }
             "Csproj" {
                 $result = Update-CsprojFile -FilePath $file.Path -NewVersion $version -DryRun:$DryRun
+            }
+            "WixProj" {
+                $result = Update-WixProjFile -FilePath $file.Path -NewVersion $version -DryRun:$DryRun
             }
         }
         if (-not $result) {
