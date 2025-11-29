@@ -6,109 +6,109 @@ using System.IO;
 using GhostDraw.Services;
 using GhostDraw.Managers;
 using GhostDraw.Helpers;
+using GhostDraw.Views;
 
-namespace GhostDraw.Core
+namespace GhostDraw.Core;
+
+public static class ServiceConfiguration
 {
-    public static class ServiceConfiguration
+    private static ServiceProvider? _serviceProvider;
+    private static Serilog.Core.LoggingLevelSwitch _levelSwitch = new(LogEventLevel.Information);
+    private static Microsoft.Extensions.Logging.ILogger? _configLogger;
+
+    public static ServiceProvider ConfigureServices()
     {
-        private static ServiceProvider? _serviceProvider;
-        private static Serilog.Core.LoggingLevelSwitch _levelSwitch = new(LogEventLevel.Information);
-        private static Microsoft.Extensions.Logging.ILogger? _configLogger;
+        // Setup Serilog
+        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string logDirectory = Path.Combine(appData, "GhostDraw");
+        Directory.CreateDirectory(logDirectory);
 
-        public static ServiceProvider ConfigureServices()
+        string logFilePath = Path.Combine(logDirectory, "ghostdraw-.log");
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.ControlledBy(_levelSwitch)
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Override("System", LogEventLevel.Warning)
+            .Enrich.FromLogContext()
+            .WriteTo.Debug(
+                outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
+            .WriteTo.File(
+                logFilePath,
+                rollingInterval: RollingInterval.Day,
+                outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
+                retainedFileCountLimit: 7,
+                fileSizeLimitBytes: 10_485_760) // 10 MB
+            .CreateLogger();
+
+        // Setup DI container
+        var services = new ServiceCollection();
+
+        // Add logging
+        services.AddLogging(builder =>
         {
-            // Setup Serilog
-            string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string logDirectory = Path.Combine(appData, "GhostDraw");
-            Directory.CreateDirectory(logDirectory);
+            builder.ClearProviders();
+            builder.AddSerilog(dispose: true);
+        });
 
-            string logFilePath = Path.Combine(logDirectory, "ghostdraw-.log");
+        // Register application services (order matters for dependencies)
+        services.AddSingleton<AppSettingsService>();
+        services.AddSingleton<CursorHelper>();
+        services.AddSingleton<OverlayWindow>();
+        services.AddSingleton<GlobalKeyboardHook>();
+        services.AddSingleton<DrawingManager>();
+        services.AddSingleton<LoggingSettingsService>();
 
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.ControlledBy(_levelSwitch)
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("System", LogEventLevel.Warning)
-                .Enrich.FromLogContext()
-                .WriteTo.Debug(
-                    outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
-                .WriteTo.File(
-                    logFilePath,
-                    rollingInterval: RollingInterval.Day,
-                    outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
-                    retainedFileCountLimit: 7,
-                    fileSizeLimitBytes: 10_485_760) // 10 MB
-                .CreateLogger();
+        // Register GlobalExceptionHandler AFTER its dependencies
+        services.AddSingleton<GlobalExceptionHandler>();
 
-            // Setup DI container
-            var services = new ServiceCollection();
+        _serviceProvider = services.BuildServiceProvider();
 
-            // Add logging
-            services.AddLogging(builder =>
-            {
-                builder.ClearProviders();
-                builder.AddSerilog(dispose: true);
-            });
-
-            // Register application services (order matters for dependencies)
-            services.AddSingleton<AppSettingsService>();
-            services.AddSingleton<CursorHelper>();
-            services.AddSingleton<OverlayWindow>();
-            services.AddSingleton<GlobalKeyboardHook>();
-            services.AddSingleton<DrawingManager>();
-            services.AddSingleton<LoggingSettingsService>();
-
-            // Register GlobalExceptionHandler AFTER its dependencies
-            services.AddSingleton<GlobalExceptionHandler>();
-
-            _serviceProvider = services.BuildServiceProvider();
-
-            // Load saved log level from settings
-            var appSettings = _serviceProvider.GetRequiredService<AppSettingsService>();
-            if (Enum.TryParse<LogEventLevel>(appSettings.CurrentSettings.LogLevel, out var savedLevel))
-            {
-                _levelSwitch.MinimumLevel = savedLevel;
-            }
-
-            // Configure hotkey from settings
-            var keyboardHook = _serviceProvider.GetRequiredService<GlobalKeyboardHook>();
-            keyboardHook.Configure(appSettings.CurrentSettings.HotkeyVirtualKeys);
-
-            // Subscribe to hotkey changes for real-time reconfiguration
-            appSettings.HotkeyChanged += (sender, vks) =>
-            {
-                _configLogger?.LogInformation("Hotkey configuration changed, reconfiguring hook");
-                keyboardHook.Configure(vks);
-            };
-
-            // Get logger for configuration logging
-            _configLogger = _serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Configuration");
-            _configLogger.LogInformation("=== GhostDraw Started at {StartTime} ===", DateTime.Now);
-            _configLogger.LogInformation("Log directory: {LogDirectory}", logDirectory);
-            _configLogger.LogInformation("Current log level: {LogLevel}", _levelSwitch.MinimumLevel);
-            _configLogger.LogInformation("Hotkey: {Hotkey}", appSettings.CurrentSettings.HotkeyDisplayName);
-
-            return _serviceProvider;
+        // Load saved log level from settings
+        var appSettings = _serviceProvider.GetRequiredService<AppSettingsService>();
+        if (Enum.TryParse<LogEventLevel>(appSettings.CurrentSettings.LogLevel, out var savedLevel))
+        {
+            _levelSwitch.MinimumLevel = savedLevel;
         }
 
-        public static void SetLogLevel(LogEventLevel level)
-        {
-            _levelSwitch.MinimumLevel = level;
-            _configLogger?.LogInformation("Log level changed to: {LogLevel}", level);
-        }
+        // Configure hotkey from settings
+        var keyboardHook = _serviceProvider.GetRequiredService<GlobalKeyboardHook>();
+        keyboardHook.Configure(appSettings.CurrentSettings.HotkeyVirtualKeys);
 
-        public static LogEventLevel GetLogLevel() => _levelSwitch.MinimumLevel;
-
-        public static string GetLogDirectory()
+        // Subscribe to hotkey changes for real-time reconfiguration
+        appSettings.HotkeyChanged += (sender, vks) =>
         {
-            string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            return Path.Combine(appData, "GhostDraw");
-        }
+            _configLogger?.LogInformation("Hotkey configuration changed, reconfiguring hook");
+            keyboardHook.Configure(vks);
+        };
 
-        public static void Shutdown()
-        {
-            _configLogger?.LogInformation("=== GhostDraw Shutdown at {StopTime} ===", DateTime.Now);
-            _serviceProvider?.Dispose();
-            Log.CloseAndFlush();
-        }
+        // Get logger for configuration logging
+        _configLogger = _serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Configuration");
+        _configLogger.LogInformation("=== GhostDraw Started at {StartTime} ===", DateTime.Now);
+        _configLogger.LogInformation("Log directory: {LogDirectory}", logDirectory);
+        _configLogger.LogInformation("Current log level: {LogLevel}", _levelSwitch.MinimumLevel);
+        _configLogger.LogInformation("Hotkey: {Hotkey}", appSettings.CurrentSettings.HotkeyDisplayName);
+
+        return _serviceProvider;
+    }
+
+    public static void SetLogLevel(LogEventLevel level)
+    {
+        _levelSwitch.MinimumLevel = level;
+        _configLogger?.LogInformation("Log level changed to: {LogLevel}", level);
+    }
+
+    public static LogEventLevel GetLogLevel() => _levelSwitch.MinimumLevel;
+
+    public static string GetLogDirectory()
+    {
+        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        return Path.Combine(appData, "GhostDraw");
+    }
+
+    public static void Shutdown()
+    {
+        _configLogger?.LogInformation("=== GhostDraw Shutdown at {StopTime} ===", DateTime.Now);
+        _serviceProvider?.Dispose();
+        Log.CloseAndFlush();
     }
 }
