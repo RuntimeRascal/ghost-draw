@@ -6,6 +6,9 @@ on:
     pull_request:
         branches: [main]
 
+env:
+    VERSION: '' # Will be set from package.json
+
 jobs:
     build:
         runs-on: windows-latest
@@ -13,6 +16,16 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+
+            - name: Get version from package.json
+              id: get_version
+              shell: pwsh
+              run: |
+                  $packageJson = Get-Content -Path "package.json" -Raw | ConvertFrom-Json
+                  $version = $packageJson.version
+                  Write-Host "Version from package.json: $version"
+                  echo "VERSION=$version" >> $env:GITHUB_ENV
+                  echo "version=$version" >> $env:GITHUB_OUTPUT
 
             - name: Setup .NET 8
               uses: actions/setup-dotnet@v4
@@ -46,7 +59,7 @@ jobs:
                     -r win-x64 `
                     --self-contained true `
                     -p:PublishSingleFile=false `
-                    -p:Version=0.0.0-ci
+                    -p:Version=${{ env.VERSION }}
 
             - name: Generate WiX component list
               shell: pwsh
@@ -62,14 +75,14 @@ jobs:
               run: |
                   dotnet build GhostDraw.Installer.wixproj `
                     -c Release `
-                    -p:Version=0.0.0-ci `
+                    -p:Version=${{ env.VERSION }} `
                     -p:PublishDir="..\Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish\"
 
             - name: Verify build outputs
               shell: pwsh
               run: |
                   $exePath = "Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish\GhostDraw.exe"
-                  $msiPath = "Installer\bin\x64\Release\GhostDrawSetup-0.0.0-ci.msi"
+                  $msiPath = "Installer\bin\x64\Release\GhostDrawSetup-${{ env.VERSION }}.msi"
 
                   if (Test-Path $exePath) {
                     Write-Host "✓ Application EXE built successfully" -ForegroundColor Green
@@ -80,16 +93,41 @@ jobs:
 
                   if (Test-Path $msiPath) {
                     $size = (Get-Item $msiPath).Length / 1MB
-                    Write-Host "✓ Installer MSI built successfully" -ForegroundColor Green
+                    Write-Host "✓ Installer MSI built successfully (${{ env.VERSION }})" -ForegroundColor Green
                     Write-Host "  Size: $([math]::Round($size, 2)) MB" -ForegroundColor Gray
                   } else {
-                    Write-Error "Installer MSI not found"
+                    Write-Error "Installer MSI not found at $msiPath"
                     exit 1
                   }
+
+            - name: Create portable zip
+              shell: pwsh
+              run: |
+                  $publishDir = "Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish"
+                  $zipPath = "GhostDraw-${{ env.VERSION }}-portable.zip"
+                  Compress-Archive -Path "$publishDir\*" -DestinationPath $zipPath -Force
+                  $size = (Get-Item $zipPath).Length / 1MB
+                  Write-Host "✓ Portable ZIP created: $zipPath" -ForegroundColor Green
+                  Write-Host "  Size: $([math]::Round($size, 2)) MB" -ForegroundColor Gray
+
+            - name: Delete old artifacts
+              uses: geekyeggo/delete-artifact@v5
+              with:
+                  name: |
+                      GhostDrawSetup-*
+                      GhostDraw-*-portable
+                  failOnError: false
 
             - name: Upload installer artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: GhostDrawSetup-CI-${{ github.sha }}
-                  path: Installer/bin/x64/Release/GhostDrawSetup-0.0.0-ci.msi
-                  retention-days: 7
+                  name: GhostDrawSetup-${{ env.VERSION }}
+                  path: Installer/bin/x64/Release/GhostDrawSetup-${{ env.VERSION }}.msi
+                  retention-days: 30
+
+            - name: Upload portable artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: GhostDraw-${{ env.VERSION }}-portable
+                  path: GhostDraw-${{ env.VERSION }}-portable.zip
+                  retention-days: 30

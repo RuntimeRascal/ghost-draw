@@ -1,6 +1,6 @@
 {
     "name": "ghost-draw",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Draw directly on your screen with a transparent overlay",
     "repository": {
         "type": "git",
@@ -19,17 +19,12 @@
         "restore": "dotnet restore GhostDraw.sln",
         "publish": "dotnet publish Src/GhostDraw/GhostDraw.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false",
         "publish:ver": "dotnet publish Src/GhostDraw/GhostDraw.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:Version=%VER%",
-        "installer": "cd Installer && powershell.exe -NoProfile -ExecutionPolicy Bypass -File build.ps1",
-        "installer:ver": "cd Installer && powershell.exe -NoProfile -ExecutionPolicy Bypass -File build.ps1 -Version %VER%",
-        "installer:generate": "cd Installer && powershell.exe -NoProfile -ExecutionPolicy Bypass -File Generate-FileList.ps1",
-        "release": "npm run clean && npm run test && npm run installer",
-        "release:ver": "npm run clean && npm run test && npm run installer:ver",
         "dev": "dotnet build Src/GhostDraw/GhostDraw.csproj && dotnet run --project Src/GhostDraw/GhostDraw.csproj",
         "dev:watch": "dotnet watch run --project Src/GhostDraw/GhostDraw.csproj",
         "format": "dotnet format GhostDraw.sln",
         "format:check": "dotnet format GhostDraw.sln --verify-no-changes",
-        "version:update": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1",
-        "version:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -DryRun"
+        "version:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -UpdateProjFiles -Bump patch -DryRun",
+        "version:tag": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -Bump patch -DryRun"
     },
     "engines": {
         "node": ">=18.0.0",

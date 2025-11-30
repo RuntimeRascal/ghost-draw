@@ -1,87 +1,190 @@
 <#
 .SYNOPSIS
-    Updates version numbers across the project based on the latest git tag.
+    Manages version numbers across the project - displays, bumps, updates files, and creates git tags.
 
 .DESCRIPTION
-    This script retrieves the latest git tag, strips any 'v' prefix, and updates
-    the version number in:
+    This script provides flexible version management:
+    - Fetches and displays the latest git tag version
+    - Optionally bumps the version (patch, minor, or major)
+    - Optionally updates version in project files (package.json, .csproj, .wixproj)
+    - Optionally creates and pushes git tags
+
+    Files that can be updated:
     - package.json
     - Src/GhostDraw/GhostDraw.csproj
+    - Installer/GhostDraw.Installer.wixproj
 
 .PARAMETER DryRun
-    If specified, shows what would be changed without making actual changes.
+    If specified, shows what would be changed without making any modifications.
 
 .PARAMETER Tag
-    Optionally specify a tag to use instead of fetching the latest from git.
+    Optional. Use a specific version/tag instead of fetching the latest from git.
+    Can be specified with or without 'v' prefix (e.g., "v1.2.3" or "1.2.3").
+
+.PARAMETER Bump
+    Optional. Increment the version (patch, minor, or major).
+    - If -Tag is provided, bumps that version
+    - Otherwise, bumps the latest git tag version
+
+.PARAMETER UpdateProjFiles
+    Optional. If specified, updates the version in all project files.
+
+.PARAMETER CreateTag
+    Optional. If specified, creates a git tag with the resolved version.
+
+.PARAMETER PushTag
+    Optional. If specified along with -CreateTag, pushes the tag to origin.
 
 .EXAMPLE
     .\Update-Version.ps1
-    Updates all version files with the latest git tag.
+    Displays the latest git tag version (no changes made).
 
 .EXAMPLE
-    .\Update-Version.ps1 -DryRun
-    Shows what would be updated without making changes.
+    .\Update-Version.ps1 -Tag "1.2.3"
+    Displays version 1.2.3 (no changes made).
 
 .EXAMPLE
-    .\Update-Version.ps1 -Tag "v1.2.3"
-    Updates all version files with the specified tag.
+    .\Update-Version.ps1 -Bump patch
+    Displays what the next patch version would be (e.g., 1.0.2 -> 1.0.3).
+
+.EXAMPLE
+    .\Update-Version.ps1 -Bump minor -UpdateProjFiles
+    Bumps minor version and updates all project files.
+
+.EXAMPLE
+    .\Update-Version.ps1 -Tag "2.0.0" -UpdateProjFiles
+    Sets version 2.0.0 in all project files.
+
+.EXAMPLE
+    .\Update-Version.ps1 -Bump major -CreateTag -PushTag
+    Bumps major version and creates/pushes a git tag (doesn't update files).
+
+.EXAMPLE
+    .\Update-Version.ps1 -Bump minor -UpdateProjFiles -CreateTag -PushTag
+    Bumps minor version, updates all files, creates tag, and pushes it.
+
+.EXAMPLE
+    .\Update-Version.ps1 -Bump patch -UpdateProjFiles -CreateTag -PushTag -DryRun
+    Shows what would happen without making any changes.
 #>
 
-[CmdletBinding()]
 param(
     [switch]$DryRun,
-    [string]$Tag
+    [string]$Tag,
+    [ValidateSet("patch", "minor", "major")]
+    [string]$Bump,
+    [switch]$UpdateProjFiles,
+    [switch]$CreateTag,
+    [switch]$PushTag
 )
 
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = "Stop"
 
 # Get the repository root (parent of Scripts directory)
-$RepoRoot = Split-Path -Parent $PSScriptRoot
+$repoRoot = Split-Path -Parent $PSScriptRoot
 
-Write-Host "Repository root: $RepoRoot" -ForegroundColor Cyan
+# Files to update (relative to repo root)
+$filesToUpdate = @(
+    "package.json",
+    "Src/GhostDraw/GhostDraw.csproj",
+    "Installer/GhostDraw.Installer.wixproj"
+)
 
-# Function to get the latest git tag
+#region Helper Functions
+
 function Get-LatestGitTag {
-    try {
-        # Fetch latest tags from remote
-        Write-Host "Fetching latest tags from remote..." -ForegroundColor Yellow
-        git fetch --tags 2>&1 | Out-Null
-        
-        # Get the latest tag sorted by version number (descending)
-        # Using -v:refname ensures proper semantic version sorting
-        $latestTag = git tag -l --sort=-v:refname | Select-Object -First 1
-        
-        if (-not $latestTag) {
-            throw "No git tags found in repository"
-        }
-        
-        return $latestTag.Trim()
+    # Fetch tags from remote
+    Write-Host "Fetching tags from remote..." -ForegroundColor Gray
+    git fetch --tags 2>$null
+    
+    # Get the latest tag sorted by version
+    $latestTag = git tag -l --sort=-v:refname | Select-Object -First 1
+    
+    if (-not $latestTag) {
+        throw "No git tags found. Please create a tag first (e.g., git tag v1.0.0)"
     }
-    catch {
-        throw "Failed to get latest git tag: $_"
-    }
+    
+    return $latestTag
 }
 
-# Function to extract version from tag (strips 'v' prefix if present)
 function Get-VersionFromTag {
     param([string]$TagName)
     
-    $version = $TagName
+    # Strip 'v' prefix if present
+    $version = $TagName -replace "^v", ""
     
-    # Strip 'v' or 'V' prefix if present
-    if ($version -match '^[vV](.+)$') {
-        $version = $Matches[1]
-    }
-    
-    # Validate version format (should be semver-like: X.Y.Z or X.Y.Z-suffix)
-    if ($version -notmatch '^\d+\.\d+(\.\d+)?(-[\w\d\.]+)?$') {
-        throw "Invalid version format: '$version'. Expected format like '1.0.0' or '1.0.0-beta'"
+    # Validate version format (basic semver)
+    if ($version -notmatch "^\d+\.\d+\.\d+") {
+        throw "Tag '$TagName' does not appear to be a valid semantic version"
     }
     
     return $version
 }
 
-# Function to update package.json
+function Get-BumpedVersion {
+    param(
+        [string]$CurrentVersion,
+        [string]$BumpType
+    )
+    
+    $parts = $CurrentVersion -split "\."
+    $major = [int]$parts[0]
+    $minor = [int]$parts[1]
+    $patch = [int]$parts[2]
+    
+    switch ($BumpType) {
+        "major" {
+            $major++
+            $minor = 0
+            $patch = 0
+        }
+        "minor" {
+            $minor++
+            $patch = 0
+        }
+        "patch" {
+            $patch++
+        }
+    }
+    
+    return "$major.$minor.$patch"
+}
+
+function New-GitTag {
+    param(
+        [string]$Version,
+        [switch]$Push,
+        [switch]$DryRun
+    )
+    
+    $tagName = "v$Version"
+    
+    if ($DryRun) {
+        Write-Host "  [DRY-RUN] Would create git tag: $tagName" -ForegroundColor Cyan
+        if ($Push) {
+            Write-Host "  [DRY-RUN] Would push tag to origin" -ForegroundColor Cyan
+        }
+        return
+    }
+    
+    # Check if tag already exists
+    $existingTag = git tag -l $tagName
+    if ($existingTag) {
+        throw "Tag '$tagName' already exists. Cannot create duplicate tag."
+    }
+    
+    # Create the tag
+    Write-Host "  Creating git tag: $tagName" -ForegroundColor Yellow
+    git tag $tagName
+    Write-Host "  Tag created: $tagName" -ForegroundColor Green
+    
+    if ($Push) {
+        Write-Host "  Pushing tag to origin..." -ForegroundColor Yellow
+        git push origin $tagName
+        Write-Host "  Tag pushed successfully" -ForegroundColor Green
+    }
+}
+
 function Update-PackageJson {
     param(
         [string]$FilePath,
@@ -89,199 +192,171 @@ function Update-PackageJson {
         [switch]$DryRun
     )
     
-    if (-not (Test-Path $FilePath)) {
-        Write-Warning "File not found: $FilePath"
-        return $false
-    }
-    
     $content = Get-Content $FilePath -Raw
-    $json = $content | ConvertFrom-Json
-    $oldVersion = $json.version
+    $pattern = '"version":\s*"[^"]*"'
+    $replacement = "`"version`": `"$NewVersion`""
     
-    if ($oldVersion -eq $NewVersion) {
-        Write-Host "  package.json: Already at version $NewVersion" -ForegroundColor Green
-        return $true
-    }
-    
-    if ($DryRun) {
-        Write-Host "  package.json: Would update $oldVersion -> $NewVersion" -ForegroundColor Yellow
-        return $true
-    }
-    
-    # Update version using regex to preserve formatting
-    $updatedContent = $content -replace '"version"\s*:\s*"[^"]*"', "`"version`": `"$NewVersion`""
-    
-    Set-Content -Path $FilePath -Value $updatedContent -NoNewline
-    Write-Host "  package.json: Updated $oldVersion -> $NewVersion" -ForegroundColor Green
-    return $true
-}
-
-# Function to update .csproj file (simple <Version> element)
-function Update-CsprojFile {
-    param(
-        [string]$FilePath,
-        [string]$NewVersion,
-        [switch]$DryRun
-    )
-    
-    if (-not (Test-Path $FilePath)) {
-        Write-Warning "File not found: $FilePath"
-        return $false
-    }
-    
-    $content = Get-Content $FilePath -Raw
-    $fileName = Split-Path $FilePath -Leaf
-    
-    # Check if Version element exists
-    if ($content -notmatch '<Version>([^<]*)</Version>') {
-        Write-Warning "  $fileName`: No <Version> element found"
-        return $false
-    }
-    
-    $oldVersion = $Matches[1]
-    
-    if ($oldVersion -eq $NewVersion) {
-        Write-Host "  $fileName`: Already at version $NewVersion" -ForegroundColor Green
-        return $true
-    }
-    
-    if ($DryRun) {
-        Write-Host "  $fileName`: Would update $oldVersion -> $NewVersion" -ForegroundColor Yellow
-        return $true
-    }
-    
-    # Update version
-    $updatedContent = $content -replace '<Version>[^<]*</Version>', "<Version>$NewVersion</Version>"
-    
-    Set-Content -Path $FilePath -Value $updatedContent -NoNewline
-    Write-Host "  $fileName`: Updated $oldVersion -> $NewVersion" -ForegroundColor Green
-    return $true
-}
-
-# Function to update WiX project file (conditional <Version> element)
-function Update-WixProjFile {
-    param(
-        [string]$FilePath,
-        [string]$NewVersion,
-        [switch]$DryRun
-    )
-    
-    if (-not (Test-Path $FilePath)) {
-        Write-Warning "File not found: $FilePath"
-        return $false
-    }
-    
-    $content = Get-Content $FilePath -Raw
-    $fileName = Split-Path $FilePath -Leaf
-    
-    # Match Version element with Condition attribute (WiX default version pattern)
-    # Pattern: <Version Condition="'$(Version)' == ''">X.Y.Z</Version>
-    if ($content -notmatch '<Version\s+Condition="[^"]*">([^<]*)</Version>') {
-        Write-Warning "  $fileName`: No conditional <Version> element found"
-        return $false
-    }
-    
-    $oldVersion = $Matches[1]
-    
-    if ($oldVersion -eq $NewVersion) {
-        Write-Host "  $fileName`: Already at version $NewVersion" -ForegroundColor Green
-        return $true
-    }
-    
-    if ($DryRun) {
-        Write-Host "  $fileName`: Would update $oldVersion -> $NewVersion" -ForegroundColor Yellow
-        return $true
-    }
-    
-    # Update version while preserving the Condition attribute
-    $updatedContent = $content -replace '(<Version\s+Condition="[^"]*">)[^<]*(</Version>)', "`${1}$NewVersion`${2}"
-    
-    Set-Content -Path $FilePath -Value $updatedContent -NoNewline
-    Write-Host "  $fileName`: Updated $oldVersion -> $NewVersion" -ForegroundColor Green
-    return $true
-}
-
-# Main execution
-try {
-    Write-Host ""
-    Write-Host "=== GhostDraw Version Update Script ===" -ForegroundColor Magenta
-    Write-Host ""
-    
-    # Get the tag to use
-    if ($Tag) {
-        $gitTag = $Tag
-        Write-Host "Using specified tag: $gitTag" -ForegroundColor Cyan
-    }
-    else {
-        $gitTag = Get-LatestGitTag
-        Write-Host "Latest git tag: $gitTag" -ForegroundColor Cyan
-    }
-    
-    # Extract version from tag
-    $version = Get-VersionFromTag -TagName $gitTag
-    Write-Host "Version to apply: $version" -ForegroundColor Cyan
-    Write-Host ""
-    
-    if ($DryRun) {
-        Write-Host "[DRY RUN] No files will be modified" -ForegroundColor Yellow
-        Write-Host ""
-    }
-    
-    # Define files to update
-    $filesToUpdate = @(
-        @{
-            Path = Join-Path $RepoRoot "package.json"
-            Type = "PackageJson"
-        },
-        @{
-            Path = Join-Path $RepoRoot "Src\GhostDraw\GhostDraw.csproj"
-            Type = "Csproj"
-        },
-        @{
-            Path = Join-Path $RepoRoot "Installer\GhostDraw.Installer.wixproj"
-            Type = "WixProj"
+    if ($content -match $pattern) {
+        $currentVersion = [regex]::Match($content, '"version":\s*"([^"]*)"').Groups[1].Value
+        
+        if ($currentVersion -eq $NewVersion) {
+            Write-Host "    Already at version $NewVersion" -ForegroundColor Gray
+            return
         }
-    )
-    
-    Write-Host "Updating version files:" -ForegroundColor White
-    
-    $success = $true
-    foreach ($file in $filesToUpdate) {
-        switch ($file.Type) {
-            "PackageJson" {
-                $result = Update-PackageJson -FilePath $file.Path -NewVersion $version -DryRun:$DryRun
-            }
-            "Csproj" {
-                $result = Update-CsprojFile -FilePath $file.Path -NewVersion $version -DryRun:$DryRun
-            }
-            "WixProj" {
-                $result = Update-WixProjFile -FilePath $file.Path -NewVersion $version -DryRun:$DryRun
-            }
-        }
-        if (-not $result) {
-            $success = $false
-        }
-    }
-    
-    Write-Host ""
-    
-    if ($success) {
+        
         if ($DryRun) {
-            Write-Host "Dry run complete. Run without -DryRun to apply changes." -ForegroundColor Yellow
+            Write-Host "    [DRY-RUN] Would update: $currentVersion -> $NewVersion" -ForegroundColor Cyan
+        } else {
+            $newContent = $content -replace $pattern, $replacement
+            Set-Content $FilePath -Value $newContent -NoNewline
+            Write-Host "    Updated: $currentVersion -> $NewVersion" -ForegroundColor Green
         }
-        else {
-            Write-Host "Version update complete!" -ForegroundColor Green
-        }
-        exit 0
-    }
-    else {
-        Write-Host "Version update completed with warnings." -ForegroundColor Yellow
-        exit 1
+    } else {
+        Write-Host "    Warning: Could not find version field" -ForegroundColor Yellow
     }
 }
-catch {
-    Write-Host ""
-    Write-Host "ERROR: $_" -ForegroundColor Red
-    Write-Host ""
-    exit 1
+
+function Update-CsprojVersion {
+    param(
+        [string]$FilePath,
+        [string]$NewVersion,
+        [switch]$DryRun
+    )
+    
+    $content = Get-Content $FilePath -Raw
+    $pattern = '<Version>([^<]*)</Version>'
+    
+    if ($content -match $pattern) {
+        $currentVersion = [regex]::Match($content, $pattern).Groups[1].Value
+        
+        if ($currentVersion -eq $NewVersion) {
+            Write-Host "    Already at version $NewVersion" -ForegroundColor Gray
+            return
+        }
+        
+        if ($DryRun) {
+            Write-Host "    [DRY-RUN] Would update: $currentVersion -> $NewVersion" -ForegroundColor Cyan
+        } else {
+            $newContent = $content -replace $pattern, "<Version>$NewVersion</Version>"
+            Set-Content $FilePath -Value $newContent -NoNewline
+            Write-Host "    Updated: $currentVersion -> $NewVersion" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "    Warning: Could not find <Version> element" -ForegroundColor Yellow
+    }
 }
+
+function Update-WixVersion {
+    param(
+        [string]$FilePath,
+        [string]$NewVersion,
+        [switch]$DryRun
+    )
+    
+    $content = Get-Content $FilePath -Raw
+    # Match: <Version Condition="'$(Version)' == ''">X.Y.Z</Version>
+    $pattern = "(<Version\s+Condition=`"'\`$\(Version\)'\s*==\s*''`">)([^<]*)(</Version>)"
+    
+    if ($content -match $pattern) {
+        $currentVersion = [regex]::Match($content, $pattern).Groups[2].Value
+        
+        if ($currentVersion -eq $NewVersion) {
+            Write-Host "    Already at version $NewVersion" -ForegroundColor Gray
+            return
+        }
+        
+        if ($DryRun) {
+            Write-Host "    [DRY-RUN] Would update: $currentVersion -> $NewVersion" -ForegroundColor Cyan
+        } else {
+            $newContent = $content -replace $pattern, "`$1$NewVersion`$3"
+            Set-Content $FilePath -Value $newContent -NoNewline
+            Write-Host "    Updated: $currentVersion -> $NewVersion" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "    Warning: Could not find conditional <Version> element" -ForegroundColor Yellow
+    }
+}
+
+#endregion
+
+#region Main Execution
+
+Write-Host ""
+Write-Host "=== Version Management Script ===" -ForegroundColor Magenta
+Write-Host ""
+
+if ($DryRun) {
+    Write-Host "[DRY-RUN MODE - No changes will be made]" -ForegroundColor Yellow
+    Write-Host ""
+}
+
+# Step 1: Determine the base version
+if ($Tag) {
+    $baseVersion = Get-VersionFromTag -TagName $Tag
+    Write-Host "Specified version: $baseVersion" -ForegroundColor Cyan
+} else {
+    $latestTag = Get-LatestGitTag
+    $baseVersion = Get-VersionFromTag -TagName $latestTag
+    Write-Host "Latest git tag: $latestTag (version $baseVersion)" -ForegroundColor Cyan
+}
+
+# Step 2: Apply bump if requested
+if ($Bump) {
+    $targetVersion = Get-BumpedVersion -CurrentVersion $baseVersion -BumpType $Bump
+    Write-Host "Bump type: $Bump" -ForegroundColor Cyan
+    Write-Host "Bumped version: $baseVersion -> $targetVersion" -ForegroundColor Green
+} else {
+    $targetVersion = $baseVersion
+}
+
+Write-Host ""
+Write-Host "Resolved version: $targetVersion" -ForegroundColor White
+Write-Host ""
+
+# Step 3: Update project files if requested
+if ($UpdateProjFiles) {
+    Write-Host "Updating project files:" -ForegroundColor White
+    
+    foreach ($file in $filesToUpdate) {
+        $fullPath = Join-Path $repoRoot $file
+        
+        if (-not (Test-Path $fullPath)) {
+            Write-Host "  File not found: $file" -ForegroundColor Red
+            continue
+        }
+        
+        Write-Host "  $file" -ForegroundColor Gray
+        
+        switch -Wildcard ($file) {
+            "*.json" {
+                Update-PackageJson -FilePath $fullPath -NewVersion $targetVersion -DryRun:$DryRun
+            }
+            "*.csproj" {
+                Update-CsprojVersion -FilePath $fullPath -NewVersion $targetVersion -DryRun:$DryRun
+            }
+            "*.wixproj" {
+                Update-WixVersion -FilePath $fullPath -NewVersion $targetVersion -DryRun:$DryRun
+            }
+        }
+    }
+    Write-Host ""
+} else {
+    Write-Host "Project files: Not updated (use -UpdateProjFiles to update)" -ForegroundColor Gray
+    Write-Host ""
+}
+
+# Step 4: Create git tag if requested
+if ($CreateTag) {
+    Write-Host "Git tag:" -ForegroundColor White
+    New-GitTag -Version $targetVersion -Push:$PushTag -DryRun:$DryRun
+    Write-Host ""
+} else {
+    Write-Host "Git tag: Not created (use -CreateTag to create)" -ForegroundColor Gray
+    Write-Host ""
+}
+
+Write-Host "=== Complete ===" -ForegroundColor Magenta
+Write-Host ""
+
+#endregion
+Write-Host ""
