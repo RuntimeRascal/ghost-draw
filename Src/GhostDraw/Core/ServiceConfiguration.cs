@@ -7,6 +7,7 @@ using GhostDraw.Services;
 using GhostDraw.Managers;
 using GhostDraw.Helpers;
 using GhostDraw.Views;
+using GhostDraw.ViewModels;
 
 namespace GhostDraw.Core;
 
@@ -60,6 +61,10 @@ public static class ServiceConfiguration
 
         // Register GlobalExceptionHandler AFTER its dependencies
         services.AddSingleton<GlobalExceptionHandler>();
+
+        // Register ViewModels and Views
+        services.AddTransient<SettingsViewModel>();
+        services.AddTransient<SettingsWindow>();
 
         _serviceProvider = services.BuildServiceProvider();
 

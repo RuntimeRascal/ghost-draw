@@ -60,7 +60,7 @@ public partial class App : Application
             // Log loaded settings
             var settings = _appSettings.CurrentSettings;
             _logger.LogInformation("Loaded settings - Color: {Color}, Thickness: {Thickness}, Hotkey: {Hotkey}, LockMode: {LockMode}",
-                settings.BrushColor, settings.BrushThickness,
+                settings.ActiveBrush, settings.BrushThickness,
                 settings.HotkeyDisplayName,
                 settings.LockDrawingMode);
 
@@ -115,9 +115,7 @@ public partial class App : Application
                 try
                 {
                     _logger?.LogDebug("Opening settings window");
-                    var logger = _serviceProvider!.GetRequiredService<ILogger<SettingsWindow>>();
-                    var loggerFactory = _serviceProvider!.GetRequiredService<ILoggerFactory>();
-                    var settingsWindow = new SettingsWindow(_loggingSettings!, _appSettings!, logger, loggerFactory);
+                    var settingsWindow = _serviceProvider!.GetRequiredService<SettingsWindow>();
                     settingsWindow.ShowDialog();
                 }
                 catch (Exception ex)
@@ -185,11 +183,14 @@ public partial class App : Application
         }
     }
 
-    private void UpdateLogLevelMenuChecks(ToolStripMenuItem logLevelMenu, LogEventLevel selectedLevel)
+    private static void UpdateLogLevelMenuChecks(ToolStripMenuItem logLevelMenu, LogEventLevel selectedLevel)
     {
         foreach (ToolStripMenuItem item in logLevelMenu.DropDownItems)
         {
-            item.Checked = item.Text.StartsWith(selectedLevel.ToString());
+            if (item.Text != null)
+            {
+                item.Checked = item.Text.StartsWith(selectedLevel.ToString());
+            }
         }
     }
 

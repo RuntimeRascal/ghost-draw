@@ -1,0 +1,38 @@
+<UserControl x:Class="GhostDraw.Views.UserControls.LoggingSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <GroupBox Header="// LOGS">
+        <StackPanel>
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                          Text="LOG LEVEL" 
+                          Foreground="#00FFFF"
+                          FontWeight="Bold"
+                          FontSize="11"
+                          FontFamily="Consolas"
+                          VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1"
+                         x:Name="LogLevelComboBox" 
+                         SelectionChanged="LogLevelComboBox_SelectionChanged"
+                         Height="40"/>
+            </Grid>
+            <TextBlock x:Name="LogLevelDescription" 
+                      Margin="0,0,0,16" 
+                      TextWrapping="Wrap"
+                      Foreground="#808080"
+                      FontSize="11"
+                      FontFamily="Consolas"
+                      LineHeight="16"/>
+            <Button x:Name="OpenLogFolderButton" 
+                   Content="OPEN FOLDER" 
+                   Click="OpenLogFolderButton_Click"
+                   Style="{StaticResource ModernButton}"
+                   HorizontalAlignment="Left"/>
+        </StackPanel>
+    </GroupBox>
+</UserControl>

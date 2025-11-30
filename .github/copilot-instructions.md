@@ -81,6 +81,23 @@ When adding new features:
 5. **Update settings UI** - Add configuration options when appropriate
 6. **Document in code** - Add XML comments for public APIs
 
+## Icon Usage in WPF
+
+**IMPORTANT**: When adding icons or symbols to WPF UI:
+
+- **Always use Segoe MDL2 Assets font** instead of Unicode symbols
+- Set `FontFamily="Segoe MDL2 Assets"` on TextBlock/TextBox controls
+- Use hex codes like `&#xE76C;` for chevron-right, `&#xE70E;` for chevron-up, etc.
+- **Never use plain Unicode characters** like ?, ?, ? - they display as `?` in the app
+- See [Segoe MDL2 Assets icons list](https://learn.microsoft.com/en-us/windows/apps/design/style/segoe-ui-symbol-font)
+
+Common icons used in GhostDraw:
+- `&#xE76C;` - ChevronRight (?)
+- `&#xE70E;` - ChevronUp (?)
+- `&#xE70D;` - ChevronDown (?)
+- `&#xE74D;` - Delete (??)
+- `&#xE73E;` - CheckMark (?)
+
 ## Resources
 
 -   [Low-Level Keyboard Hook Documentation](https://learn.microsoft.com/en-us/windows/win32/winmsg/lowlevelkeyboardproc)

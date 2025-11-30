@@ -20,6 +20,7 @@ public class AppSettingsService
     public event EventHandler<bool>? LockDrawingModeChanged;
     public event EventHandler<(double min, double max)>? BrushThicknessRangeChanged;
     public event EventHandler<List<int>>? HotkeyChanged;
+    public event EventHandler<List<string>>? ColorPaletteChanged;
 
     public AppSettingsService(ILogger<AppSettingsService> logger)
     {
@@ -53,13 +54,21 @@ public class AppSettingsService
             {
                 _logger.LogInformation("Loading settings from {Path}", _settingsFilePath);
                 string json = File.ReadAllText(_settingsFilePath);
+                
+                // Try to deserialize as current format
                 var settings = JsonSerializer.Deserialize<AppSettings>(json);
 
                 if (settings != null)
                 {
+                    // Migrate old settings format if needed
+                    settings = MigrateSettings(json, settings);
+                    
                     _logger.LogInformation("Settings loaded successfully");
-                    _logger.LogDebug("Brush Color: {Color}, Thickness: {Thickness}, Hotkey: {Hotkey}",
-                        settings.BrushColor, settings.BrushThickness, settings.HotkeyDisplayName);
+                    _logger.LogDebug("Active Brush: {Color}, Thickness: {Thickness}, Hotkey: {Hotkey}",
+                        settings.ActiveBrush, settings.BrushThickness, settings.HotkeyDisplayName);
+                    
+                    // Save migrated settings to update file format
+                    SaveSettings(settings);
                     return settings;
                 }
             }
@@ -74,6 +83,40 @@ public class AppSettingsService
             _logger.LogError(ex, "Failed to load settings from {Path}, using defaults", _settingsFilePath);
             return new AppSettings();
         }
+    }
+
+    /// <summary>
+    /// Migrates settings from old format to new format
+    /// </summary>
+    private AppSettings MigrateSettings(string json, AppSettings settings)
+    {
+        try
+        {
+            // Parse as JsonDocument to check for old properties
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            // Migrate old "brushColor" to new "activeBrush"
+            if (root.TryGetProperty("brushColor", out var brushColorProp))
+            {
+                var oldBrushColor = brushColorProp.GetString();
+                if (!string.IsNullOrEmpty(oldBrushColor))
+                {
+                    settings.ActiveBrush = oldBrushColor;
+                    _logger.LogInformation("Migrated 'brushColor' to 'activeBrush': {Color}", oldBrushColor);
+                }
+            }
+
+            // Future migrations can be added here
+            // Example: if (root.TryGetProperty("oldProperty", out var oldProp)) { ... }
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to migrate settings, using loaded values as-is");
+        }
+
+        return settings;
     }
 
     /// <summary>
@@ -102,12 +145,12 @@ public class AppSettingsService
     }
 
     /// <summary>
-    /// Updates brush color and persists to disk
+    /// Updates active brush color and persists to disk
     /// </summary>
-    public void SetBrushColor(string colorHex)
+    public void SetActiveBrush(string colorHex)
     {
-        _logger.LogInformation("Setting brush color to {Color}", colorHex);
-        _currentSettings.BrushColor = colorHex;
+        _logger.LogInformation("Setting active brush to {Color}", colorHex);
+        _currentSettings.ActiveBrush = colorHex;
         SaveSettings(_currentSettings);
 
         // Raise event to notify UI
@@ -195,14 +238,14 @@ public class AppSettingsService
     /// </summary>
     public string GetNextColor()
     {
-        var currentIndex = _currentSettings.ColorPalette.IndexOf(_currentSettings.BrushColor);
+        var currentIndex = _currentSettings.ColorPalette.IndexOf(_currentSettings.ActiveBrush);
         var nextIndex = (currentIndex + 1) % _currentSettings.ColorPalette.Count;
         var nextColor = _currentSettings.ColorPalette[nextIndex];
 
         _logger.LogDebug("Cycling color from {CurrentColor} to {NextColor}",
-            _currentSettings.BrushColor, nextColor);
+            _currentSettings.ActiveBrush, nextColor);
 
-        SetBrushColor(nextColor);
+        SetActiveBrush(nextColor);
         return nextColor;
     }
 
@@ -214,6 +257,69 @@ public class AppSettingsService
         _logger.LogInformation("Setting log level to {LogLevel}", logLevel);
         _currentSettings.LogLevel = logLevel;
         SaveSettings(_currentSettings);
+    }
+
+    /// <summary>
+    /// Adds a color to the palette
+    /// </summary>
+    public void AddColorToPalette(string colorHex)
+    {
+        if (string.IsNullOrWhiteSpace(colorHex))
+        {
+            _logger.LogWarning("Attempted to add invalid color to palette");
+            return;
+        }
+
+        if (_currentSettings.ColorPalette.Contains(colorHex))
+        {
+            _logger.LogDebug("Color {Color} already exists in palette", colorHex);
+            return;
+        }
+
+        _logger.LogInformation("Adding color {Color} to palette", colorHex);
+        _currentSettings.ColorPalette.Add(colorHex);
+        SaveSettings(_currentSettings);
+        ColorPaletteChanged?.Invoke(this, new List<string>(_currentSettings.ColorPalette));
+    }
+
+    /// <summary>
+    /// Removes a color from the palette
+    /// </summary>
+    public void RemoveColorFromPalette(string colorHex)
+    {
+        if (_currentSettings.ColorPalette.Count <= 1)
+        {
+            _logger.LogWarning("Cannot remove last color from palette");
+            return;
+        }
+
+        if (!_currentSettings.ColorPalette.Contains(colorHex))
+        {
+            _logger.LogDebug("Color {Color} not found in palette", colorHex);
+            return;
+        }
+
+        _logger.LogInformation("Removing color {Color} from palette", colorHex);
+        _currentSettings.ColorPalette.Remove(colorHex);
+        SaveSettings(_currentSettings);
+        ColorPaletteChanged?.Invoke(this, new List<string>(_currentSettings.ColorPalette));
+    }
+
+    /// <summary>
+    /// Updates the entire color palette
+    /// </summary>
+    public void SetColorPalette(List<string> colors)
+    {
+        if (colors == null || colors.Count == 0)
+        {
+            _logger.LogWarning("Cannot set empty color palette");
+            return;
+        }
+
+        _logger.LogInformation("Setting color palette with {Count} colors", colors.Count);
+        _currentSettings.ColorPalette = new List<string>(colors);
+        SaveSettings(_currentSettings);
+        ColorPaletteChanged?.Invoke(this, new List<string>(_currentSettings.ColorPalette));
     }
 
     /// <summary>

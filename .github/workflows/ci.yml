@@ -3,8 +3,8 @@ name: CI Build
 on:
     push:
         branches: [main]
-    pull_request:
-        branches: [main]
+    # pull_request:
+    #     branches: [main]
 
 permissions:
     contents: write # Required for creating draft releases

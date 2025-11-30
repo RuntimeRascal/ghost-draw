@@ -24,7 +24,7 @@
         "format": "dotnet format GhostDraw.sln",
         "format:check": "dotnet format GhostDraw.sln --verify-no-changes",
         "version:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -UpdateProjFiles -Bump patch -DryRun",
-        "version:tag": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -Bump patch -DryRun"
+        "version:tag": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -Bump patch -DryRun"
     },
     "engines": {
         "node": ">=18.0.0",
