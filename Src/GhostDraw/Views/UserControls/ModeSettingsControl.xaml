@@ -1,0 +1,49 @@
+<UserControl x:Class="GhostDraw.Views.UserControls.ModeSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/CyberpunkStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <GroupBox Header="// MODE">
+        <StackPanel>
+            <CheckBox x:Name="LockModeCheckBox"
+                     Content="LOCK DRAWING MODE"
+                     Foreground="#FF0080"
+                     FontWeight="Bold"
+                     FontFamily="Consolas"
+                     FontSize="12"
+                     Checked="LockModeCheckBox_Changed"
+                     Unchecked="LockModeCheckBox_Changed"
+                     Margin="0,0,0,16"/>
+            <Border Background="#0A0E27"
+                   BorderBrush="#404040"
+                   BorderThickness="1"
+                   Padding="16">
+                <StackPanel>
+                    <TextBlock Foreground="#B0B0B0"
+                              FontSize="11"
+                              FontFamily="Consolas"
+                              TextWrapping="Wrap"
+                              Margin="0,0,0,8"
+                              LineHeight="16">
+                        <Run Text="[ON]" Foreground="#00FF00" FontWeight="Bold"/>
+                        <Run Text=" Press once to lock, press again to unlock"/>
+                    </TextBlock>
+                    <TextBlock Foreground="#B0B0B0"
+                              FontSize="11"
+                              FontFamily="Consolas"
+                              TextWrapping="Wrap"
+                              LineHeight="16">
+                        <Run Text="[OFF]" Foreground="#FF6B6B" FontWeight="Bold"/>
+                        <Run Text=" Hold to draw, release to clear"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </GroupBox>
+</UserControl>
