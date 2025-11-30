@@ -1,6 +1,6 @@
 <div align="center">
 
-# ?? GhostDraw
+# 👻 GhostDraw
 
 ### Draw on Your Screen, Anywhere, Anytime
 
@@ -20,29 +20,29 @@
 
 ---
 
-## ? Features
+## ✨ Features
 
-### ?? **Drawing Tools**
+### 🎨 **Drawing Tools**
 - **Customizable Color Palette** - Create your own color collection and cycle through them while drawing
 - **Variable Brush Thickness** - Adjust brush size from 1-100px with configurable min/max ranges
 - **Smooth Drawing** - High-performance rendering for fluid strokes
 - **Mouse Wheel Control** - Change brush thickness on-the-fly while drawing
 
-### ?? **Hotkey System**
+### ⌨️ **Hotkey System**
 - **Global Hotkey** - Activate drawing mode from any application
 - **Customizable Shortcuts** - Define your own key combinations
 - **Two Draw Modes**:
   - **Toggle Mode** - Press once to start, press again to stop
   - **Hold Mode** - Draw only while holding the hotkey
 
-### ?? **User Experience**
+### 🖥️ **User Experience**
 - **Transparent Overlay** - Draw on top of any application without blocking input
 - **System Tray Integration** - Runs quietly in the background
 - **Emergency Exit** - Press `ESC` to instantly hide the overlay
 - **Right-Click Color Cycling** - Quickly switch between your palette colors
 - **Position-Numbered Palette** - Easily organize and reorder your favorite colors
 
-### ??? **Safety & Stability**
+### 🛡️ **Safety & Stability**
 - **Fail-Safe Design** - Won't lock you out of your system if it crashes
 - **Fast Input Processing** - All hooks complete in < 5ms for responsive system
 - **Graceful Error Handling** - Protected critical paths ensure stability
@@ -50,7 +50,7 @@
 
 ---
 
-## ?? Screenshots
+## 📸 Screenshots
 
 ### Settings Window
 ![Settings Window](docs/Settings.png)
@@ -76,7 +76,7 @@ Customize every aspect of GhostDraw with the intuitive settings panel:
 
 ---
 
-## ?? Getting Started
+## 🚀 Getting Started
 
 ### Requirements
 
@@ -88,76 +88,76 @@ Customize every aspect of GhostDraw with the intuitive settings panel:
 1. **Download** the latest release from the [Releases page](https://github.com/RuntimeRascal/ghost-draw/releases)
 2. **Extract** the ZIP file to your preferred location (e.g., `C:\Program Files\GhostDraw`)
 3. **Run** `GhostDraw.exe`
-4. The application will start and **minimize to the system tray** ??
+4. The application will start and **minimize to the system tray** 👻
 
-> **?? Tip**: Create a shortcut in your Startup folder to launch GhostDraw automatically when Windows starts!
+> **💡 Tip**: Create a shortcut in your Startup folder to launch GhostDraw automatically when Windows starts!
 
 ---
 
-## ?? How to Use
+## 🎯 How to Use
 
 ### Basic Drawing
 
-1. **Activate Drawing Mode**  
+1. **Activate Drawing Mode**
    Press your configured hotkey (default: `Ctrl+Alt+D`)
 
-2. **Start Drawing**  
+2. **Start Drawing**
    Click and drag with your **left mouse button** to draw
 
-3. **Cycle Colors**  
+3. **Cycle Colors**
    **Right-click** while drawing to switch to the next color in your palette
 
-4. **Adjust Thickness**  
+4. **Adjust Thickness**
    Scroll the **mouse wheel** while drawing to change brush size
 
-5. **Exit Drawing Mode**  
+5. **Exit Drawing Mode**
    - Press the hotkey again (toggle mode)
    - Press `ESC` for emergency exit
    - Release the hotkey (hold mode)
 
 ### Customizing Your Palette
 
-1. **Open Settings**  
-   Right-click the system tray icon ? **Settings**
+1. **Open Settings**
+   Right-click the system tray icon → **Settings**
 
-2. **Edit Palette Colors**  
+2. **Edit Palette Colors**
    Click to expand the color palette section
 
-3. **Add Colors**  
+3. **Add Colors**
    Click **+ ADD COLOR** and choose your color
 
-4. **Reorder Colors**  
-   Use the **? Up** and **? Down** buttons to arrange colors  
-   (Press ? on first item to move it to end, ? on last to move to start)
+4. **Reorder Colors**
+   Use the **⬆ Up** and **⬇ Down** buttons to arrange colors
+   (Press ⬆ on first item to move it to end, ⬇ on last to move to start)
 
-5. **Remove Colors**  
-   Click the **?? Delete** button (minimum 1 color required)
+5. **Remove Colors**
+   Click the **🗑️ Delete** button (minimum 1 color required)
 
-6. **Select Active Color**  
-   Click any color swatch to set it as your active brush color  
-   (Indicated by pink border and ? checkmark)
+6. **Select Active Color**
+   Click any color swatch to set it as your active brush color
+   (Indicated by pink border and ✓ checkmark)
 
 ### Configuring Hotkeys
 
-1. **Open Settings** ? Navigate to **HOTKEY** section
+1. **Open Settings** → Navigate to **HOTKEY** section
 2. **Click** the hotkey input field
 3. **Press** your desired key combination
 4. **Save & Close** to apply changes
 
-> **?? Note**: Some key combinations may conflict with system shortcuts or other applications.
+> **⚠️ Note**: Some key combinations may conflict with system shortcuts or other applications.
 
 ### Drawing Modes
 
 - **Lock Mode (Toggle)**: Press hotkey once to start drawing, press again to stop
 - **Hold Mode**: Drawing is only active while the hotkey is held down
 
-Change modes in **Settings** ? **MODE** section
+Change modes in **Settings** → **MODE** section
 
 ---
 
-## ?? Configuration
+## ⚙️ Configuration
 
-All settings are automatically saved to:  
+All settings are automatically saved to:
 `%LOCALAPPDATA%\GhostDraw\settings.json`
 
 ### Default Settings
@@ -168,26 +168,26 @@ All settings are automatically saved to:
   "brushThickness": 3,
   "minBrushThickness": 1,
   "maxBrushThickness": 20,
-  "hotkeyVirtualKeys": [162, 164, 68],  // Ctrl+Alt+D
+  "hotkeyVirtualKeys": [162, 164, 68],
   "lockDrawingMode": false,
   "colorPalette": [
-    "#FF0000",  // Red
-    "#00FF00",  // Green
-    "#0000FF",  // Blue
-    "#FFFF00",  // Yellow
-    "#FF00FF",  // Magenta
-    "#00FFFF",  // Cyan
-    "#FFFFFF",  // White
-    "#000000",  // Black
-    "#FFA500",  // Orange
-    "#800080"   // Purple
+    "#FF0000",
+    "#00FF00",
+    "#0000FF",
+    "#FFFF00",
+    "#FF00FF",
+    "#00FFFF",
+    "#FFFFFF",
+    "#000000",
+    "#FFA500",
+    "#800080"
   ]
 }
 ```
 
 ---
 
-## ??? Architecture
+## 🏗️ Architecture
 
 GhostDraw is built with modern .NET practices and WPF:
 
@@ -198,29 +198,17 @@ GhostDraw is built with modern .NET practices and WPF:
 - **Structured Logging** - Serilog + Microsoft.Extensions.Logging
 - **.NET 8** - Latest LTS framework
 
-### Key Components
-
-```
-?? GhostDraw
-??? ?? OverlayWindow          - Transparent fullscreen drawing canvas
-??? ?? SettingsWindow          - Cyberpunk-themed configuration UI
-??? ?? AppSettingsService      - Settings management & persistence
-??? ?? GlobalKeyboardHook      - System-wide hotkey capture
-??? ??? DrawingManager          - Stroke rendering & input handling
-??? ??? UserControls            - Reusable settings panels
-```
-
 ### Design Principles
 
-? **Safety First** - User must never be locked out of their system  
-? **Fast Hooks** - All hook callbacks complete in < 5ms  
-? **Graceful Failure** - Exceptions are caught, logged, and handled  
-? **Clean Resources** - Hooks and resources always released on exit  
-? **Structured Logging** - Comprehensive diagnostics without performance impact  
+✅ **Safety First** - User must never be locked out of their system
+✅ **Fast Hooks** - All hook callbacks complete in < 5ms
+✅ **Graceful Failure** - Exceptions are caught, logged, and handled
+✅ **Clean Resources** - Hooks and resources always released on exit
+✅ **Structured Logging** - Comprehensive diagnostics without performance impact
 
 ---
 
-## ?? Troubleshooting
+## 🔧 Troubleshooting
 
 ### Drawing overlay doesn't appear
 - Check if the hotkey is conflicting with another application
@@ -228,7 +216,7 @@ GhostDraw is built with modern .NET practices and WPF:
 - Ensure .NET 8 runtime is installed
 
 ### Application won't start
-- Right-click `GhostDraw.exe` ? **Run as administrator**
+- Right-click `GhostDraw.exe` → **Run as administrator**
 - Check Windows Event Viewer for crash logs
 - Review logs in `%LOCALAPPDATA%\GhostDraw\logs\`
 
@@ -244,7 +232,7 @@ GhostDraw is built with modern .NET practices and WPF:
 
 ---
 
-## ?? Logging
+## 📋 Logging
 
 GhostDraw uses structured logging with configurable levels:
 
@@ -257,29 +245,29 @@ GhostDraw uses structured logging with configurable levels:
 
 Logs are stored in: `%LOCALAPPDATA%\GhostDraw\logs\`
 
-Access logs via **Settings** ? **LOGS** ? **OPEN FOLDER**
+Access logs via **Settings** → **LOGS** → **OPEN FOLDER**
 
 ---
 
-## ?? Contributing
+## 🤝 Contributing
 
 We welcome contributions! Whether it's:
-- ?? Bug reports
-- ?? Feature suggestions
-- ?? Documentation improvements
-- ?? Code contributions
+- 🐛 Bug reports
+- 💡 Feature suggestions
+- 📝 Documentation improvements
+- 💻 Code contributions
 
 Please check out our [Contributing Guidelines](CONTRIBUTING.md) to get started.
 
 ---
 
-## ?? License
+## 📄 License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## ?? Acknowledgments
+## 🙏 Acknowledgments
 
 - **Segoe MDL2 Assets** - Microsoft's icon font
 - **Serilog** - Flexible logging framework
@@ -287,7 +275,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-## ?? Contact
+## 📬 Contact
 
 - **Issues**: [GitHub Issues](https://github.com/RuntimeRascal/ghost-draw/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/RuntimeRascal/ghost-draw/discussions)
@@ -296,8 +284,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 <div align="center">
 
-**Made with ?? for creators, presenters, and anyone who loves drawing on their screen**
+**Made with 💜 for creators, presenters, and anyone who loves drawing on their screen**
 
-? **Star this repo if you find it useful!** ?
+⭐ **Star this repo if you find it useful!** ⭐
 
 </div>
