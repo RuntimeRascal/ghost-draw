@@ -80,8 +80,8 @@ public partial class OverlayWindow : Window
         try
         {
             var settings = _appSettings.CurrentSettings;
-            this.Cursor = _cursorHelper.CreateColoredPencilCursor(settings.BrushColor);
-            _logger.LogDebug("Updated cursor with color {Color}", settings.BrushColor);
+            this.Cursor = _cursorHelper.CreateColoredPencilCursor(settings.ActiveBrush);
+            _logger.LogDebug("Updated cursor with color {Color}", settings.ActiveBrush);
         }
         catch (Exception ex)
         {
@@ -184,11 +184,11 @@ public partial class OverlayWindow : Window
         try
         {
             strokeBrush = new SolidColorBrush(
-                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(settings.BrushColor));
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(settings.ActiveBrush));
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to parse brush color {Color}, using default red", settings.BrushColor);
+            _logger.LogWarning(ex, "Failed to parse brush color {Color}, using default red", settings.ActiveBrush);
             strokeBrush = System.Windows.Media.Brushes.Red;
         }
 
@@ -204,7 +204,7 @@ public partial class OverlayWindow : Window
         _currentStroke.Points.Add(startPoint);
         DrawingCanvas.Children.Add(_currentStroke);
         _logger.LogDebug("Stroke added to canvas with color {Color} and thickness {Thickness}, total strokes: {StrokeCount}",
-            settings.BrushColor, settings.BrushThickness, DrawingCanvas.Children.Count);
+            settings.ActiveBrush, settings.BrushThickness, DrawingCanvas.Children.Count);
     }
 
     private void AddPointToStroke(System.Windows.Point point)

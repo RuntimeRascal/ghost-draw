@@ -8,10 +8,10 @@ namespace GhostDraw.Core;
 public class AppSettings
 {
     /// <summary>
-    /// Brush color in hex format (e.g., "#FF0000" for red)
+    /// Active brush color from the palette in hex format (e.g., "#FF0000" for red)
     /// </summary>
-    [JsonPropertyName("brushColor")]
-    public string BrushColor { get; set; } = "#FF0000";
+    [JsonPropertyName("activeBrush")]
+    public string ActiveBrush { get; set; } = "#FF0000";
 
     /// <summary>
     /// Brush thickness in pixels
@@ -82,7 +82,7 @@ public class AppSettings
     {
         return new AppSettings
         {
-            BrushColor = BrushColor,
+            ActiveBrush = ActiveBrush,
             BrushThickness = BrushThickness,
             MinBrushThickness = MinBrushThickness,
             MaxBrushThickness = MaxBrushThickness,

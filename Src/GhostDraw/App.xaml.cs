@@ -60,7 +60,7 @@ public partial class App : Application
             // Log loaded settings
             var settings = _appSettings.CurrentSettings;
             _logger.LogInformation("Loaded settings - Color: {Color}, Thickness: {Thickness}, Hotkey: {Hotkey}, LockMode: {LockMode}",
-                settings.BrushColor, settings.BrushThickness,
+                settings.ActiveBrush, settings.BrushThickness,
                 settings.HotkeyDisplayName,
                 settings.LockDrawingMode);
 
