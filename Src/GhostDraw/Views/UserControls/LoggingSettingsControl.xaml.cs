@@ -8,22 +8,34 @@ namespace GhostDraw.Views.UserControls;
 
 public partial class LoggingSettingsControl : WpfUserControl
 {
-    private readonly LoggingSettingsService _loggingSettings = null!;
+    // DependencyProperty for LoggingSettings
+    public static readonly DependencyProperty LoggingSettingsProperty =
+        DependencyProperty.Register(
+            nameof(LoggingSettings),
+            typeof(LoggingSettingsService),
+            typeof(LoggingSettingsControl),
+            new PropertyMetadata(null, OnLoggingSettingsChanged));
+
+    public LoggingSettingsService? LoggingSettings
+    {
+        get => (LoggingSettingsService?)GetValue(LoggingSettingsProperty);
+        set => SetValue(LoggingSettingsProperty, value);
+    }
+
+    private static void OnLoggingSettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is LoggingSettingsControl control && e.NewValue is LoggingSettingsService loggingSettings)
+        {
+            control.LoadSettings(loggingSettings);
+        }
+    }
 
     public LoggingSettingsControl()
     {
         InitializeComponent();
     }
 
-    public LoggingSettingsControl(LoggingSettingsService loggingSettings)
-    {
-        _loggingSettings = loggingSettings;
-        InitializeComponent();
-
-        LoadSettings();
-    }
-
-    private void LoadSettings()
+    private void LoadSettings(LoggingSettingsService loggingSettings)
     {
         foreach (var level in LoggingSettingsService.GetAvailableLogLevels())
         {
@@ -34,7 +46,7 @@ public partial class LoggingSettingsControl : WpfUserControl
             });
         }
 
-        var currentLevel = _loggingSettings.CurrentLevel;
+        var currentLevel = loggingSettings.CurrentLevel;
         foreach (LogLevelItem item in LogLevelComboBox.Items)
         {
             if (item.Level == currentLevel)
@@ -49,9 +61,9 @@ public partial class LoggingSettingsControl : WpfUserControl
 
     private void LogLevelComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (LogLevelComboBox.SelectedItem is LogLevelItem selectedItem)
+        if (LogLevelComboBox.SelectedItem is LogLevelItem selectedItem && LoggingSettings != null)
         {
-            _loggingSettings.SetLogLevel(selectedItem.Level);
+            LoggingSettings.SetLogLevel(selectedItem.Level);
             UpdateLogLevelDescription(selectedItem.Level);
         }
     }
@@ -72,9 +84,11 @@ public partial class LoggingSettingsControl : WpfUserControl
 
     private void OpenLogFolderButton_Click(object sender, RoutedEventArgs e)
     {
+        if (LoggingSettings == null) return;
+
         try
         {
-            System.Diagnostics.Process.Start("explorer.exe", _loggingSettings.GetLogDirectory());
+            System.Diagnostics.Process.Start("explorer.exe", LoggingSettings.GetLogDirectory());
         }
         catch (Exception ex)
         {

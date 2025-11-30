@@ -12,36 +12,54 @@ namespace GhostDraw.Views.UserControls;
 
 public partial class DrawingSettingsControl : WpfUserControl
 {
-    private readonly AppSettingsService _appSettings = null!;
     private int _updateNestingLevel = 0;
+
+    // DependencyProperty for AppSettings to enable XAML binding
+    public static readonly DependencyProperty AppSettingsProperty =
+        DependencyProperty.Register(
+            nameof(AppSettings),
+            typeof(AppSettingsService),
+            typeof(DrawingSettingsControl),
+            new PropertyMetadata(null, OnAppSettingsChanged));
+
+    public AppSettingsService? AppSettings
+    {
+        get => (AppSettingsService?)GetValue(AppSettingsProperty);
+        set => SetValue(AppSettingsProperty, value);
+    }
+
+    private static void OnAppSettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is DrawingSettingsControl control && e.NewValue is AppSettingsService appSettings)
+        {
+            control.Initialize(appSettings);
+        }
+    }
 
     public DrawingSettingsControl()
     {
         InitializeComponent();
     }
 
-    public DrawingSettingsControl(AppSettingsService appSettings)
+    private void Initialize(AppSettingsService appSettings)
     {
-        _appSettings = appSettings;
-        InitializeComponent();
-
         // Load initial settings
-        LoadSettings();
+        LoadSettings(appSettings);
 
         // Subscribe to settings change events
-        _appSettings.BrushColorChanged += OnBrushColorChanged;
-        _appSettings.BrushThicknessChanged += OnBrushThicknessChanged;
-        _appSettings.BrushThicknessRangeChanged += OnBrushThicknessRangeChanged;
+        appSettings.BrushColorChanged += OnBrushColorChanged;
+        appSettings.BrushThicknessChanged += OnBrushThicknessChanged;
+        appSettings.BrushThicknessRangeChanged += OnBrushThicknessRangeChanged;
 
         // Unsubscribe when unloaded
-        Unloaded += (s, e) => UnsubscribeFromEvents();
+        Unloaded += (s, e) => UnsubscribeFromEvents(appSettings);
     }
 
-    private void UnsubscribeFromEvents()
+    private void UnsubscribeFromEvents(AppSettingsService appSettings)
     {
-        _appSettings.BrushColorChanged -= OnBrushColorChanged;
-        _appSettings.BrushThicknessChanged -= OnBrushThicknessChanged;
-        _appSettings.BrushThicknessRangeChanged -= OnBrushThicknessRangeChanged;
+        appSettings.BrushColorChanged -= OnBrushColorChanged;
+        appSettings.BrushThicknessChanged -= OnBrushThicknessChanged;
+        appSettings.BrushThicknessRangeChanged -= OnBrushThicknessRangeChanged;
     }
 
     private void OnBrushColorChanged(object? sender, string colorHex)
@@ -117,9 +135,9 @@ public partial class DrawingSettingsControl : WpfUserControl
         });
     }
 
-    private void LoadSettings()
+    private void LoadSettings(AppSettingsService appSettings)
     {
-        var settings = _appSettings.CurrentSettings;
+        var settings = appSettings.CurrentSettings;
         _updateNestingLevel++;
 
         try
@@ -154,27 +172,29 @@ public partial class DrawingSettingsControl : WpfUserControl
 
     private void ChooseColorButton_Click(object sender, RoutedEventArgs e)
     {
+        if (AppSettings == null) return;
+        
         var colorDialog = new System.Windows.Forms.ColorDialog
         {
             FullOpen = true,
-            Color = System.Drawing.ColorTranslator.FromHtml(_appSettings.CurrentSettings.BrushColor)
+            Color = System.Drawing.ColorTranslator.FromHtml(AppSettings.CurrentSettings.BrushColor)
         };
 
         if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
         {
             var color = colorDialog.Color;
             string hexColor = $"#{color.R:X2}{color.G:X2}{color.B:X2}";
-            _appSettings.SetBrushColor(hexColor);
+            AppSettings.SetBrushColor(hexColor);
         }
     }
 
     private void ThicknessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (ThicknessValueText != null && _updateNestingLevel == 0)
+        if (ThicknessValueText != null && _updateNestingLevel == 0 && AppSettings != null)
         {
             double value = e.NewValue;
             ThicknessValueText.Text = $"{value:F0} px";
-            _appSettings.SetBrushThickness(value);
+            AppSettings.SetBrushThickness(value);
         }
     }
 
@@ -185,9 +205,11 @@ public partial class DrawingSettingsControl : WpfUserControl
 
     private void MinUpButton_Click(object sender, RoutedEventArgs e)
     {
+        if (AppSettings == null) return;
+        
         if (double.TryParse(MinThicknessTextBox.Text, out double value))
         {
-            var maxValue = _appSettings.CurrentSettings.MaxBrushThickness;
+            var maxValue = AppSettings.CurrentSettings.MaxBrushThickness;
             if (value < maxValue - 1)
                 MinThicknessTextBox.Text = (value + 1).ToString("F0");
         }
@@ -213,9 +235,11 @@ public partial class DrawingSettingsControl : WpfUserControl
 
     private void MaxDownButton_Click(object sender, RoutedEventArgs e)
     {
+        if (AppSettings == null) return;
+        
         if (double.TryParse(MaxThicknessTextBox.Text, out double value))
         {
-            var minValue = _appSettings.CurrentSettings.MinBrushThickness;
+            var minValue = AppSettings.CurrentSettings.MinBrushThickness;
             if (value > minValue + 1)
                 MaxThicknessTextBox.Text = (value - 1).ToString("F0");
         }
@@ -223,7 +247,7 @@ public partial class DrawingSettingsControl : WpfUserControl
 
     private void MinThicknessTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (MinThicknessTextBox == null || MaxThicknessTextBox == null || ThicknessSlider == null)
+        if (MinThicknessTextBox == null || MaxThicknessTextBox == null || ThicknessSlider == null || AppSettings == null)
             return;
 
         if (_updateNestingLevel > 0)
@@ -231,7 +255,7 @@ public partial class DrawingSettingsControl : WpfUserControl
 
         if (double.TryParse(MinThicknessTextBox.Text, out double minValue) && minValue > 0)
         {
-            var settings = _appSettings.CurrentSettings;
+            var settings = AppSettings.CurrentSettings;
             double maxValue = settings.MaxBrushThickness;
 
             if (double.TryParse(MaxThicknessTextBox.Text, out double parsedMax))
@@ -243,19 +267,19 @@ public partial class DrawingSettingsControl : WpfUserControl
                 _updateNestingLevel++;
                 try
                 {
-                    _appSettings.SetBrushThicknessRange(minValue, maxValue);
+                    AppSettings.SetBrushThicknessRange(minValue, maxValue);
                     ThicknessSlider.Minimum = minValue;
                     ThicknessSlider.Maximum = maxValue;
 
                     if (preservedValue < minValue)
                     {
                         ThicknessSlider.Value = minValue;
-                        _appSettings.SetBrushThickness(minValue);
+                        AppSettings.SetBrushThickness(minValue);
                     }
                     else if (preservedValue > maxValue)
                     {
                         ThicknessSlider.Value = maxValue;
-                        _appSettings.SetBrushThickness(maxValue);
+                        AppSettings.SetBrushThickness(maxValue);
                     }
                     else
                     {
@@ -272,7 +296,7 @@ public partial class DrawingSettingsControl : WpfUserControl
 
     private void MaxThicknessTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (MinThicknessTextBox == null || MaxThicknessTextBox == null || ThicknessSlider == null)
+        if (MinThicknessTextBox == null || MaxThicknessTextBox == null || ThicknessSlider == null || AppSettings == null)
             return;
 
         if (_updateNestingLevel > 0)
@@ -280,7 +304,7 @@ public partial class DrawingSettingsControl : WpfUserControl
 
         if (double.TryParse(MaxThicknessTextBox.Text, out double maxValue) && maxValue > 0)
         {
-            var settings = _appSettings.CurrentSettings;
+            var settings = AppSettings.CurrentSettings;
             double minValue = settings.MinBrushThickness;
 
             if (double.TryParse(MinThicknessTextBox.Text, out double parsedMin))
@@ -292,19 +316,19 @@ public partial class DrawingSettingsControl : WpfUserControl
                 _updateNestingLevel++;
                 try
                 {
-                    _appSettings.SetBrushThicknessRange(minValue, maxValue);
+                    AppSettings.SetBrushThicknessRange(minValue, maxValue);
                     ThicknessSlider.Minimum = minValue;
                     ThicknessSlider.Maximum = maxValue;
 
                     if (preservedValue < minValue)
                     {
                         ThicknessSlider.Value = minValue;
-                        _appSettings.SetBrushThickness(minValue);
+                        AppSettings.SetBrushThickness(minValue);
                     }
                     else if (preservedValue > maxValue)
                     {
                         ThicknessSlider.Value = maxValue;
-                        _appSettings.SetBrushThickness(maxValue);
+                        AppSettings.SetBrushThickness(maxValue);
                     }
                     else
                     {

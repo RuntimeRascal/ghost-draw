@@ -6,23 +6,40 @@ namespace GhostDraw.Views.UserControls;
 
 public partial class ModeSettingsControl : WpfUserControl
 {
-    private readonly AppSettingsService _appSettings = null!;
     private int _updateNestingLevel = 0;
+
+    // DependencyProperty for AppSettings
+    public static readonly DependencyProperty AppSettingsProperty =
+        DependencyProperty.Register(
+            nameof(AppSettings),
+            typeof(AppSettingsService),
+            typeof(ModeSettingsControl),
+            new PropertyMetadata(null, OnAppSettingsChanged));
+
+    public AppSettingsService? AppSettings
+    {
+        get => (AppSettingsService?)GetValue(AppSettingsProperty);
+        set => SetValue(AppSettingsProperty, value);
+    }
+
+    private static void OnAppSettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is ModeSettingsControl control && e.NewValue is AppSettingsService appSettings)
+        {
+            control.Initialize(appSettings);
+        }
+    }
 
     public ModeSettingsControl()
     {
         InitializeComponent();
     }
 
-    public ModeSettingsControl(AppSettingsService appSettings)
+    private void Initialize(AppSettingsService appSettings)
     {
-        _appSettings = appSettings;
-        InitializeComponent();
-
-        LoadSettings();
-
-        _appSettings.LockDrawingModeChanged += OnLockDrawingModeChanged;
-        Unloaded += (s, e) => _appSettings.LockDrawingModeChanged -= OnLockDrawingModeChanged;
+        LoadSettings(appSettings);
+        appSettings.LockDrawingModeChanged += OnLockDrawingModeChanged;
+        Unloaded += (s, e) => appSettings.LockDrawingModeChanged -= OnLockDrawingModeChanged;
     }
 
     private void OnLockDrawingModeChanged(object? sender, bool isLocked)
@@ -42,17 +59,17 @@ public partial class ModeSettingsControl : WpfUserControl
         });
     }
 
-    private void LoadSettings()
+    private void LoadSettings(AppSettingsService appSettings)
     {
-        var settings = _appSettings.CurrentSettings;
+        var settings = appSettings.CurrentSettings;
         LockModeCheckBox.IsChecked = settings.LockDrawingMode;
     }
 
     private void LockModeCheckBox_Changed(object sender, RoutedEventArgs e)
     {
-        if (_updateNestingLevel == 0 && LockModeCheckBox.IsChecked.HasValue)
+        if (_updateNestingLevel == 0 && LockModeCheckBox.IsChecked.HasValue && AppSettings != null)
         {
-            _appSettings.SetLockDrawingMode(LockModeCheckBox.IsChecked.Value);
+            AppSettings.SetLockDrawingMode(LockModeCheckBox.IsChecked.Value);
         }
     }
 }

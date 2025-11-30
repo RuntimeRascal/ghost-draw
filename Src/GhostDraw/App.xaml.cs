@@ -115,9 +115,7 @@ public partial class App : Application
                 try
                 {
                     _logger?.LogDebug("Opening settings window");
-                    var logger = _serviceProvider!.GetRequiredService<ILogger<SettingsWindow>>();
-                    var loggerFactory = _serviceProvider!.GetRequiredService<ILoggerFactory>();
-                    var settingsWindow = new SettingsWindow(_loggingSettings!, _appSettings!, logger, loggerFactory);
+                    var settingsWindow = _serviceProvider!.GetRequiredService<SettingsWindow>();
                     settingsWindow.ShowDialog();
                 }
                 catch (Exception ex)

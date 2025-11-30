@@ -1,13 +1,6 @@
 <UserControl x:Class="GhostDraw.Views.UserControls.HotkeySettingsControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Styles/CyberpunkStyles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
     
     <GroupBox Header="// HOTKEY">
         <StackPanel>
@@ -54,7 +47,7 @@
                 </Border.Effect>
                 <StackPanel>
                     <TextBlock x:Name="RecorderStatusText"
-                              Text="?? RECORDING... Press your hotkey combination"
+                              Text="RECORDING... Press your hotkey combination"
                               Foreground="#FF0080"
                               FontSize="14"
                               FontWeight="Bold"
@@ -82,7 +75,7 @@
             <StackPanel Orientation="Horizontal" 
                        HorizontalAlignment="Center">
                 <Button x:Name="RecordButton"
-                       Content="?? RECORD NEW HOTKEY"
+                       Content="RECORD NEW HOTKEY"
                        Style="{StaticResource ModernButton}"
                        Click="RecordButton_Click"
                        Margin="0,0,12,0"/>
@@ -120,7 +113,7 @@
                     </Button.Template>
                 </Button>
                 <Button x:Name="ApplyHotkeyButton"
-                       Content="? APPLY"
+                       Content="APPLY"
                        Visibility="Collapsed"
                        Click="ApplyHotkey_Click"
                        Style="{StaticResource ModernButton}"/>
