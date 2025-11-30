@@ -56,6 +56,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Cyberpunk Title Bar -->
@@ -119,10 +120,10 @@
                     </Grid>
                 </Border>
 
-                <!-- Content Area -->
+                <!-- Content Area (Scrollable) -->
                 <ScrollViewer Grid.Row="1" 
                              VerticalScrollBarVisibility="Auto"
-                             Margin="28,12,20,28">
+                             Margin="28,12,28,12">
                     <ScrollViewer.Resources>
                         <Style TargetType="ScrollViewer">
                             <Setter Property="Template">
@@ -163,55 +164,65 @@
 
                         <!-- Logging Settings -->
                         <uc:LoggingSettingsControl LoggingSettings="{Binding LoggingSettings}"/>
-
-                        <!-- Action Buttons -->
-                        <Grid Margin="0,12,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Button Grid.Column="1"
-                                   Content="RESET"
-                                   Click="ResetButton_Click"
-                                   Margin="0,0,12,0"
-                                   Padding="20,12"
-                                   Background="Transparent"
-                                   Foreground="#808080"
-                                   BorderBrush="#404040"
-                                   BorderThickness="1"
-                                   FontSize="12"
-                                   FontWeight="Bold"
-                                   FontFamily="Consolas"
-                                   Cursor="Hand">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="border"
-                                                Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter HorizontalAlignment="Center" 
-                                                            VerticalAlignment="Center"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="border" Property="BorderBrush" Value="#808080"/>
-                                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-
-                            <Button Grid.Column="2"
-                                   Content="SAVE &amp; CLOSE"
-                                   Click="CloseButton_Click"
-                                   Style="{StaticResource ModernButton}"/>
-                        </Grid>
                     </StackPanel>
                 </ScrollViewer>
+
+                <!-- Fixed Footer with Action Buttons -->
+                <Border Grid.Row="2"
+                       BorderThickness="0,2,0,0"
+                       Padding="28,16,28,28">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#FF0080" Offset="0"/>
+                            <GradientStop Color="#00FFFF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="1"
+                               Content="RESET"
+                               Click="ResetButton_Click"
+                               Margin="0,0,12,0"
+                               Padding="20,12"
+                               Background="Transparent"
+                               Foreground="#808080"
+                               BorderBrush="#404040"
+                               BorderThickness="1"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               FontFamily="Consolas"
+                               Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="border"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" 
+                                                        VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="border" Property="BorderBrush" Value="#808080"/>
+                                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button Grid.Column="2"
+                               Content="SAVE &amp; CLOSE"
+                               Click="CloseButton_Click"
+                               Style="{StaticResource ModernButton}"/>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
     </Grid>

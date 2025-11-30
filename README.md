@@ -1,146 +1,303 @@
-# GhostDraw
+<div align="center">
 
-A lightweight Windows desktop application that allows you to draw directly on your screen using a simple keyboard hotkey and mouse input.
+# ?? GhostDraw
 
-## Features
+### Draw on Your Screen, Anywhere, Anytime
 
-- **Global Hotkey**: Toggle drawing mode with `Ctrl+Alt+D`
-- **Fullscreen Overlay**: Draw on top of any application
-- **System Tray Integration**: Runs quietly in the background
-- **Emergency Exit**: Press `ESC` to quickly hide the overlay
-- **Transparent Drawing**: Overlay is completely transparent when not actively drawing
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![Windows](https://img.shields.io/badge/Windows-10%2B-0078D6?logo=windows)](https://www.microsoft.com/windows)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/RuntimeRascal/ghost-draw)](https://github.com/RuntimeRascal/ghost-draw/releases)
 
-## Requirements
+**GhostDraw** is a lightweight, cyberpunk-themed Windows desktop application that lets you draw directly on your screen with a simple keyboard hotkey. Perfect for presentations, tutorials, collaboration, or just having fun!
 
-- Windows 10 or later
-- .NET 8 Runtime
+[**Download Latest Release**](https://github.com/RuntimeRascal/ghost-draw/releases) | [**Report Bug**](https://github.com/RuntimeRascal/ghost-draw/issues) | [**Request Feature**](https://github.com/RuntimeRascal/ghost-draw/issues)
 
-## Installation
+![GhostDraw Demo](docs/Demo.gif)
+<!-- TODO: Add animated GIF showing drawing on screen -->
 
-1. Download the latest release from the [Releases](https://github.com/RuntimeRascal/ghost-draw/releases) page
-2. Extract the ZIP file to a folder of your choice
-3. Run `GhostDraw.exe`
-4. The application will start minimized to the system tray
+</div>
 
-## Usage
+---
 
-1. **Start Drawing**: Press `Ctrl+Alt+D` to activate the drawing overlay
-2. **Draw**: Click and drag with your mouse to draw on the screen
-3. **Exit Drawing Mode**: Press `Ctrl+Alt+D` again or press `ESC`
-4. **Exit Application**: Right-click the system tray icon and select "Exit"
+## ? Features
 
-## Building from Source
+### ?? **Drawing Tools**
+- **Customizable Color Palette** - Create your own color collection and cycle through them while drawing
+- **Variable Brush Thickness** - Adjust brush size from 1-100px with configurable min/max ranges
+- **Smooth Drawing** - High-performance rendering for fluid strokes
+- **Mouse Wheel Control** - Change brush thickness on-the-fly while drawing
 
-### Prerequisites
+### ?? **Hotkey System**
+- **Global Hotkey** - Activate drawing mode from any application
+- **Customizable Shortcuts** - Define your own key combinations
+- **Two Draw Modes**:
+  - **Toggle Mode** - Press once to start, press again to stop
+  - **Hold Mode** - Draw only while holding the hotkey
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- Visual Studio 2022 (recommended) or any .NET-compatible IDE
+### ?? **User Experience**
+- **Transparent Overlay** - Draw on top of any application without blocking input
+- **System Tray Integration** - Runs quietly in the background
+- **Emergency Exit** - Press `ESC` to instantly hide the overlay
+- **Right-Click Color Cycling** - Quickly switch between your palette colors
+- **Position-Numbered Palette** - Easily organize and reorder your favorite colors
 
-### Build Steps
+### ??? **Safety & Stability**
+- **Fail-Safe Design** - Won't lock you out of your system if it crashes
+- **Fast Input Processing** - All hooks complete in < 5ms for responsive system
+- **Graceful Error Handling** - Protected critical paths ensure stability
+- **Proper Resource Cleanup** - Memory and hooks always released properly
 
-```bash
-# Clone the repository
-git clone https://github.com/RuntimeRascal/ghost-draw.git
-cd ghost-draw
+---
 
-# Navigate to the source directory
-cd src
+## ?? Screenshots
 
-# Restore dependencies
-dotnet restore
+### Settings Window
+![Settings Window](docs/Settings.png)
 
-# Build the project
-dotnet build --configuration Release
+Customize every aspect of GhostDraw with the intuitive settings panel:
+- Color palette management with add/remove/reorder
+- Brush thickness range configuration
+- Hotkey customization
+- Drawing mode selection
+- Logging level control
 
-# Run the application
-dotnet run --configuration Release
+### Active Drawing Mode
+![Drawing Mode](docs/DrawingMode.png)
+<!-- TODO: Add screenshot of drawing overlay in action with colored strokes -->
+
+### Color Palette Cycling
+![Color Cycling](docs/ColorCycling.png)
+<!-- TODO: Add screenshot showing color palette with active color indicator -->
+
+### System Tray Integration
+![System Tray](docs/SystemTray.png)
+<!-- TODO: Add screenshot of system tray icon and context menu -->
+
+---
+
+## ?? Getting Started
+
+### Requirements
+
+- **Operating System**: Windows 10 or later
+- **.NET Runtime**: [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) (automatically included in releases)
+
+### Installation
+
+1. **Download** the latest release from the [Releases page](https://github.com/RuntimeRascal/ghost-draw/releases)
+2. **Extract** the ZIP file to your preferred location (e.g., `C:\Program Files\GhostDraw`)
+3. **Run** `GhostDraw.exe`
+4. The application will start and **minimize to the system tray** ??
+
+> **?? Tip**: Create a shortcut in your Startup folder to launch GhostDraw automatically when Windows starts!
+
+---
+
+## ?? How to Use
+
+### Basic Drawing
+
+1. **Activate Drawing Mode**  
+   Press your configured hotkey (default: `Ctrl+Alt+D`)
+
+2. **Start Drawing**  
+   Click and drag with your **left mouse button** to draw
+
+3. **Cycle Colors**  
+   **Right-click** while drawing to switch to the next color in your palette
+
+4. **Adjust Thickness**  
+   Scroll the **mouse wheel** while drawing to change brush size
+
+5. **Exit Drawing Mode**  
+   - Press the hotkey again (toggle mode)
+   - Press `ESC` for emergency exit
+   - Release the hotkey (hold mode)
+
+### Customizing Your Palette
+
+1. **Open Settings**  
+   Right-click the system tray icon ? **Settings**
+
+2. **Edit Palette Colors**  
+   Click to expand the color palette section
+
+3. **Add Colors**  
+   Click **+ ADD COLOR** and choose your color
+
+4. **Reorder Colors**  
+   Use the **? Up** and **? Down** buttons to arrange colors  
+   (Press ? on first item to move it to end, ? on last to move to start)
+
+5. **Remove Colors**  
+   Click the **?? Delete** button (minimum 1 color required)
+
+6. **Select Active Color**  
+   Click any color swatch to set it as your active brush color  
+   (Indicated by pink border and ? checkmark)
+
+### Configuring Hotkeys
+
+1. **Open Settings** ? Navigate to **HOTKEY** section
+2. **Click** the hotkey input field
+3. **Press** your desired key combination
+4. **Save & Close** to apply changes
+
+> **?? Note**: Some key combinations may conflict with system shortcuts or other applications.
+
+### Drawing Modes
+
+- **Lock Mode (Toggle)**: Press hotkey once to start drawing, press again to stop
+- **Hold Mode**: Drawing is only active while the hotkey is held down
+
+Change modes in **Settings** ? **MODE** section
+
+---
+
+## ?? Configuration
+
+All settings are automatically saved to:  
+`%LOCALAPPDATA%\GhostDraw\settings.json`
+
+### Default Settings
+
+```json
+{
+  "activeBrush": "#FFFFFF",
+  "brushThickness": 3,
+  "minBrushThickness": 1,
+  "maxBrushThickness": 20,
+  "hotkeyVirtualKeys": [162, 164, 68],  // Ctrl+Alt+D
+  "lockDrawingMode": false,
+  "colorPalette": [
+    "#FF0000",  // Red
+    "#00FF00",  // Green
+    "#0000FF",  // Blue
+    "#FFFF00",  // Yellow
+    "#FF00FF",  // Magenta
+    "#00FFFF",  // Cyan
+    "#FFFFFF",  // White
+    "#000000",  // Black
+    "#FFA500",  // Orange
+    "#800080"   // Purple
+  ]
+}
 ```
 
-## Architecture
+---
 
-GhostDraw is built using modern .NET practices:
+## ??? Architecture
 
+GhostDraw is built with modern .NET practices and WPF:
+
+### Technology Stack
 - **WPF** - UI framework and overlay rendering
-- **Global Windows Hooks** - Keyboard and mouse input capture
+- **Global Windows Hooks** - Low-level keyboard/mouse capture
 - **Dependency Injection** - Microsoft.Extensions.DependencyInjection
 - **Structured Logging** - Serilog + Microsoft.Extensions.Logging
 - **.NET 8** - Latest LTS framework
 
-### Project Structure
+### Key Components
 
 ```
-ghost-draw/
-??? src/                    # Main application source code
-?   ??? GhostDraw.csproj   # Project file
-?   ??? ...                # Application code
-??? tests/                 # Unit and integration tests
-??? docs/                  # Additional documentation
-??? .github/               # GitHub configuration
-?   ??? copilot-instructions.md  # AI assistant guidelines
-??? README.md              # This file
+?? GhostDraw
+??? ?? OverlayWindow          - Transparent fullscreen drawing canvas
+??? ?? SettingsWindow          - Cyberpunk-themed configuration UI
+??? ?? AppSettingsService      - Settings management & persistence
+??? ?? GlobalKeyboardHook      - System-wide hotkey capture
+??? ??? DrawingManager          - Stroke rendering & input handling
+??? ??? UserControls            - Reusable settings panels
 ```
 
-## Safety & Stability
+### Design Principles
 
-GhostDraw intercepts global keyboard and mouse input. The application is designed with safety as the top priority:
-
-- **Fail-Safe Design**: Crashes won't lock you out of your system
-- **Emergency Exit**: ESC key always hides the overlay
-- **Fast Hook Processing**: All input hooks complete in < 5ms
-- **Graceful Error Handling**: All critical paths are protected with try-catch blocks
-- **Proper Cleanup**: Resources are always released on exit
-
-## Contributing
-
-Contributions are welcome! Please read the [Copilot Instructions](.github/copilot-instructions.md) for detailed guidelines on:
-
-- Safety requirements
-- Code style and conventions
-- Architecture patterns
-- Testing considerations
-
-### Development Guidelines
-
-1. **Safety First**: Never compromise user system stability
-2. **Test Thoroughly**: Especially edge cases (multi-monitor, high DPI, rapid input)
-3. **Log Appropriately**: Use structured logging with proper levels
-4. **Handle Errors**: Catch and log exceptions gracefully
-5. **Keep It Fast**: Hook callbacks must be lightning fast (< 5ms)
-
-## Roadmap
-
-Future features under consideration:
-
-- [ ] Brush customization (color, thickness, opacity)
-- [ ] Stroke persistence (save/load drawings)
-- [ ] Undo/redo functionality
-- [ ] Screenshot integration
-- [ ] Multiple drawing tools (pen, highlighter, eraser)
-- [ ] Shape tools (line, rectangle, circle)
-
-## Known Issues
-
-- None currently reported
-
-## License
-
-[Specify your license here - e.g., MIT, GPL, etc.]
-
-## Acknowledgments
-
-Built with:
-- [WPF](https://github.com/dotnet/wpf) - UI framework
-- [Serilog](https://serilog.net/) - Logging library
-- [Microsoft.Extensions.DependencyInjection](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection) - DI container
-
-## Support
-
-If you encounter any issues or have questions:
-
-1. Check the [Issues](https://github.com/RuntimeRascal/ghost-draw/issues) page
-2. Create a new issue with detailed information
-3. Include logs from `%LOCALAPPDATA%\GhostDraw\logs\` if applicable
+? **Safety First** - User must never be locked out of their system  
+? **Fast Hooks** - All hook callbacks complete in < 5ms  
+? **Graceful Failure** - Exceptions are caught, logged, and handled  
+? **Clean Resources** - Hooks and resources always released on exit  
+? **Structured Logging** - Comprehensive diagnostics without performance impact  
 
 ---
 
-**?? Important**: This application uses global keyboard and mouse hooks. Use responsibly and ensure you understand the [safety guidelines](.github/copilot-instructions.md) if modifying the code.
+## ?? Troubleshooting
+
+### Drawing overlay doesn't appear
+- Check if the hotkey is conflicting with another application
+- Try changing the hotkey in Settings
+- Ensure .NET 8 runtime is installed
+
+### Application won't start
+- Right-click `GhostDraw.exe` ? **Run as administrator**
+- Check Windows Event Viewer for crash logs
+- Review logs in `%LOCALAPPDATA%\GhostDraw\logs\`
+
+### Drawing is laggy or slow
+- Reduce brush thickness range (lower max value)
+- Close other resource-intensive applications
+- Check CPU usage in Task Manager
+
+### Hotkey doesn't work
+- Verify the key combination isn't used by Windows or other apps
+- Try a different key combination
+- Restart GhostDraw after changing hotkeys
+
+---
+
+## ?? Logging
+
+GhostDraw uses structured logging with configurable levels:
+
+- **Verbose** - Everything (very noisy)
+- **Debug** - Detailed diagnostic information
+- **Information** - General application flow (default)
+- **Warning** - Unexpected but recoverable situations
+- **Error** - Errors that don't crash the app
+- **Fatal** - Critical errors requiring restart
+
+Logs are stored in: `%LOCALAPPDATA%\GhostDraw\logs\`
+
+Access logs via **Settings** ? **LOGS** ? **OPEN FOLDER**
+
+---
+
+## ?? Contributing
+
+We welcome contributions! Whether it's:
+- ?? Bug reports
+- ?? Feature suggestions
+- ?? Documentation improvements
+- ?? Code contributions
+
+Please check out our [Contributing Guidelines](CONTRIBUTING.md) to get started.
+
+---
+
+## ?? License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## ?? Acknowledgments
+
+- **Segoe MDL2 Assets** - Microsoft's icon font
+- **Serilog** - Flexible logging framework
+- **WPF Community** - Inspiration and best practices
+
+---
+
+## ?? Contact
+
+- **Issues**: [GitHub Issues](https://github.com/RuntimeRascal/ghost-draw/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/RuntimeRascal/ghost-draw/discussions)
+
+---
+
+<div align="center">
+
+**Made with ?? for creators, presenters, and anyone who loves drawing on their screen**
+
+? **Star this repo if you find it useful!** ?
+
+</div>
