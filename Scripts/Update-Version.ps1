@@ -255,10 +255,10 @@ function Update-WixVersion {
     
     $content = Get-Content $FilePath -Raw
     # Match: <Version Condition="'$(Version)' == ''">X.Y.Z</Version>
-    $pattern = "(<Version\s+Condition=`"'\`$\(Version\)'\s*==\s*''`">)([^<]*)(</Version>)"
+    $pattern = '<Version\s+Condition="''\$\(Version\)''\s*==\s*''''">([^<]*)</Version>'
     
     if ($content -match $pattern) {
-        $currentVersion = [regex]::Match($content, $pattern).Groups[2].Value
+        $currentVersion = [regex]::Match($content, $pattern).Groups[1].Value
         
         if ($currentVersion -eq $NewVersion) {
             Write-Host "    Already at version $NewVersion" -ForegroundColor Gray
@@ -268,7 +268,8 @@ function Update-WixVersion {
         if ($DryRun) {
             Write-Host "    [DRY-RUN] Would update: $currentVersion -> $NewVersion" -ForegroundColor Cyan
         } else {
-            $newContent = $content -replace $pattern, "`$1$NewVersion`$3"
+            $replacement = "<Version Condition=`"'`$(Version)' == ''`">$NewVersion</Version>"
+            $newContent = $content -replace $pattern, $replacement
             Set-Content $FilePath -Value $newContent -NoNewline
             Write-Host "    Updated: $currentVersion -> $NewVersion" -ForegroundColor Green
         }
