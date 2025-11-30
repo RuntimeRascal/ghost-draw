@@ -40,8 +40,7 @@ public partial class SettingsWindow : Window
         stackPanel.Children.Clear();
 
         // Create and add Drawing Settings
-        var drawingLogger = _loggerFactory.CreateLogger<DrawingSettingsControl>();
-        var drawingControl = new DrawingSettingsControl(_appSettings, drawingLogger);
+        var drawingControl = new DrawingSettingsControl(_appSettings);
         stackPanel.Children.Add(drawingControl);
 
         // Create and add Hotkey Settings
@@ -50,13 +49,11 @@ public partial class SettingsWindow : Window
         stackPanel.Children.Add(hotkeyControl);
 
         // Create and add Mode Settings
-        var modeLogger = _loggerFactory.CreateLogger<ModeSettingsControl>();
-        var modeControl = new ModeSettingsControl(_appSettings, modeLogger);
+        var modeControl = new ModeSettingsControl(_appSettings);
         stackPanel.Children.Add(modeControl);
 
         // Create and add Logging Settings
-        var loggingLogger = _loggerFactory.CreateLogger<LoggingSettingsControl>();
-        var loggingControl = new LoggingSettingsControl(_loggingSettings, loggingLogger);
+        var loggingControl = new LoggingSettingsControl(_loggingSettings);
         stackPanel.Children.Add(loggingControl);
 
         // Create and add Action Buttons Grid

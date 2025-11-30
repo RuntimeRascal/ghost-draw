@@ -2,9 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Microsoft.Extensions.Logging;
 using GhostDraw.Services;
-using GhostDraw.Core;
 using WpfUserControl = System.Windows.Controls.UserControl;
 using WpfColor = System.Windows.Media.Color;
 using WpfBrush = System.Windows.Media.Brushes;
@@ -14,8 +12,7 @@ namespace GhostDraw.Views.UserControls;
 
 public partial class DrawingSettingsControl : WpfUserControl
 {
-    private readonly AppSettingsService _appSettings;
-    private readonly ILogger<DrawingSettingsControl> _logger;
+    private readonly AppSettingsService _appSettings = null!;
     private int _updateNestingLevel = 0;
 
     public DrawingSettingsControl()
@@ -23,10 +20,9 @@ public partial class DrawingSettingsControl : WpfUserControl
         InitializeComponent();
     }
 
-    public DrawingSettingsControl(AppSettingsService appSettings, ILogger<DrawingSettingsControl> logger)
+    public DrawingSettingsControl(AppSettingsService appSettings)
     {
         _appSettings = appSettings;
-        _logger = logger;
         InitializeComponent();
 
         // Load initial settings
@@ -58,8 +54,9 @@ public partial class DrawingSettingsControl : WpfUserControl
                 ColorPreview.Background = new SolidColorBrush(
                     (WpfColor)WpfColorConverter.ConvertFromString(colorHex));
             }
-            catch
+            catch (FormatException)
             {
+                // Invalid color format, fallback to red
                 ColorPreview.Background = WpfBrush.Red;
             }
             finally
@@ -133,8 +130,9 @@ public partial class DrawingSettingsControl : WpfUserControl
                 ColorPreview.Background = new SolidColorBrush(
                     (WpfColor)WpfColorConverter.ConvertFromString(settings.BrushColor));
             }
-            catch
+            catch (FormatException)
             {
+                // Invalid color format, fallback to red
                 ColorPreview.Background = WpfBrush.Red;
             }
 

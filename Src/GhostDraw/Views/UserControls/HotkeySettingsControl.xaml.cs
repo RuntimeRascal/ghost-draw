@@ -15,11 +15,10 @@ namespace GhostDraw.Views.UserControls;
 
 public partial class HotkeySettingsControl : WpfUserControl
 {
-    private readonly AppSettingsService _appSettings;
-    private readonly ILogger<HotkeySettingsControl> _logger;
-    private readonly ILoggerFactory _loggerFactory;
+    private readonly AppSettingsService _appSettings = null!;
+    private readonly ILogger<HotkeySettingsControl> _logger = null!;
+    private readonly ILoggerFactory _loggerFactory = null!;
     
-    private bool _isRecording = false;
     private readonly HashSet<int> _recordedKeys = new();
     private GlobalKeyboardHook? _recorderHook;
 
@@ -51,7 +50,6 @@ public partial class HotkeySettingsControl : WpfUserControl
 
     private void StartRecording()
     {
-        _isRecording = true;
         _recordedKeys.Clear();
 
         // Show recorder UI
@@ -103,8 +101,6 @@ public partial class HotkeySettingsControl : WpfUserControl
 
     private void StopRecording(bool accepted)
     {
-        _isRecording = false;
-
         _recorderHook?.Stop();
         _recorderHook?.Dispose();
         _recorderHook = null;

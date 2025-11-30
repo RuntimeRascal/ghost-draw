@@ -185,11 +185,14 @@ public partial class App : Application
         }
     }
 
-    private void UpdateLogLevelMenuChecks(ToolStripMenuItem logLevelMenu, LogEventLevel selectedLevel)
+    private static void UpdateLogLevelMenuChecks(ToolStripMenuItem logLevelMenu, LogEventLevel selectedLevel)
     {
         foreach (ToolStripMenuItem item in logLevelMenu.DropDownItems)
         {
-            item.Checked = item.Text.StartsWith(selectedLevel.ToString());
+            if (item.Text != null)
+            {
+                item.Checked = item.Text.StartsWith(selectedLevel.ToString());
+            }
         }
     }
 

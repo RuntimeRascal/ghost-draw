@@ -1,5 +1,4 @@
 using System.Windows;
-using Microsoft.Extensions.Logging;
 using GhostDraw.Services;
 using WpfUserControl = System.Windows.Controls.UserControl;
 
@@ -7,8 +6,7 @@ namespace GhostDraw.Views.UserControls;
 
 public partial class ModeSettingsControl : WpfUserControl
 {
-    private readonly AppSettingsService _appSettings;
-    private readonly ILogger<ModeSettingsControl> _logger;
+    private readonly AppSettingsService _appSettings = null!;
     private int _updateNestingLevel = 0;
 
     public ModeSettingsControl()
@@ -16,10 +14,9 @@ public partial class ModeSettingsControl : WpfUserControl
         InitializeComponent();
     }
 
-    public ModeSettingsControl(AppSettingsService appSettings, ILogger<ModeSettingsControl> logger)
+    public ModeSettingsControl(AppSettingsService appSettings)
     {
         _appSettings = appSettings;
-        _logger = logger;
         InitializeComponent();
 
         LoadSettings();

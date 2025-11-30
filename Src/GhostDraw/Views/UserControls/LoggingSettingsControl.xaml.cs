@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Extensions.Logging;
 using Serilog.Events;
 using GhostDraw.Services;
 using WpfUserControl = System.Windows.Controls.UserControl;
@@ -9,18 +8,16 @@ namespace GhostDraw.Views.UserControls;
 
 public partial class LoggingSettingsControl : WpfUserControl
 {
-    private readonly LoggingSettingsService _loggingSettings;
-    private readonly ILogger<LoggingSettingsControl> _logger;
+    private readonly LoggingSettingsService _loggingSettings = null!;
 
     public LoggingSettingsControl()
     {
         InitializeComponent();
     }
 
-    public LoggingSettingsControl(LoggingSettingsService loggingSettings, ILogger<LoggingSettingsControl> logger)
+    public LoggingSettingsControl(LoggingSettingsService loggingSettings)
     {
         _loggingSettings = loggingSettings;
-        _logger = logger;
         InitializeComponent();
 
         LoadSettings();

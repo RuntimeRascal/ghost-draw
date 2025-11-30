@@ -25,3 +25,13 @@
 	- [X] Installer should be able to uninstall the app cleanly removing all files and registry entries.
 	- [X] Installer should be able to update the app to a new version if run again and a current version is already installed.
 - [ ] Create github actions workflow to build and package the installer. And publish to realeases on github.
+
+
+
+
+## Settings
+Seams like my settings file settings sometimes get overwritten. I set the key combo to Ctrl + Shift + x but sometimes it gets reset to Ctrl + Shift + D.
+
+Create a default settings json file that we use as defaults for non set settings and for re-creating the settings file if it is corrupted.
+
+On startup load settings, if there is an error loading settings, show user via toast or message dialog that the settings file is corupted and will be re-recreated with defaults. Update the settings file content with default settings.
