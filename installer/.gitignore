@@ -1,9 +1,0 @@
-# Auto-generated component file
-HarvestedFiles.wxs
-
-# MSBuild preprocessor output
-preprocessed.xml
-
-# Build outputs
-bin/
-obj/
