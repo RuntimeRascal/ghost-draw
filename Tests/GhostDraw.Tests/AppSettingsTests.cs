@@ -11,7 +11,7 @@ public class AppSettingsTests
         var settings = new AppSettings();
 
         // Assert
-        Assert.Equal("#FF0000", settings.BrushColor);
+        Assert.Equal("#FF0000", settings.ActiveBrush);
         Assert.Equal(3.0, settings.BrushThickness);
         Assert.Equal(1.0, settings.MinBrushThickness);
         Assert.Equal(20.0, settings.MaxBrushThickness);
@@ -46,20 +46,20 @@ public class AppSettingsTests
         // Arrange
         var original = new AppSettings
         {
-            BrushColor = "#0000FF",
+            ActiveBrush = "#0000FF",
             BrushThickness = 5.0,
             LockDrawingMode = true
         };
 
         // Act
         var clone = original.Clone();
-        clone.BrushColor = "#00FF00";
+        clone.ActiveBrush = "#00FF00";
         clone.BrushThickness = 10.0;
 
         // Assert
-        Assert.Equal("#0000FF", original.BrushColor);
+        Assert.Equal("#0000FF", original.ActiveBrush);
         Assert.Equal(5.0, original.BrushThickness);
-        Assert.Equal("#00FF00", clone.BrushColor);
+        Assert.Equal("#00FF00", clone.ActiveBrush);
         Assert.Equal(10.0, clone.BrushThickness);
     }
 
@@ -105,16 +105,16 @@ public class AppSettingsTests
     [InlineData("#0000FF")]
     [InlineData("#FFFFFF")]
     [InlineData("#000000")]
-    public void AppSettings_BrushColor_ShouldAcceptValidHexColors(string color)
+    public void AppSettings_ActiveBrush_ShouldAcceptValidHexColors(string color)
     {
         // Arrange & Act
         var settings = new AppSettings
         {
-            BrushColor = color
+            ActiveBrush = color
         };
 
         // Assert
-        Assert.Equal(color, settings.BrushColor);
+        Assert.Equal(color, settings.ActiveBrush);
     }
 
     [Theory]

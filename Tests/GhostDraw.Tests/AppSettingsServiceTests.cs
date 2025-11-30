@@ -86,7 +86,7 @@ public class AppSettingsServiceTests : IDisposable
         // Assert
         var settings = service.CurrentSettings;
         Assert.NotNull(settings);
-        Assert.Equal("#FF0000", settings.BrushColor);
+        Assert.Equal("#FF0000", settings.ActiveBrush);
         Assert.Equal(3.0, settings.BrushThickness);
         Assert.False(settings.LockDrawingMode);
     }
@@ -100,27 +100,27 @@ public class AppSettingsServiceTests : IDisposable
         // Act
         var settings1 = service.CurrentSettings;
         var settings2 = service.CurrentSettings;
-        settings1.BrushColor = "#FFFFFF";
+        settings1.ActiveBrush = "#FFFFFF";
 
         // Assert - Verify they are different instances
         Assert.NotSame(settings1, settings2);
-        Assert.Equal("#FF0000", settings2.BrushColor); // settings2 should still have default
+        Assert.Equal("#FF0000", settings2.ActiveBrush); // settings2 should still have default
     }
 
     [Theory]
     [InlineData("#FF0000")]
     [InlineData("#00FF00")]
     [InlineData("#0000FF")]
-    public void SetBrushColor_ShouldUpdateColor(string color)
+    public void SetActiveBrush_ShouldUpdateColor(string color)
     {
         // Arrange
         var service = CreateService();
 
         // Act
-        service.SetBrushColor(color);
+        service.SetActiveBrush(color);
 
         // Assert
-        Assert.Equal(color, service.CurrentSettings.BrushColor);
+        Assert.Equal(color, service.CurrentSettings.ActiveBrush);
     }
 
     [Theory]
@@ -173,7 +173,7 @@ public class AppSettingsServiceTests : IDisposable
     {
         // Arrange
         var service = CreateService();
-        var firstColor = service.CurrentSettings.BrushColor;
+        var firstColor = service.CurrentSettings.ActiveBrush;
         var palette = service.CurrentSettings.ColorPalette;
 
         // Act
@@ -182,7 +182,7 @@ public class AppSettingsServiceTests : IDisposable
         // Assert
         var expectedIndex = (palette.IndexOf(firstColor) + 1) % palette.Count;
         Assert.Equal(palette[expectedIndex], nextColor);
-        Assert.Equal(nextColor, service.CurrentSettings.BrushColor);
+        Assert.Equal(nextColor, service.CurrentSettings.ActiveBrush);
     }
 
     [Fact]
@@ -193,7 +193,7 @@ public class AppSettingsServiceTests : IDisposable
         var palette = service.CurrentSettings.ColorPalette;
 
         // Set to last color in palette
-        service.SetBrushColor(palette[palette.Count - 1]);
+        service.SetActiveBrush(palette[palette.Count - 1]);
 
         // Act
         var nextColor = service.GetNextColor();
@@ -207,7 +207,7 @@ public class AppSettingsServiceTests : IDisposable
     {
         // Arrange
         var service = CreateService();
-        service.SetBrushColor("#123456");
+        service.SetActiveBrush("#123456");
         service.SetBrushThickness(15.0);
         service.SetLockDrawingMode(true);
 
@@ -216,7 +216,7 @@ public class AppSettingsServiceTests : IDisposable
 
         // Assert
         var settings = service.CurrentSettings;
-        Assert.Equal("#FF0000", settings.BrushColor);
+        Assert.Equal("#FF0000", settings.ActiveBrush);
         Assert.Equal(3.0, settings.BrushThickness);
         Assert.False(settings.LockDrawingMode);
     }
@@ -383,13 +383,13 @@ public class AppSettingsServiceTests : IDisposable
     }
 
     [Fact]
-    public void SetBrushColor_ShouldTriggerLogging()
+    public void SetActiveBrush_ShouldTriggerLogging()
     {
         // Arrange
         var service = CreateService();
 
         // Act
-        service.SetBrushColor("#ABCDEF");
+        service.SetActiveBrush("#ABCDEF");
 
         // Assert - Verify logger was called (using Moq verification)
         _mockLogger.Verify(
@@ -410,7 +410,7 @@ public class AppSettingsServiceTests : IDisposable
         var palette = service.CurrentSettings.ColorPalette;
 
         // Set to a color not in the palette
-        service.SetBrushColor("#999999");
+        service.SetActiveBrush("#999999");
 
         // Act
         var nextColor = service.GetNextColor();
