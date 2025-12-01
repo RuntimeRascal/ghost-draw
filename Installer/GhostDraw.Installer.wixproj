@@ -8,6 +8,8 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <PublishDir>..\Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish\</PublishDir>
     <DefineConstants>PublishDir=$(PublishDir);ProductVersion=$(Version)</DefineConstants>
+    <!-- Suppress ICE64: We intentionally preserve user data folder on uninstall -->
+    <SuppressIces>ICE64</SuppressIces>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Product.wxs" />
