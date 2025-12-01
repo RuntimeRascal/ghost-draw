@@ -145,27 +145,30 @@ jobs:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   $tagName = "v${{ env.VERSION }}"
-                  $ErrorActionPreference = "SilentlyContinue"
 
-                  # Get release info for this tag (if exists)
-                  $release = gh release view $tagName --json isDraft,name 2>&1
-                  $exitCode = $LASTEXITCODE
-
-                  $ErrorActionPreference = "Stop"
-
-                  if ($exitCode -ne 0) {
-                    Write-Host "No release exists for $tagName - will create draft release"
-                    echo "skip_release=false" >> $env:GITHUB_OUTPUT
-                  } else {
-                    $releaseInfo = $release | ConvertFrom-Json
-                    if ($releaseInfo.isDraft) {
-                      Write-Host "Draft release exists for $tagName - will update with new assets"
-                      echo "skip_release=false" >> $env:GITHUB_OUTPUT
+                  # Try to get release info, capture result
+                  try {
+                    $release = gh release view $tagName --json isDraft,name 2>$null
+                    if ($LASTEXITCODE -eq 0 -and $release) {
+                      $releaseInfo = $release | ConvertFrom-Json
+                      if ($releaseInfo.isDraft -eq $true) {
+                        Write-Host "Draft release exists for $tagName - will update with new assets"
+                        "skip_release=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+                      } else {
+                        Write-Host "Published release exists for $tagName - skipping"
+                        "skip_release=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+                      }
                     } else {
-                      Write-Host "Published release exists for $tagName - skipping"
-                      echo "skip_release=true" >> $env:GITHUB_OUTPUT
+                      Write-Host "No release exists for $tagName - will create draft release"
+                      "skip_release=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
                     }
+                  } catch {
+                    Write-Host "No release exists for $tagName - will create draft release"
+                    "skip_release=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
                   }
+
+                  # Always exit successfully
+                  exit 0
 
             - name: Create or update draft release
               if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_release.outputs.skip_release == 'false'
