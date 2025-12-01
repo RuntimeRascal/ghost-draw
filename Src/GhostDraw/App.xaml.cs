@@ -73,6 +73,7 @@ public partial class App : Application
             _keyboardHook.HotkeyPressed += OnHotkeyPressed;
             _keyboardHook.HotkeyReleased += OnHotkeyReleased;
             _keyboardHook.EscapePressed += OnEscapePressed;
+            _keyboardHook.ClearCanvasPressed += OnClearCanvasPressed;
             _keyboardHook.Start();
 
             // Setup system tray icon
@@ -230,6 +231,23 @@ public partial class App : Application
         catch (Exception ex)
         {
             _exceptionHandler?.HandleException(ex, "Escape pressed handler");
+        }
+    }
+
+    private void OnClearCanvasPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Only clear canvas if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("R pressed - clearing canvas");
+                _drawingManager?.ClearCanvas();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Clear canvas handler");
         }
     }
 
