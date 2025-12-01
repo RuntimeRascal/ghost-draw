@@ -145,11 +145,15 @@ jobs:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   $tagName = "v${{ env.VERSION }}"
+                  $ErrorActionPreference = "SilentlyContinue"
 
                   # Get release info for this tag (if exists)
-                  $release = gh release view $tagName --json isDraft,name 2>$null
+                  $release = gh release view $tagName --json isDraft,name 2>&1
+                  $exitCode = $LASTEXITCODE
 
-                  if ($LASTEXITCODE -ne 0) {
+                  $ErrorActionPreference = "Stop"
+
+                  if ($exitCode -ne 0) {
                     Write-Host "No release exists for $tagName - will create draft release"
                     echo "skip_release=false" >> $env:GITHUB_OUTPUT
                   } else {
