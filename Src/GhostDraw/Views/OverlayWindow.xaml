@@ -41,5 +41,54 @@
                        Foreground="#FF0080"
                        Text="3 px"/>
         </Border>
+        
+        <!-- Canvas Cleared Toast (center of screen, cyberpunk style) -->
+        <Border x:Name="CanvasClearedToastBorder"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Padding="24,16"
+                Background="#1A1A2E"
+                BorderBrush="#00FF88"
+                BorderThickness="2"
+                CornerRadius="4"
+                Opacity="0"
+                IsHitTestVisible="False">
+            <Border.Effect>
+                <DropShadowEffect Color="#00FF88" 
+                                  Opacity="0.7" 
+                                  BlurRadius="20" 
+                                  ShadowDepth="0"/>
+            </Border.Effect>
+            <TextBlock x:Name="CanvasClearedToastText"
+                       FontFamily="Segoe UI"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       Foreground="#00FF88"
+                       Text="Canvas Cleared"/>
+        </Border>
+        
+        <!-- Drawing Mode Hint (center of screen, fades out on activation) -->
+        <Border x:Name="DrawingModeHintBorder"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,100"
+                Padding="20,12"
+                Background="#1A1A2E"
+                BorderBrush="#808080"
+                BorderThickness="1"
+                CornerRadius="4"
+                Opacity="0"
+                IsHitTestVisible="False">
+            <Border.Effect>
+                <DropShadowEffect Color="#808080" 
+                                  Opacity="0.5" 
+                                  BlurRadius="10" 
+                                  ShadowDepth="0"/>
+            </Border.Effect>
+            <TextBlock FontFamily="Segoe UI"
+                       FontSize="16"
+                       Foreground="#B0B0B0"
+                       Text="Press R to clear canvas  |  ESC to exit"/>
+        </Border>
     </Grid>
 </Window>

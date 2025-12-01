@@ -24,6 +24,16 @@ public partial class OverlayWindow : Window
     private readonly TimeSpan _indicatorDisplayDuration = TimeSpan.FromSeconds(1.5);
     private readonly TimeSpan _fadeOutDuration = TimeSpan.FromMilliseconds(300);
 
+    // Canvas cleared toast animation
+    private readonly DispatcherTimer _canvasClearedToastTimer;
+    private readonly TimeSpan _toastDisplayDuration = TimeSpan.FromSeconds(1.0);
+    private readonly TimeSpan _toastFadeOutDuration = TimeSpan.FromMilliseconds(200);
+
+    // Drawing mode hint animation
+    private readonly DispatcherTimer _drawingModeHintTimer;
+    private readonly TimeSpan _hintDisplayDuration = TimeSpan.FromSeconds(3.0);
+    private readonly TimeSpan _hintFadeOutDuration = TimeSpan.FromMilliseconds(500);
+
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper)
     {
         _logger = logger;
@@ -39,6 +49,20 @@ public partial class OverlayWindow : Window
             Interval = _indicatorDisplayDuration
         };
         _thicknessIndicatorTimer.Tick += ThicknessIndicatorTimer_Tick;
+
+        // Initialize canvas cleared toast timer
+        _canvasClearedToastTimer = new DispatcherTimer
+        {
+            Interval = _toastDisplayDuration
+        };
+        _canvasClearedToastTimer.Tick += CanvasClearedToastTimer_Tick;
+
+        // Initialize drawing mode hint timer
+        _drawingModeHintTimer = new DispatcherTimer
+        {
+            Interval = _hintDisplayDuration
+        };
+        _drawingModeHintTimer.Tick += DrawingModeHintTimer_Tick;
 
         // Make window span all monitors
         Left = SystemParameters.VirtualScreenLeft;
@@ -62,8 +86,13 @@ public partial class OverlayWindow : Window
         Loaded += (s, e) => _logger.LogDebug("Loaded event fired");
         IsVisibleChanged += (s, e) => _logger.LogDebug("IsVisibleChanged ? {IsVisible}", IsVisible);
 
-        // Ensure timer is stopped when window is closed
-        Closed += (s, e) => _thicknessIndicatorTimer.Stop();
+        // Ensure timers are stopped when window is closed
+        Closed += (s, e) =>
+        {
+            _thicknessIndicatorTimer.Stop();
+            _canvasClearedToastTimer.Stop();
+            _drawingModeHintTimer.Stop();
+        };
 
         _logger.LogDebug("Mouse events wired up");
     }
@@ -77,6 +106,10 @@ public partial class OverlayWindow : Window
 
         _isDrawing = true;
         UpdateCursor();
+        
+        // Show the drawing mode hint
+        ShowDrawingModeHint();
+        
         _logger.LogDebug("IsHitTestVisible={IsHitTestVisible}, Focusable={Focusable}",
             IsHitTestVisible, Focusable);
     }
@@ -86,8 +119,10 @@ public partial class OverlayWindow : Window
         _logger.LogInformation("?? Drawing disabled");
         _isDrawing = false;
 
-        // Hide thickness indicator
+        // Hide all indicators and toasts
         HideThicknessIndicator();
+        HideCanvasClearedToast();
+        HideDrawingModeHint();
 
         // Clear canvas when exiting drawing mode too
         ClearDrawing();
@@ -339,4 +374,190 @@ public partial class OverlayWindow : Window
             _logger.LogError(ex, "Failed to hide thickness indicator");
         }
     }
+
+    /// <summary>
+    /// Public method to clear the canvas and show visual feedback (called via R key)
+    /// </summary>
+    public void ClearCanvas()
+    {
+        try
+        {
+            int strokeCount = DrawingCanvas.Children.Count;
+            
+            if (strokeCount > 0)
+            {
+                _logger.LogInformation("Clearing {StrokeCount} strokes from canvas via R key", strokeCount);
+                ClearDrawing();
+                ShowCanvasClearedToast();
+            }
+            else
+            {
+                _logger.LogDebug("Canvas already empty, no clear needed");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to clear canvas");
+        }
+    }
+
+    #region Canvas Cleared Toast
+
+    /// <summary>
+    /// Shows the "Canvas Cleared" toast with animation
+    /// </summary>
+    private void ShowCanvasClearedToast()
+    {
+        try
+        {
+            // Stop any existing animations and timer
+            _canvasClearedToastTimer.Stop();
+            CanvasClearedToastBorder.BeginAnimation(OpacityProperty, null);
+
+            // Show the toast immediately
+            CanvasClearedToastBorder.Opacity = 1.0;
+
+            // Start the timer for fade-out
+            _canvasClearedToastTimer.Start();
+
+            _logger.LogDebug("Canvas cleared toast shown");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to show canvas cleared toast");
+        }
+    }
+
+    /// <summary>
+    /// Timer tick handler that starts the fade-out animation for the toast
+    /// </summary>
+    private void CanvasClearedToastTimer_Tick(object? sender, EventArgs e)
+    {
+        try
+        {
+            _canvasClearedToastTimer.Stop();
+
+            // Create and start fade-out animation
+            var fadeOutAnimation = new DoubleAnimation
+            {
+                From = 1.0,
+                To = 0.0,
+                Duration = new Duration(_toastFadeOutDuration),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            CanvasClearedToastBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
+
+            _logger.LogDebug("Canvas cleared toast fade-out started");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to fade out canvas cleared toast");
+            // Ensure toast is hidden even if animation fails
+            CanvasClearedToastBorder.Opacity = 0;
+        }
+    }
+
+    /// <summary>
+    /// Immediately hides the canvas cleared toast
+    /// </summary>
+    private void HideCanvasClearedToast()
+    {
+        try
+        {
+            _canvasClearedToastTimer.Stop();
+            CanvasClearedToastBorder.BeginAnimation(OpacityProperty, null);
+            CanvasClearedToastBorder.Opacity = 0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to hide canvas cleared toast");
+        }
+    }
+
+    #endregion
+
+    #region Drawing Mode Hint
+
+    /// <summary>
+    /// Shows the drawing mode hint with animation (displayed when entering drawing mode)
+    /// </summary>
+    private void ShowDrawingModeHint()
+    {
+        try
+        {
+            // Stop any existing animations and timer
+            _drawingModeHintTimer.Stop();
+            DrawingModeHintBorder.BeginAnimation(OpacityProperty, null);
+
+            // Show the hint with fade-in animation
+            var fadeInAnimation = new DoubleAnimation
+            {
+                From = 0.0,
+                To = 0.8,
+                Duration = new Duration(TimeSpan.FromMilliseconds(200)),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            DrawingModeHintBorder.BeginAnimation(OpacityProperty, fadeInAnimation);
+
+            // Start the timer for fade-out
+            _drawingModeHintTimer.Start();
+
+            _logger.LogDebug("Drawing mode hint shown");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to show drawing mode hint");
+        }
+    }
+
+    /// <summary>
+    /// Timer tick handler that starts the fade-out animation for the hint
+    /// </summary>
+    private void DrawingModeHintTimer_Tick(object? sender, EventArgs e)
+    {
+        try
+        {
+            _drawingModeHintTimer.Stop();
+
+            // Create and start fade-out animation
+            var fadeOutAnimation = new DoubleAnimation
+            {
+                From = 0.8,
+                To = 0.0,
+                Duration = new Duration(_hintFadeOutDuration),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            DrawingModeHintBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
+
+            _logger.LogDebug("Drawing mode hint fade-out started");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to fade out drawing mode hint");
+            // Ensure hint is hidden even if animation fails
+            DrawingModeHintBorder.Opacity = 0;
+        }
+    }
+
+    /// <summary>
+    /// Immediately hides the drawing mode hint
+    /// </summary>
+    private void HideDrawingModeHint()
+    {
+        try
+        {
+            _drawingModeHintTimer.Stop();
+            DrawingModeHintBorder.BeginAnimation(OpacityProperty, null);
+            DrawingModeHintBorder.Opacity = 0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to hide drawing mode hint");
+        }
+    }
+
+    #endregion
 }

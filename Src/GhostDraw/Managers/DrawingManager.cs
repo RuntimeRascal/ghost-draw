@@ -163,4 +163,28 @@ public class DrawingManager
             // Don't throw - this is for emergency cleanup
         }
     }
+
+    /// <summary>
+    /// Clears the canvas while keeping drawing mode active
+    /// </summary>
+    public void ClearCanvas()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _logger.LogInformation("Clearing canvas (R key)");
+                _overlayWindow.ClearCanvas();
+            }
+            else
+            {
+                _logger.LogDebug("ClearCanvas ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to clear canvas");
+            // Don't re-throw - not critical
+        }
+    }
 }

@@ -12,6 +12,7 @@ public class GlobalKeyboardHook : IDisposable
 
     // Only keep VK_ESCAPE constant (emergency exit)
     private const int VK_ESCAPE = 0x1B;    // 27
+    private const int VK_R = 0x52;         // 82 - 'R' key for clear canvas
 
     private readonly ILogger<GlobalKeyboardHook> _logger;
     private readonly LowLevelKeyboardProc _proc;
@@ -23,6 +24,7 @@ public class GlobalKeyboardHook : IDisposable
     public event EventHandler? HotkeyPressed;
     public event EventHandler? HotkeyReleased;
     public event EventHandler? EscapePressed;
+    public event EventHandler? ClearCanvasPressed;
 
     // NEW: Raw key events for recorder
     public event EventHandler<KeyEventArgs>? KeyPressed;
@@ -179,6 +181,13 @@ public class GlobalKeyboardHook : IDisposable
                 {
                     _logger.LogInformation("?? ESC pressed - emergency exit");
                     EscapePressed?.Invoke(this, EventArgs.Empty);
+                }
+
+                // Check for R key press (clear canvas)
+                if (vkCode == VK_R && isKeyDown)
+                {
+                    _logger.LogDebug("R key pressed - clear canvas request");
+                    ClearCanvasPressed?.Invoke(this, EventArgs.Empty);
                 }
 
                 // Track hotkey state
