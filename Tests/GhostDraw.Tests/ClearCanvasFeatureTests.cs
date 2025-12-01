@@ -64,8 +64,8 @@ public class ClearCanvasFeatureTests
     {
         // Arrange
         var hook = new GlobalKeyboardHook(_mockLogger.Object);
-        var disposed = false;
-        hook.ClearCanvasPressed += (s, e) => { disposed = !disposed; };
+        var eventHandled = false;
+        hook.ClearCanvasPressed += (s, e) => { eventHandled = !eventHandled; };
 
         // Act & Assert - Dispose should work without throwing
         var exception = Record.Exception(() => hook.Dispose());
