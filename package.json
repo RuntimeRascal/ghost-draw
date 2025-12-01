@@ -1,6 +1,6 @@
 {
     "name": "ghost-draw",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Draw directly on your screen with a transparent overlay",
     "repository": {
         "type": "git",
@@ -23,7 +23,7 @@
         "dev:watch": "dotnet watch run --project Src/GhostDraw/GhostDraw.csproj",
         "format": "dotnet format GhostDraw.sln",
         "format:check": "dotnet format GhostDraw.sln --verify-no-changes",
-        "version:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -UpdateProjFiles -Bump patch -DryRun",
+        "version:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -UpdateProjFiles -Bump patch -DryRun",
         "version:tag": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -Bump patch -DryRun"
     },
     "engines": {
