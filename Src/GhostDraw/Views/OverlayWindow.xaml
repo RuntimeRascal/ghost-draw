@@ -9,9 +9,37 @@
         ShowInTaskbar="False"
         WindowState="Maximized"
         ResizeMode="NoResize">
-    <Canvas x:Name="DrawingCanvas">
-        <Canvas.Background>
-            <SolidColorBrush Color="White" Opacity="0.01"/>
-        </Canvas.Background>
-    </Canvas>
+    <Grid>
+        <Canvas x:Name="DrawingCanvas">
+            <Canvas.Background>
+                <SolidColorBrush Color="White" Opacity="0.01"/>
+            </Canvas.Background>
+        </Canvas>
+        
+        <!-- Thickness Indicator (top-right corner, cyberpunk style) -->
+        <Border x:Name="ThicknessIndicatorBorder"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,30,30,0"
+                Padding="16,10"
+                Background="#1A1A2E"
+                BorderBrush="#FF0080"
+                BorderThickness="2"
+                CornerRadius="4"
+                Opacity="0"
+                IsHitTestVisible="False">
+            <Border.Effect>
+                <DropShadowEffect Color="#FF0080" 
+                                  Opacity="0.7" 
+                                  BlurRadius="15" 
+                                  ShadowDepth="0"/>
+            </Border.Effect>
+            <TextBlock x:Name="ThicknessIndicatorText"
+                       FontFamily="Segoe UI"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="#FF0080"
+                       Text="3 px"/>
+        </Border>
+    </Grid>
 </Window>

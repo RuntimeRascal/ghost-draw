@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using GhostDraw.Helpers;
 using GhostDraw.Services;
 using Microsoft.Extensions.Logging;
@@ -17,6 +19,11 @@ public partial class OverlayWindow : Window
     private Polyline? _currentStroke;
     private bool _isDrawing = false;
 
+    // Thickness indicator animation
+    private readonly DispatcherTimer _thicknessIndicatorTimer;
+    private readonly TimeSpan _indicatorDisplayDuration = TimeSpan.FromSeconds(1.5);
+    private readonly TimeSpan _fadeOutDuration = TimeSpan.FromMilliseconds(300);
+
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper)
     {
         _logger = logger;
@@ -25,6 +32,13 @@ public partial class OverlayWindow : Window
         _logger.LogDebug("OverlayWindow constructor called");
 
         InitializeComponent();
+
+        // Initialize thickness indicator timer
+        _thicknessIndicatorTimer = new DispatcherTimer
+        {
+            Interval = _indicatorDisplayDuration
+        };
+        _thicknessIndicatorTimer.Tick += ThicknessIndicatorTimer_Tick;
 
         // Make window span all monitors
         Left = SystemParameters.VirtualScreenLeft;
@@ -48,6 +62,9 @@ public partial class OverlayWindow : Window
         Loaded += (s, e) => _logger.LogDebug("Loaded event fired");
         IsVisibleChanged += (s, e) => _logger.LogDebug("IsVisibleChanged ? {IsVisible}", IsVisible);
 
+        // Ensure timer is stopped when window is closed
+        Closed += (s, e) => _thicknessIndicatorTimer.Stop();
+
         _logger.LogDebug("Mouse events wired up");
     }
 
@@ -68,6 +85,9 @@ public partial class OverlayWindow : Window
     {
         _logger.LogInformation("?? Drawing disabled");
         _isDrawing = false;
+
+        // Hide thickness indicator
+        HideThicknessIndicator();
 
         // Clear canvas when exiting drawing mode too
         ClearDrawing();
@@ -163,6 +183,9 @@ public partial class OverlayWindow : Window
                 _appSettings.SetBrushThickness(newThickness);
                 _logger.LogInformation("Brush thickness adjusted to {Thickness} via mouse wheel", newThickness);
 
+                // Show thickness indicator
+                ShowThicknessIndicator(newThickness);
+
                 // Mark event as handled
                 e.Handled = true;
             }
@@ -238,6 +261,82 @@ public partial class OverlayWindow : Window
         if (_currentStroke != null)
         {
             _currentStroke.StrokeThickness = settings.BrushThickness;
+        }
+    }
+
+    /// <summary>
+    /// Shows the thickness indicator with the specified value and resets the fade timer
+    /// </summary>
+    /// <param name="thickness">The current brush thickness value</param>
+    private void ShowThicknessIndicator(double thickness)
+    {
+        try
+        {
+            // Update the text
+            ThicknessIndicatorText.Text = $"{thickness:0} px";
+
+            // Stop any existing animations and timer
+            _thicknessIndicatorTimer.Stop();
+            ThicknessIndicatorBorder.BeginAnimation(OpacityProperty, null);
+
+            // Show the indicator immediately
+            ThicknessIndicatorBorder.Opacity = 1.0;
+
+            // Start the timer for fade-out
+            _thicknessIndicatorTimer.Start();
+
+            _logger.LogDebug("Thickness indicator shown: {Thickness} px", thickness);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to show thickness indicator");
+        }
+    }
+
+    /// <summary>
+    /// Timer tick handler that starts the fade-out animation
+    /// </summary>
+    private void ThicknessIndicatorTimer_Tick(object? sender, EventArgs e)
+    {
+        try
+        {
+            _thicknessIndicatorTimer.Stop();
+
+            // Create and start fade-out animation
+            var fadeOutAnimation = new DoubleAnimation
+            {
+                From = 1.0,
+                To = 0.0,
+                Duration = new Duration(_fadeOutDuration),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            ThicknessIndicatorBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
+
+            _logger.LogDebug("Thickness indicator fade-out started");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to fade out thickness indicator");
+            // Ensure indicator is hidden even if animation fails
+            ThicknessIndicatorBorder.Opacity = 0;
+        }
+    }
+
+    /// <summary>
+    /// Immediately hides the thickness indicator (called when drawing mode is disabled)
+    /// </summary>
+    private void HideThicknessIndicator()
+    {
+        try
+        {
+            _thicknessIndicatorTimer.Stop();
+            ThicknessIndicatorBorder.BeginAnimation(OpacityProperty, null);
+            ThicknessIndicatorBorder.Opacity = 0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to hide thickness indicator");
         }
     }
 }
