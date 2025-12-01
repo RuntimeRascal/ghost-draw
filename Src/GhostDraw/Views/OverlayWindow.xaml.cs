@@ -388,12 +388,14 @@ public partial class OverlayWindow : Window
             {
                 _logger.LogInformation("Clearing {StrokeCount} strokes from canvas via R key", strokeCount);
                 ClearDrawing();
-                ShowCanvasClearedToast();
             }
             else
             {
-                _logger.LogDebug("Canvas already empty, no clear needed");
+                _logger.LogDebug("Canvas already empty, clear acknowledged");
             }
+            
+            // Always show feedback so user knows R key was recognized
+            ShowCanvasClearedToast();
         }
         catch (Exception ex)
         {
