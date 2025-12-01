@@ -135,26 +135,36 @@ jobs:
                   path: GhostDraw-${{ env.VERSION }}-portable.zip
                   retention-days: 30
 
-            # Only create/update draft release if the tag doesn't exist yet
-            # This allows CI to run safely whether tag exists or not
-            - name: Check if tag exists
-              id: check_tag
+            # Check if a PUBLISHED (non-draft) release exists for this version
+            # If only a draft exists, we should update it with new assets
+            - name: Check if published release exists
+              id: check_release
               if: github.event_name == 'push' && github.ref == 'refs/heads/main'
               shell: pwsh
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   $tagName = "v${{ env.VERSION }}"
-                  git fetch --tags
-                  $tagExists = git tag -l $tagName
-                  if ($tagExists) {
-                    Write-Host "Tag $tagName already exists - skipping draft release"
-                    echo "tag_exists=true" >> $env:GITHUB_OUTPUT
+
+                  # Get release info for this tag (if exists)
+                  $release = gh release view $tagName --json isDraft,name 2>$null
+
+                  if ($LASTEXITCODE -ne 0) {
+                    Write-Host "No release exists for $tagName - will create draft release"
+                    echo "skip_release=false" >> $env:GITHUB_OUTPUT
                   } else {
-                    Write-Host "Tag $tagName does not exist - will create/update draft release"
-                    echo "tag_exists=false" >> $env:GITHUB_OUTPUT
+                    $releaseInfo = $release | ConvertFrom-Json
+                    if ($releaseInfo.isDraft) {
+                      Write-Host "Draft release exists for $tagName - will update with new assets"
+                      echo "skip_release=false" >> $env:GITHUB_OUTPUT
+                    } else {
+                      Write-Host "Published release exists for $tagName - skipping"
+                      echo "skip_release=true" >> $env:GITHUB_OUTPUT
+                    }
                   }
 
             - name: Create or update draft release
-              if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_tag.outputs.tag_exists == 'false'
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_release.outputs.skip_release == 'false'
               uses: softprops/action-gh-release@v2
               with:
                   tag_name: v${{ env.VERSION }}
