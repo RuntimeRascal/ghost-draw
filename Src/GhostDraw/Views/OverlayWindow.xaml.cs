@@ -62,6 +62,9 @@ public partial class OverlayWindow : Window
         Loaded += (s, e) => _logger.LogDebug("Loaded event fired");
         IsVisibleChanged += (s, e) => _logger.LogDebug("IsVisibleChanged ? {IsVisible}", IsVisible);
 
+        // Ensure timer is stopped when window is closed
+        Closed += (s, e) => _thicknessIndicatorTimer.Stop();
+
         _logger.LogDebug("Mouse events wired up");
     }
 
