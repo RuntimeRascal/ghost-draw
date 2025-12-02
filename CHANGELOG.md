@@ -5,9 +5,14 @@ All notable changes to GhostDraw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## v1.0.6
 
 ### Added
+- **Screenshot Capture** - Capture your drawings as images
+  - Press `Ctrl+S` to capture full screen with drawings (saved to Pictures\GhostDraw)
+  - Key suppression prevents Windows from intercepting Ctrl+S during drawing mode
+  - Optional: Copy to clipboard, open folder, play shutter sound (configurable in settings)
 - **Eraser Tool** - Remove drawing objects underneath the cursor
   - Press `E` to activate Eraser tool
   - Click and drag to erase drawings interactively
@@ -16,10 +21,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Works with both polylines (pen strokes) and lines (straight line tool)
   - Custom eraser cursor with visual feedback
 - **Improved Code Quality**
+  - Added explicit type aliases to resolve WPF/WinForms namespace conflicts
+  - Fixed `Point`, `Brush`, `Color`, `ColorConverter`, and `Brushes` type ambiguities
   - Enhanced tool interface consistency
 
 ### Fixed
+- Screenshot hotkey (`Ctrl+S`) now correctly detects Control key by tracking both left (VK_LCONTROL) and right (VK_RCONTROL) control keys instead of generic VK_CONTROL
+- Ambiguous reference errors caused by both WPF (`System.Windows`) and WinForms (`System.Drawing`) being enabled
 - LineTool's `OnDeactivated` method now properly resets state without calling non-existent method
+- Build errors related to namespace conflicts in drawing tool implementations
+
+### Changed
+- Snipping tool (`S` key) now properly exits drawing mode to allow user interaction
+- User must manually reactivate drawing mode after using snipping tool (press hotkey)
 
 ## v1.0.5
 

@@ -45,24 +45,6 @@ public class ScreenshotFeatureTests
     }
 
     [Fact]
-    public void GlobalKeyboardHook_ShouldHaveScreenshotSnipPressedEvent()
-    {
-        // Arrange & Act
-        var hook = new GlobalKeyboardHook(_mockHookLogger.Object);
-        var eventSubscribed = false;
-
-        // Assert - Verify the event exists and can be subscribed to
-        hook.ScreenshotSnipPressed += (s, e) => { eventSubscribed = true; };
-
-        // The event should be subscribable (event exists)
-        Assert.NotNull(hook);
-        Assert.False(eventSubscribed); // Event hasn't fired yet
-
-        // Cleanup
-        hook.Dispose();
-    }
-
-    [Fact]
     public void GlobalKeyboardHook_ScreenshotFullPressedEvent_ShouldBeInvokable()
     {
         // Arrange
@@ -87,38 +69,12 @@ public class ScreenshotFeatureTests
     }
 
     [Fact]
-    public void GlobalKeyboardHook_ScreenshotSnipPressedEvent_ShouldBeInvokable()
-    {
-        // Arrange
-        var hook = new GlobalKeyboardHook(_mockHookLogger.Object);
-        var handlerCalled = false;
-        
-        hook.ScreenshotSnipPressed += (s, e) =>
-        {
-            handlerCalled = true;
-        };
-
-        // Act - We can't directly invoke the event from outside,
-        // but we verify the event handler registration works
-        // The actual key press handling is tested via integration tests on Windows
-
-        // Assert - Event can be subscribed without error
-        Assert.NotNull(hook);
-        Assert.False(handlerCalled); // Handler not called until key press
-
-        // Cleanup
-        hook.Dispose();
-    }
-
-    [Fact]
     public void GlobalKeyboardHook_Dispose_ShouldNotThrowWithScreenshotEvents()
     {
         // Arrange
         var hook = new GlobalKeyboardHook(_mockHookLogger.Object);
         var fullHandled = false;
-        var snipHandled = false;
         hook.ScreenshotFullPressed += (s, e) => { fullHandled = !fullHandled; };
-        hook.ScreenshotSnipPressed += (s, e) => { snipHandled = !snipHandled; };
 
         // Act & Assert - Dispose should work without throwing
         var exception = Record.Exception(() => hook.Dispose());
@@ -136,26 +92,6 @@ public class ScreenshotFeatureTests
         hook.ScreenshotFullPressed += (s, e) => subscriberCount++;
         hook.ScreenshotFullPressed += (s, e) => subscriberCount++;
         hook.ScreenshotFullPressed += (s, e) => subscriberCount++;
-
-        // Assert - Should be able to add multiple handlers without error
-        Assert.NotNull(hook);
-        Assert.Equal(0, subscriberCount); // Handlers not called yet
-
-        // Cleanup
-        hook.Dispose();
-    }
-
-    [Fact]
-    public void GlobalKeyboardHook_MultipleEventSubscribers_ShouldWorkForScreenshotSnip()
-    {
-        // Arrange
-        var hook = new GlobalKeyboardHook(_mockHookLogger.Object);
-        var subscriberCount = 0;
-
-        // Act - Add multiple subscribers
-        hook.ScreenshotSnipPressed += (s, e) => subscriberCount++;
-        hook.ScreenshotSnipPressed += (s, e) => subscriberCount++;
-        hook.ScreenshotSnipPressed += (s, e) => subscriberCount++;
 
         // Assert - Should be able to add multiple handlers without error
         Assert.NotNull(hook);
@@ -303,22 +239,6 @@ public class ScreenshotFeatureTests
         });
 
         // Assert
-        Assert.Null(exception);
-    }
-
-    [Fact]
-    public void ScreenshotService_OpenSnippingTool_ShouldNotThrowException()
-    {
-        // Arrange
-        var service = new ScreenshotService(_mockScreenshotLogger.Object, _mockAppSettings.Object);
-
-        // Act
-        var exception = Record.Exception(() =>
-        {
-            service.OpenSnippingTool();
-        });
-
-        // Assert - Method should handle exceptions internally and not throw
         Assert.Null(exception);
     }
 

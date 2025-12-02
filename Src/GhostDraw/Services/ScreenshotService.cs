@@ -32,6 +32,7 @@ public class ScreenshotService
     {
         try
         {
+            _logger.LogInformation("====== ScreenshotService.CaptureFullScreen CALLED ======");
             _logger.LogInformation("Capturing fullscreen screenshot");
 
             // Get screen dimensions
@@ -41,88 +42,68 @@ public class ScreenshotService
                 (int)SystemParameters.VirtualScreenWidth,
                 (int)SystemParameters.VirtualScreenHeight);
 
-            _logger.LogDebug("Screen bounds: {Bounds}", bounds);
+            _logger.LogInformation("Screen bounds: X={X}, Y={Y}, Width={Width}, Height={Height}", 
+                bounds.X, bounds.Y, bounds.Width, bounds.Height);
 
             // Create bitmap for screen capture
+            _logger.LogInformation("Creating bitmap for screen capture");
             using var bitmap = new System.Drawing.Bitmap(bounds.Width, bounds.Height);
+            
+            _logger.LogInformation("Copying screen to bitmap using Graphics.CopyFromScreen");
             using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
             {
                 // Copy screen to bitmap
                 graphics.CopyFromScreen(bounds.Location, System.Drawing.Point.Empty, bounds.Size);
             }
+            _logger.LogInformation("Screen copied to bitmap successfully");
 
             // Save the screenshot
+            _logger.LogInformation("Calling SaveScreenshot to save bitmap to file");
             var filePath = SaveScreenshot(bitmap);
+            _logger.LogInformation("SaveScreenshot returned: {FilePath}", filePath ?? "(null)");
 
             if (filePath != null)
             {
+                var settings = _appSettings.CurrentSettings;
+                _logger.LogInformation("Screenshot settings - CopyToClipboard: {Copy}, OpenFolder: {Open}, PlaySound: {Sound}",
+                    settings.CopyScreenshotToClipboard, settings.OpenFolderAfterScreenshot, settings.PlayShutterSound);
+                
                 // Copy to clipboard if enabled
-                if (_appSettings.CurrentSettings.CopyScreenshotToClipboard)
+                if (settings.CopyScreenshotToClipboard)
                 {
+                    _logger.LogInformation("Copying screenshot to clipboard");
                     CopyToClipboard(bitmap);
                 }
 
                 // Open folder if enabled
-                if (_appSettings.CurrentSettings.OpenFolderAfterScreenshot)
+                if (settings.OpenFolderAfterScreenshot)
                 {
+                    _logger.LogInformation("Opening folder containing screenshot");
                     OpenFolder(filePath);
                 }
 
                 // Play shutter sound if enabled
-                if (_appSettings.CurrentSettings.PlayShutterSound)
+                if (settings.PlayShutterSound)
                 {
+                    _logger.LogInformation("Playing shutter sound");
                     PlayShutterSound();
                 }
 
-                _logger.LogInformation("Screenshot saved to: {FilePath}", filePath);
+                _logger.LogInformation("Screenshot saved successfully to: {FilePath}", filePath);
+            }
+            else
+            {
+                _logger.LogError("Screenshot file path is NULL - save failed");
             }
 
+            _logger.LogInformation("====== ScreenshotService.CaptureFullScreen COMPLETED ======");
             return filePath;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to capture fullscreen screenshot");
+            _logger.LogError(ex, "EXCEPTION in CaptureFullScreen: {Message}", ex.Message);
+            _logger.LogError("Stack trace: {StackTrace}", ex.StackTrace);
             return null;
-        }
-    }
-
-    /// <summary>
-    /// Opens the Windows Snipping Tool for custom area capture
-    /// </summary>
-    public void OpenSnippingTool()
-    {
-        try
-        {
-            _logger.LogInformation("Opening Windows Snipping Tool");
-
-            // Try SnippingTool.exe first (Windows 7, 8, 10)
-            var snippingToolPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.System),
-                "SnippingTool.exe");
-
-            if (File.Exists(snippingToolPath))
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = snippingToolPath,
-                    UseShellExecute = true
-                });
-                _logger.LogDebug("Started SnippingTool.exe");
-            }
-            else
-            {
-                // Try Snip & Sketch (Windows 10/11) - ms-screenclip: protocol
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "ms-screenclip:",
-                    UseShellExecute = true
-                });
-                _logger.LogDebug("Started Snip & Sketch via ms-screenclip:");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to open snipping tool");
         }
     }
 
@@ -130,30 +111,56 @@ public class ScreenshotService
     {
         try
         {
+            _logger.LogInformation("====== SaveScreenshot CALLED ======");
             var settings = _appSettings.CurrentSettings;
             var savePath = settings.ScreenshotSavePath;
+            
+            _logger.LogInformation("Screenshot save path from settings: {SavePath}", savePath);
+            _logger.LogInformation("Bitmap dimensions: {Width}x{Height}", bitmap.Width, bitmap.Height);
 
             // Ensure directory exists
             if (!Directory.Exists(savePath))
             {
+                _logger.LogInformation("Directory does not exist, creating: {Path}", savePath);
                 Directory.CreateDirectory(savePath);
-                _logger.LogInformation("Created screenshot directory: {Path}", savePath);
+                _logger.LogInformation("Created screenshot directory successfully");
+            }
+            else
+            {
+                _logger.LogInformation("Directory already exists: {Path}", savePath);
             }
 
             // Generate filename with timestamp
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var fileName = $"GhostDraw_{timestamp}.png";
             var filePath = Path.Combine(savePath, fileName);
+            
+            _logger.LogInformation("Generated filename: {FileName}", fileName);
+            _logger.LogInformation("Full file path: {FilePath}", filePath);
 
             // Save as PNG
+            _logger.LogInformation("Saving bitmap to file as PNG...");
             bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+            _logger.LogInformation("Bitmap saved successfully!");
+            
+            // Verify file exists
+            if (File.Exists(filePath))
+            {
+                var fileInfo = new FileInfo(filePath);
+                _logger.LogInformation("Screenshot file verified - Size: {Size} bytes", fileInfo.Length);
+            }
+            else
+            {
+                _logger.LogError("Screenshot file does NOT exist after save!");
+            }
 
-            _logger.LogInformation("Screenshot saved: {FilePath}", filePath);
+            _logger.LogInformation("====== SaveScreenshot COMPLETED ======");
             return filePath;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save screenshot");
+            _logger.LogError(ex, "EXCEPTION in SaveScreenshot: {Message}", ex.Message);
+            _logger.LogError("Stack trace: {StackTrace}", ex.StackTrace);
             return null;
         }
     }

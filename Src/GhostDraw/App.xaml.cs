@@ -79,7 +79,6 @@ public partial class App : Application
             _keyboardHook.EraserToolPressed += OnEraserToolPressed;
             _keyboardHook.HelpPressed += OnHelpPressed;
             _keyboardHook.ScreenshotFullPressed += OnScreenshotFullPressed;
-            _keyboardHook.ScreenshotSnipPressed += OnScreenshotSnipPressed;
             _keyboardHook.Start();
 
             // Setup system tray icon
@@ -329,33 +328,27 @@ public partial class App : Application
     {
         try
         {
+            _logger?.LogInformation("====== OnScreenshotFullPressed CALLED ======");
+            _logger?.LogInformation("DrawingManager null: {IsNull}", _drawingManager == null);
+            _logger?.LogInformation("DrawingManager.IsDrawingMode: {IsDrawingMode}", _drawingManager?.IsDrawingMode);
+            
             // Capture full screenshot if drawing mode is active
             if (_drawingManager?.IsDrawingMode == true)
             {
-                _logger?.LogInformation("Ctrl+S pressed - capturing full screenshot");
+                _logger?.LogInformation("Ctrl+S pressed - capturing full screenshot (calling DrawingManager.CaptureFullScreenshot)");
                 _drawingManager?.CaptureFullScreenshot();
+                _logger?.LogInformation("DrawingManager.CaptureFullScreenshot call completed");
             }
-        }
-        catch (Exception ex)
-        {
-            _exceptionHandler?.HandleException(ex, "Screenshot full pressed handler");
-        }
-    }
-
-    private void OnScreenshotSnipPressed(object? sender, EventArgs e)
-    {
-        try
-        {
-            // Open snipping tool if drawing mode is active
-            if (_drawingManager?.IsDrawingMode == true)
+            else
             {
-                _logger?.LogInformation("S pressed - opening snipping tool");
-                _drawingManager?.OpenSnippingTool();
+                _logger?.LogWarning("Screenshot ignored - drawing mode is NOT active");
             }
+            _logger?.LogInformation("====== OnScreenshotFullPressed COMPLETED ======");
         }
         catch (Exception ex)
         {
-            _exceptionHandler?.HandleException(ex, "Screenshot snip pressed handler");
+            _logger?.LogError(ex, "Exception in OnScreenshotFullPressed");
+            _exceptionHandler?.HandleException(ex, "Screenshot full pressed handler");
         }
     }
 
