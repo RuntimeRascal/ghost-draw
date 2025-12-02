@@ -162,6 +162,9 @@
                         <!-- Mode Settings -->
                         <uc:ModeSettingsControl AppSettings="{Binding AppSettings}"/>
 
+                        <!-- Screenshot Settings -->
+                        <uc:ScreenshotSettingsControl AppSettings="{Binding AppSettings}"/>
+
                         <!-- Logging Settings -->
                         <uc:LoggingSettingsControl LoggingSettings="{Binding LoggingSettings}"/>
                     </StackPanel>
