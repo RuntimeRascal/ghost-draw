@@ -1,29 +1,24 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Shapes;
 using Microsoft.Extensions.Logging;
+using Point = System.Windows.Point;
 
 namespace GhostDraw.Tools;
 
 /// <summary>
 /// Eraser tool - removes drawing objects underneath the cursor
 /// </summary>
-public class EraserTool : IDrawingTool
+public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
 {
-    private readonly ILogger<EraserTool> _logger;
+    private readonly ILogger<EraserTool> _logger = logger;
     private bool _isErasing = false;
     private double _currentThickness = 3.0;
     private readonly HashSet<UIElement> _erasedElements = new();
-    
+
     // Tolerance for parallel line detection in intersection algorithm
     private const double PARALLEL_LINE_TOLERANCE = 0.001;
-
-    public EraserTool(ILogger<EraserTool> logger)
-    {
-        _logger = logger;
-    }
 
     public void OnMouseDown(Point position, Canvas canvas)
     {

@@ -1,26 +1,25 @@
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Microsoft.Extensions.Logging;
+using Point = System.Windows.Point;
+using Brush = System.Windows.Media.Brush;
+using Brushes = System.Windows.Media.Brushes;
+using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
 
 namespace GhostDraw.Tools;
 
 /// <summary>
 /// Freehand drawing tool
 /// </summary>
-public class PenTool : IDrawingTool
+public class PenTool(ILogger<PenTool> logger) : IDrawingTool
 {
-    private readonly ILogger<PenTool> _logger;
+    private readonly ILogger<PenTool> _logger = logger;
     private Polyline? _currentStroke;
     private string _currentColor = "#FF0000";
     private double _currentThickness = 3.0;
-
-    public PenTool(ILogger<PenTool> logger)
-    {
-        _logger = logger;
-    }
 
     public void OnMouseDown(Point position, Canvas canvas)
     {

@@ -1,28 +1,27 @@
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Microsoft.Extensions.Logging;
+using Point = System.Windows.Point;
+using Brush = System.Windows.Media.Brush;
+using Brushes = System.Windows.Media.Brushes;
+using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
 
 namespace GhostDraw.Tools;
 
 /// <summary>
 /// Straight line drawing tool - click two points to draw a line
 /// </summary>
-public class LineTool : IDrawingTool
+public class LineTool(ILogger<LineTool> logger) : IDrawingTool
 {
-    private readonly ILogger<LineTool> _logger;
+    private readonly ILogger<LineTool> _logger = logger;
     private Line? _currentLine;
     private Point? _lineStartPoint;
     private bool _isCreatingLine = false;
     private string _currentColor = "#FF0000";
     private double _currentThickness = 3.0;
-
-    public LineTool(ILogger<LineTool> logger)
-    {
-        _logger = logger;
-    }
 
     public void OnMouseDown(Point position, Canvas canvas)
     {
@@ -61,32 +60,37 @@ public class LineTool : IDrawingTool
     public void OnDeactivated()
     {
         _logger.LogDebug("Line tool deactivated");
-        CancelCurrentLine();
+        if (_currentLine != null)
+        {
+            _currentLine = null;
+            _lineStartPoint = null;
+            _isCreatingLine = false;
+        }
     }
 
     public void OnColorChanged(string colorHex)
     {
         _currentColor = colorHex;
-        
+
         // Update in-progress line color if one exists
         if (_currentLine != null)
         {
             _currentLine.Stroke = CreateBrushFromHex(colorHex);
         }
-        
+
         _logger.LogDebug("Line color changed to {Color}", colorHex);
     }
 
     public void OnThicknessChanged(double thickness)
     {
         _currentThickness = thickness;
-        
+
         // Update in-progress line thickness if one exists
         if (_currentLine != null)
         {
             _currentLine.StrokeThickness = thickness;
         }
-        
+
         _logger.LogDebug("Line thickness changed to {Thickness}", thickness);
     }
 
@@ -94,9 +98,9 @@ public class LineTool : IDrawingTool
     {
         _lineStartPoint = startPoint;
         _isCreatingLine = true;
-        
+
         var brush = CreateBrushFromHex(_currentColor);
-        
+
         _currentLine = new Line
         {
             X1 = startPoint.X,
@@ -108,7 +112,7 @@ public class LineTool : IDrawingTool
             StrokeStartLineCap = PenLineCap.Round,
             StrokeEndLineCap = PenLineCap.Round
         };
-        
+
         canvas.Children.Add(_currentLine);
         _logger.LogInformation("Line started at ({X:F0}, {Y:F0})", startPoint.X, startPoint.Y);
     }
@@ -119,16 +123,14 @@ public class LineTool : IDrawingTool
         {
             _currentLine.X2 = endPoint.X;
             _currentLine.Y2 = endPoint.Y;
-            
+
             _logger.LogInformation("Line finished at ({X:F0}, {Y:F0})", endPoint.X, endPoint.Y);
         }
-        
+
         _currentLine = null;
         _lineStartPoint = null;
         _isCreatingLine = false;
     }
-
-
 
     private Brush CreateBrushFromHex(string colorHex)
     {

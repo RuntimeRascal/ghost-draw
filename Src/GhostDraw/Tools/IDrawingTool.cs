@@ -1,6 +1,6 @@
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Point = System.Windows.Point;
 
 namespace GhostDraw.Tools;
 

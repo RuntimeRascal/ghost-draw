@@ -5,6 +5,22 @@ All notable changes to GhostDraw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.0.6
+
+### Added
+- **Eraser Tool** - Remove drawing objects underneath the cursor
+  - Press `E` to activate Eraser tool
+  - Click and drag to erase drawings interactively
+  - Eraser size adjusts with mouse wheel (same as brush thickness)
+  - Intelligent intersection detection for precise erasing
+  - Works with both polylines (pen strokes) and lines (straight line tool)
+  - Custom eraser cursor with visual feedback
+- **Improved Code Quality**
+  - Enhanced tool interface consistency
+
+### Fixed
+- LineTool's `OnDeactivated` method now properly resets state without calling non-existent method
+
 ## v1.0.5
 
 ### Added
@@ -115,4 +131,3 @@ When adding new features or fixes:
 
 ### Fixed
 - Issue description and what was fixed
-```
