@@ -10,15 +10,18 @@ public class DrawingManager
     private readonly ILogger<DrawingManager> _logger;
     private readonly OverlayWindow _overlayWindow;
     private readonly AppSettingsService _appSettings;
+    private readonly ScreenshotService _screenshotService;
     private bool _isDrawingLocked = false;
 
     public bool IsDrawingMode => _overlayWindow.IsVisible || _isDrawingLocked;
 
-    public DrawingManager(ILogger<DrawingManager> logger, OverlayWindow overlayWindow, AppSettingsService appSettings)
+    public DrawingManager(ILogger<DrawingManager> logger, OverlayWindow overlayWindow, 
+        AppSettingsService appSettings, ScreenshotService screenshotService)
     {
         _logger = logger;
         _overlayWindow = overlayWindow;
         _appSettings = appSettings;
+        _screenshotService = screenshotService;
 
         // Initialize lock mode state from saved settings
         _isDrawingLocked = _appSettings.CurrentSettings.LockDrawingMode;
@@ -309,6 +312,95 @@ public class DrawingManager
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to clear canvas");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
+    /// Captures a fullscreen screenshot (Ctrl+S)
+    /// </summary>
+    public void CaptureFullScreenshot()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _logger.LogInformation("Capturing full screenshot (Ctrl+S)");
+                var filePath = _screenshotService.CaptureFullScreen(_overlayWindow);
+                
+                if (filePath != null)
+                {
+                    _overlayWindow.ShowScreenshotSaved();
+                }
+                else
+                {
+                    _logger.LogWarning("Screenshot capture failed");
+                }
+            }
+            else
+            {
+                _logger.LogDebug("CaptureFullScreenshot ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to capture full screenshot");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
+    /// Opens the snipping tool for custom area capture (S key)
+    /// </summary>
+    public void OpenSnippingTool()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _logger.LogInformation("Opening snipping tool (S key)");
+                
+                // Temporarily hide overlay to allow snipping tool to capture
+                _overlayWindow.Hide();
+                
+                // Open snipping tool
+                _screenshotService.OpenSnippingTool();
+                
+                // Show overlay again after a short delay
+                System.Windows.Threading.DispatcherTimer timer = new()
+                {
+                    Interval = TimeSpan.FromMilliseconds(500)
+                };
+                timer.Tick += (s, e) =>
+                {
+                    timer.Stop();
+                    if (_isDrawingLocked || !_appSettings.CurrentSettings.LockDrawingMode)
+                    {
+                        _overlayWindow.Show();
+                    }
+                };
+                timer.Start();
+            }
+            else
+            {
+                _logger.LogDebug("OpenSnippingTool ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to open snipping tool");
+            // Try to ensure overlay is shown again
+            try
+            {
+                if (_isDrawingLocked)
+                {
+                    _overlayWindow.Show();
+                }
+            }
+            catch
+            {
+                // Ignore if show fails
+            }
             // Don't re-throw - not critical
         }
     }

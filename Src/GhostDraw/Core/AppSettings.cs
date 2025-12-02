@@ -82,6 +82,32 @@ public class AppSettings
     };
 
     /// <summary>
+    /// Directory path where screenshots will be saved
+    /// </summary>
+    [JsonPropertyName("screenshotSavePath")]
+    public string ScreenshotSavePath { get; set; } = System.IO.Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), 
+        "GhostDraw");
+
+    /// <summary>
+    /// If true, copies screenshot to clipboard after capture
+    /// </summary>
+    [JsonPropertyName("copyScreenshotToClipboard")]
+    public bool CopyScreenshotToClipboard { get; set; } = true;
+
+    /// <summary>
+    /// If true, plays a shutter sound when screenshot is captured
+    /// </summary>
+    [JsonPropertyName("playShutterSound")]
+    public bool PlayShutterSound { get; set; } = false;
+
+    /// <summary>
+    /// If true, opens the folder after screenshot is saved
+    /// </summary>
+    [JsonPropertyName("openFolderAfterScreenshot")]
+    public bool OpenFolderAfterScreenshot { get; set; } = false;
+
+    /// <summary>
     /// Creates a deep copy of the settings
     /// </summary>
     public AppSettings Clone()
@@ -96,7 +122,11 @@ public class AppSettings
             HotkeyVirtualKeys = new List<int>(HotkeyVirtualKeys),
             LockDrawingMode = LockDrawingMode,
             LogLevel = LogLevel,
-            ColorPalette = new List<string>(ColorPalette)
+            ColorPalette = new List<string>(ColorPalette),
+            ScreenshotSavePath = ScreenshotSavePath,
+            CopyScreenshotToClipboard = CopyScreenshotToClipboard,
+            PlayShutterSound = PlayShutterSound,
+            OpenFolderAfterScreenshot = OpenFolderAfterScreenshot
         };
     }
 }

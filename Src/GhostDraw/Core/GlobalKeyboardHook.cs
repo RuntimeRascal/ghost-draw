@@ -17,6 +17,8 @@ public class GlobalKeyboardHook : IDisposable
     private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
     private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
     private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
+    private const int VK_S = 0x53;         // 83 - 'S' key for screenshot (snipping tool)
+    private const int VK_CONTROL = 0x11;   // 17 - Control key
 
     private readonly ILogger<GlobalKeyboardHook> _logger;
     private readonly LowLevelKeyboardProc _proc;
@@ -33,6 +35,8 @@ public class GlobalKeyboardHook : IDisposable
     public event EventHandler? LineToolPressed;
     public event EventHandler? EraserToolPressed;
     public event EventHandler? HelpPressed;
+    public event EventHandler? ScreenshotFullPressed;
+    public event EventHandler? ScreenshotSnipPressed;
 
     // NEW: Raw key events for recorder
     public event EventHandler<KeyEventArgs>? KeyPressed;
@@ -226,6 +230,24 @@ public class GlobalKeyboardHook : IDisposable
                     HelpPressed?.Invoke(this, EventArgs.Empty);
                 }
 
+                // Check for S key press (screenshot)
+                if (vkCode == VK_S && isKeyDown)
+                {
+                    // Check if Control key is pressed for full screenshot (Ctrl+S)
+                    bool isCtrlPressed = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+                    
+                    if (isCtrlPressed)
+                    {
+                        _logger.LogDebug("Ctrl+S pressed - full screenshot request");
+                        ScreenshotFullPressed?.Invoke(this, EventArgs.Empty);
+                    }
+                    else
+                    {
+                        _logger.LogDebug("S key pressed - snipping tool request");
+                        ScreenshotSnipPressed?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+
                 // Track hotkey state
                 if (_hotkeyVKs.Contains(vkCode))
                 {
@@ -295,4 +317,7 @@ public class GlobalKeyboardHook : IDisposable
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern nint GetModuleHandle(string lpModuleName);
+
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
 }

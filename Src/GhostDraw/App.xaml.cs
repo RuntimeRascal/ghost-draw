@@ -78,6 +78,8 @@ public partial class App : Application
             _keyboardHook.LineToolPressed += OnLineToolPressed;
             _keyboardHook.EraserToolPressed += OnEraserToolPressed;
             _keyboardHook.HelpPressed += OnHelpPressed;
+            _keyboardHook.ScreenshotFullPressed += OnScreenshotFullPressed;
+            _keyboardHook.ScreenshotSnipPressed += OnScreenshotSnipPressed;
             _keyboardHook.Start();
 
             // Setup system tray icon
@@ -320,6 +322,40 @@ public partial class App : Application
         catch (Exception ex)
         {
             _exceptionHandler?.HandleException(ex, "Help pressed handler");
+        }
+    }
+
+    private void OnScreenshotFullPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Capture full screenshot if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("Ctrl+S pressed - capturing full screenshot");
+                _drawingManager?.CaptureFullScreenshot();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Screenshot full pressed handler");
+        }
+    }
+
+    private void OnScreenshotSnipPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Open snipping tool if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("S pressed - opening snipping tool");
+                _drawingManager?.OpenSnippingTool();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Screenshot snip pressed handler");
         }
     }
 
