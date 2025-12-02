@@ -51,6 +51,9 @@ public static class ServiceConfiguration
             builder.AddSerilog(dispose: true);
         });
 
+        // Register settings store (file-based for production)
+        services.AddSingleton<ISettingsStore, FileSettingsStore>();
+
         // Register application services (order matters for dependencies)
         services.AddSingleton<AppSettingsService>();
         services.AddSingleton<CursorHelper>();

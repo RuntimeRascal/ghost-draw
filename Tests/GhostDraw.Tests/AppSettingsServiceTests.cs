@@ -6,75 +6,29 @@ using GhostDraw.Core;
 
 namespace GhostDraw.Tests;
 
-public class AppSettingsServiceTests : IDisposable
+public class AppSettingsServiceTests
 {
-    private readonly string _testSettingsPath;
-    private readonly string _testDirectory;
     private readonly Mock<ILogger<AppSettingsService>> _mockLogger;
-    private readonly string _actualSettingsPath;
+    private readonly Mock<ILogger<FileSettingsStore>> _mockStoreLogger;
+    private readonly InMemorySettingsStore _inMemoryStore;
 
     public AppSettingsServiceTests()
     {
         _mockLogger = new Mock<ILogger<AppSettingsService>>();
-
-        // Create a temporary directory for test settings
-        _testDirectory = Path.Combine(Path.GetTempPath(), $"GhostDrawTests_{Guid.NewGuid()}");
-        Directory.CreateDirectory(_testDirectory);
-        _testSettingsPath = Path.Combine(_testDirectory, "settings.json");
-
-        // Determine the actual settings path used by AppSettingsService
-        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string settingsDirectory = Path.Combine(appData, "GhostDraw");
-        _actualSettingsPath = Path.Combine(settingsDirectory, "settings.json");
-
-        // Clean up any existing settings file before tests to ensure clean state
-        CleanupSettingsFile();
+        _mockStoreLogger = new Mock<ILogger<FileSettingsStore>>();
+        _inMemoryStore = new InMemorySettingsStore();
     }
 
-    public void Dispose()
-    {
-        // Cleanup test directory
-        if (Directory.Exists(_testDirectory))
-        {
-            try
-            {
-                Directory.Delete(_testDirectory, true);
-            }
-            catch
-            {
-                // Ignore cleanup errors
-            }
-        }
-
-        // Also cleanup the actual settings file to prevent pollution between test runs
-        CleanupSettingsFile();
-    }
-
-    /// <summary>
-    /// Deletes the actual settings file to ensure tests start with a clean slate
-    /// </summary>
-    private void CleanupSettingsFile()
-    {
-        try
-        {
-            if (File.Exists(_actualSettingsPath))
-            {
-                File.Delete(_actualSettingsPath);
-            }
-        }
-        catch
-        {
-            // Ignore if file is locked or doesn't exist
-        }
-    }
-
-    /// <summary>
-    /// Helper to create a testable service by using the actual LocalApplicationData,
-    /// but we'll verify behavior through public API
-    /// </summary>
     private AppSettingsService CreateService()
     {
-        return new AppSettingsService(_mockLogger.Object);
+        return new AppSettingsService(_mockLogger.Object, _inMemoryStore);
+    }
+
+    // Helper method to create service with pre-populated settings
+    private AppSettingsService CreateServiceWithSettings(AppSettings settings)
+    {
+        _inMemoryStore.Save(settings);
+        return new AppSettingsService(_mockLogger.Object, _inMemoryStore);
     }
 
     [Fact]
@@ -303,7 +257,7 @@ public class AppSettingsServiceTests : IDisposable
     public void SetBrushThicknessRange_ShouldPersistMinAndMax()
     {
         // Arrange
-        var service = new AppSettingsService(_mockLogger.Object);
+        var service = new AppSettingsService(_mockLogger.Object, _inMemoryStore);
 
         // Act
         service.SetBrushThicknessRange(5, 30);
@@ -313,7 +267,7 @@ public class AppSettingsServiceTests : IDisposable
         Assert.Equal(30, service.CurrentSettings.MaxBrushThickness);
 
         // Create a new service instance to verify persistence
-        var newService = new AppSettingsService(_mockLogger.Object);
+        var newService = new AppSettingsService(_mockLogger.Object, _inMemoryStore);
         Assert.Equal(5, newService.CurrentSettings.MinBrushThickness);
         Assert.Equal(30, newService.CurrentSettings.MaxBrushThickness);
     }
@@ -322,7 +276,7 @@ public class AppSettingsServiceTests : IDisposable
     public void SetBrushThicknessRange_ShouldAdjustCurrentThicknessIfOutOfRange()
     {
         // Arrange
-        var service = new AppSettingsService(_mockLogger.Object);
+        var service = new AppSettingsService(_mockLogger.Object, _inMemoryStore);
         service.SetBrushThickness(15);
 
         // Act - set range that excludes current value
@@ -336,7 +290,7 @@ public class AppSettingsServiceTests : IDisposable
     public void SetBrushThicknessRange_ShouldNotAdjustCurrentThicknessIfInRange()
     {
         // Arrange
-        var service = new AppSettingsService(_mockLogger.Object);
+        var service = new AppSettingsService(_mockLogger.Object, _inMemoryStore);
         service.SetBrushThickness(8);
 
         // Act - set range that includes current value
@@ -350,7 +304,7 @@ public class AppSettingsServiceTests : IDisposable
     public void SetBrushThicknessRange_ShouldRaiseEvent()
     {
         // Arrange
-        var service = new AppSettingsService(_mockLogger.Object);
+        var service = new AppSettingsService(_mockLogger.Object, _inMemoryStore);
         (double min, double max) eventData = (0, 0);
         service.BrushThicknessRangeChanged += (sender, data) => eventData = data;
 
@@ -423,7 +377,7 @@ public class AppSettingsServiceTests : IDisposable
     public void SetHotkey_ShouldPersistHotkeyConfiguration()
     {
         // Arrange
-        var service = new AppSettingsService(_mockLogger.Object);
+        var service = new AppSettingsService(_mockLogger.Object, _inMemoryStore);
         var vks = new List<int> { 0xA0, 0x46 };  // Shift + F
 
         // Act
@@ -433,7 +387,7 @@ public class AppSettingsServiceTests : IDisposable
         Assert.Equal(vks, service.CurrentSettings.HotkeyVirtualKeys);
 
         // Create a new service instance to verify persistence
-        var newService = new AppSettingsService(_mockLogger.Object);
+        var newService = new AppSettingsService(_mockLogger.Object, _inMemoryStore);
         Assert.Equal(vks, newService.CurrentSettings.HotkeyVirtualKeys);
     }
 }

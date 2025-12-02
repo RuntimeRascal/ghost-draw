@@ -147,6 +147,125 @@ public class CursorHelper(ILogger<CursorHelper> logger) : IDisposable
         }
     }
 
+    /// <summary>
+    /// Creates a crosshair cursor with color indicator for the Line tool
+    /// </summary>
+    /// <param name="colorHex">Hex color for the line (e.g., "#FF0000")</param>
+    /// <returns>Custom cursor</returns>
+    public WpfCursor CreateLineCursor(string colorHex)
+    {
+        lock (_cursorLock)
+        {
+            if (_disposed)
+            {
+                _logger.LogWarning("CreateLineCursor called on disposed CursorHelper");
+                return WpfCursors.Cross;
+            }
+
+            try
+            {
+                _logger.LogDebug("Creating line cursor with color {Color}", colorHex);
+
+                // Destroy previous cursor handle to prevent leaks
+                if (_currentCursorHandle != nint.Zero)
+                {
+                    try
+                    {
+                        DestroyCursor(_currentCursorHandle);
+                        _logger.LogDebug("Destroyed previous cursor handle");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to destroy previous cursor handle");
+                    }
+                    _currentCursorHandle = nint.Zero;
+                }
+
+                // Create a bitmap for the cursor (32x32 pixels)
+                int size = 32;
+                using (Bitmap bitmap = new Bitmap(size, size))
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.Clear(Color.Transparent);
+
+                    // Parse the line color
+                    Color lineColor = ColorTranslator.FromHtml(colorHex);
+
+                    // Draw two circles with a line connecting them
+                    // Left circle is at the hotspot (where the mouse clicks)
+                    int circleRadius = 4;
+                    int circleSpacing = 20; // Increased spacing for better visibility
+                    
+                    // Position left circle at the hotspot (6 pixels from left edge for visual balance)
+                    Point leftCircleCenter = new Point(6, size / 2);
+                    Point rightCircleCenter = new Point(6 + circleSpacing, size / 2);
+
+                    // Draw connecting line with the active color
+                    using (Pen linePen = new Pen(lineColor, 2))
+                    {
+                        g.DrawLine(linePen, leftCircleCenter, rightCircleCenter);
+                    }
+
+                    // Draw left circle (outline) - this is where the line starts
+                    using (Pen circlePen = new Pen(Color.White, 2))
+                    {
+                        g.DrawEllipse(circlePen, 
+                            leftCircleCenter.X - circleRadius, 
+                            leftCircleCenter.Y - circleRadius, 
+                            circleRadius * 2, 
+                            circleRadius * 2);
+                    }
+                    using (Pen circleOutline = new Pen(Color.Black, 1))
+                    {
+                        g.DrawEllipse(circleOutline, 
+                            leftCircleCenter.X - circleRadius - 1, 
+                            leftCircleCenter.Y - circleRadius - 1, 
+                            circleRadius * 2 + 2, 
+                            circleRadius * 2 + 2);
+                    }
+
+                    // Draw right circle (outline)
+                    using (Pen circlePen = new Pen(Color.White, 2))
+                    {
+                        g.DrawEllipse(circlePen, 
+                            rightCircleCenter.X - circleRadius, 
+                            rightCircleCenter.Y - circleRadius, 
+                            circleRadius * 2, 
+                            circleRadius * 2);
+                    }
+                    using (Pen circleOutline = new Pen(Color.Black, 1))
+                    {
+                        g.DrawEllipse(circleOutline, 
+                            rightCircleCenter.X - circleRadius - 1, 
+                            rightCircleCenter.Y - circleRadius - 1, 
+                            circleRadius * 2 + 2, 
+                            circleRadius * 2 + 2);
+                    }
+
+                    // Convert bitmap to cursor with hotspot at the left circle center
+                    nint hCursor = CreateCursorFromBitmap(bitmap, leftCircleCenter.X, leftCircleCenter.Y);
+
+                    if (hCursor != nint.Zero)
+                    {
+                        _currentCursorHandle = hCursor;
+                        _logger.LogDebug("Successfully created line cursor (handle: {Handle})", hCursor);
+
+                        return System.Windows.Interop.CursorInteropHelper.Create(new SafeCursorHandle(hCursor));
+                    }
+                }
+
+                _logger.LogWarning("Failed to create line cursor, returning default");
+                return WpfCursors.Cross;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating line cursor, using default");
+                return WpfCursors.Cross;
+            }
+        }
+    }
+
     private nint CreateCursorFromBitmap(Bitmap bitmap, int hotspotX, int hotspotY)
     {
         nint hIcon = nint.Zero;

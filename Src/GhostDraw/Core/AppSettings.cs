@@ -32,6 +32,12 @@ public class AppSettings
     public double MaxBrushThickness { get; set; } = 20.0;
 
     /// <summary>
+    /// The currently active drawing tool
+    /// </summary>
+    [JsonPropertyName("activeTool")]
+    public DrawTool ActiveTool { get; set; } = DrawTool.Pen;
+
+    /// <summary>
     /// Virtual key codes for the hotkey combination
     /// </summary>
     [JsonPropertyName("hotkeyVirtualKeys")]
@@ -86,6 +92,7 @@ public class AppSettings
             BrushThickness = BrushThickness,
             MinBrushThickness = MinBrushThickness,
             MaxBrushThickness = MaxBrushThickness,
+            ActiveTool = ActiveTool,
             HotkeyVirtualKeys = new List<int>(HotkeyVirtualKeys),
             LockDrawingMode = LockDrawingMode,
             LogLevel = LogLevel,

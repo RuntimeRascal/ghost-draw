@@ -74,6 +74,9 @@ public partial class App : Application
             _keyboardHook.HotkeyReleased += OnHotkeyReleased;
             _keyboardHook.EscapePressed += OnEscapePressed;
             _keyboardHook.ClearCanvasPressed += OnClearCanvasPressed;
+            _keyboardHook.PenToolPressed += OnPenToolPressed;
+            _keyboardHook.LineToolPressed += OnLineToolPressed;
+            _keyboardHook.HelpPressed += OnHelpPressed;
             _keyboardHook.Start();
 
             // Setup system tray icon
@@ -248,6 +251,57 @@ public partial class App : Application
         catch (Exception ex)
         {
             _exceptionHandler?.HandleException(ex, "Clear canvas handler");
+        }
+    }
+
+    private void OnPenToolPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Only switch to pen tool if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("P pressed - selecting pen tool");
+                _drawingManager?.SetPenTool();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Pen tool handler");
+        }
+    }
+
+    private void OnLineToolPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Only switch to line tool if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("L pressed - selecting line tool");
+                _drawingManager?.SetLineTool();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Line tool handler");
+        }
+    }
+
+    private void OnHelpPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Show help overlay if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("F1 pressed - showing help");
+                _drawingManager?.ShowHelp();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Help pressed handler");
         }
     }
 
