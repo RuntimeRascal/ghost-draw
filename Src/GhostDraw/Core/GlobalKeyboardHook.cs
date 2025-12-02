@@ -46,6 +46,7 @@ public class GlobalKeyboardHook : IDisposable
     private List<int> _hotkeyVKs = new() { 0xA2, 0xA4, 0x44 };  // Default: Ctrl+Alt+D
     private Dictionary<int, bool> _keyStates = new();
     private bool _wasHotkeyActive = false;
+    private bool _isControlPressed = false;
 
     public GlobalKeyboardHook(ILogger<GlobalKeyboardHook> logger)
     {
@@ -188,6 +189,12 @@ public class GlobalKeyboardHook : IDisposable
                 else
                     KeyReleased?.Invoke(this, new KeyEventArgs(vkCode));
 
+                // Track Control key state
+                if (vkCode == VK_CONTROL)
+                {
+                    _isControlPressed = isKeyDown;
+                }
+
                 // Check for ESC key press (emergency exit)
                 if (vkCode == VK_ESCAPE && isKeyDown)
                 {
@@ -233,10 +240,8 @@ public class GlobalKeyboardHook : IDisposable
                 // Check for S key press (screenshot)
                 if (vkCode == VK_S && isKeyDown)
                 {
-                    // Check if Control key is pressed for full screenshot (Ctrl+S)
-                    bool isCtrlPressed = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
-                    
-                    if (isCtrlPressed)
+                    // Use tracked Control key state to determine action
+                    if (_isControlPressed)
                     {
                         _logger.LogDebug("Ctrl+S pressed - full screenshot request");
                         ScreenshotFullPressed?.Invoke(this, EventArgs.Empty);
@@ -317,7 +322,4 @@ public class GlobalKeyboardHook : IDisposable
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern nint GetModuleHandle(string lpModuleName);
-
-    [DllImport("user32.dll")]
-    private static extern short GetAsyncKeyState(int vKey);
 }

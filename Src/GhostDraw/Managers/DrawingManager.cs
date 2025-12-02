@@ -13,6 +13,9 @@ public class DrawingManager
     private readonly ScreenshotService _screenshotService;
     private bool _isDrawingLocked = false;
 
+    // Delay in milliseconds before re-showing overlay after opening snipping tool
+    private const int SnippingToolOverlayDelayMs = 500;
+
     public bool IsDrawingMode => _overlayWindow.IsVisible || _isDrawingLocked;
 
     public DrawingManager(ILogger<DrawingManager> logger, OverlayWindow overlayWindow, 
@@ -369,7 +372,7 @@ public class DrawingManager
                 // Show overlay again after a short delay
                 System.Windows.Threading.DispatcherTimer timer = new()
                 {
-                    Interval = TimeSpan.FromMilliseconds(500)
+                    Interval = TimeSpan.FromMilliseconds(SnippingToolOverlayDelayMs)
                 };
                 timer.Tick += (s, e) =>
                 {

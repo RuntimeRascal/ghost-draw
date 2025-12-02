@@ -168,11 +168,20 @@ public class ScreenshotService
                 System.Drawing.Imaging.ImageLockMode.ReadOnly,
                 bitmap.PixelFormat);
 
+            // Determine WPF pixel format based on bitmap format
+            PixelFormat pixelFormat = bitmap.PixelFormat switch
+            {
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb => PixelFormats.Bgra32,
+                System.Drawing.Imaging.PixelFormat.Format24bppRgb => PixelFormats.Bgr24,
+                System.Drawing.Imaging.PixelFormat.Format32bppRgb => PixelFormats.Bgr32,
+                _ => PixelFormats.Bgra32 // Default fallback
+            };
+
             var bitmapSource = BitmapSource.Create(
                 bitmapData.Width,
                 bitmapData.Height,
                 96, 96,
-                PixelFormats.Bgra32,
+                pixelFormat,
                 null,
                 bitmapData.Scan0,
                 bitmapData.Stride * bitmapData.Height,
