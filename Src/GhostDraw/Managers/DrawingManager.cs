@@ -241,6 +241,31 @@ public class DrawingManager
     }
 
     /// <summary>
+    /// Sets the active tool to Eraser
+    /// </summary>
+    public void SetEraserTool()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _appSettings.SetActiveTool(DrawTool.Eraser);
+                _overlayWindow.OnToolChanged(DrawTool.Eraser);
+                _logger.LogInformation("Tool set to Eraser");
+            }
+            else
+            {
+                _logger.LogDebug("SetEraserTool ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set eraser tool");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
     /// Shows the help popup with keyboard shortcuts
     /// </summary>
     public void ShowHelp()

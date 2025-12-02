@@ -16,5 +16,10 @@ public enum DrawTool
     /// <summary>
     /// Straight line tool - click two points to draw a line
     /// </summary>
-    Line
+    Line,
+    
+    /// <summary>
+    /// Eraser tool - removes drawing objects underneath the cursor
+    /// </summary>
+    Eraser
 }

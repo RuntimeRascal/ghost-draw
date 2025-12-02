@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using GhostDraw.Core;
 using GhostDraw.Helpers;
 using GhostDraw.Services;
+using GhostDraw.Tools;
 using Microsoft.Extensions.Logging;
 using WpfCursors = System.Windows.Input.Cursors;
 
@@ -17,13 +18,13 @@ public partial class OverlayWindow : Window
     private readonly ILogger<OverlayWindow> _logger;
     private readonly AppSettingsService _appSettings;
     private readonly CursorHelper _cursorHelper;
-    private Polyline? _currentStroke;
     private bool _isDrawing = false;
 
-    // Line tool state
-    private Line? _currentLine;
-    private System.Windows.Point? _lineStartPoint;
-    private bool _isCreatingLine = false;
+    // Tool instances
+    private readonly PenTool _penTool;
+    private readonly LineTool _lineTool;
+    private readonly EraserTool _eraserTool;
+    private IDrawingTool? _activeTool;
 
     /// <summary>
     /// Gets the display name of the current hotkey combination for binding
@@ -50,11 +51,15 @@ public partial class OverlayWindow : Window
     private readonly TimeSpan _helpDisplayDuration = TimeSpan.FromSeconds(4.0);
     private readonly TimeSpan _helpFadeOutDuration = TimeSpan.FromMilliseconds(500);
 
-    public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper)
+    public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
+        PenTool penTool, LineTool lineTool, EraserTool eraserTool)
     {
         _logger = logger;
         _appSettings = appSettings;
         _cursorHelper = cursorHelper;
+        _penTool = penTool;
+        _lineTool = lineTool;
+        _eraserTool = eraserTool;
         _logger.LogDebug("OverlayWindow constructor called");
 
         InitializeComponent();
@@ -129,6 +134,21 @@ public partial class OverlayWindow : Window
         ClearDrawing();
 
         _isDrawing = true;
+
+        // Initialize active tool based on current settings
+        var settings = _appSettings.CurrentSettings;
+        _activeTool = settings.ActiveTool switch
+        {
+            DrawTool.Pen => _penTool,
+            DrawTool.Line => _lineTool,
+            DrawTool.Eraser => _eraserTool,
+            _ => _penTool
+        };
+
+        _activeTool.OnActivated();
+        _activeTool.OnColorChanged(settings.ActiveBrush);
+        _activeTool.OnThicknessChanged(settings.BrushThickness);
+
         UpdateCursor();
         
         // Show the drawing mode hint
@@ -143,8 +163,12 @@ public partial class OverlayWindow : Window
         _logger.LogInformation("?? Drawing disabled");
         _isDrawing = false;
 
-        // Cancel any in-progress line
-        CancelCurrentLine();
+        // Deactivate current tool and cancel any in-progress operations
+        if (_activeTool != null)
+        {
+            _activeTool.Cancel(DrawingCanvas);
+            _activeTool.OnDeactivated();
+        }
 
         // Hide all indicators and toasts
         HideThicknessIndicator();
@@ -168,6 +192,7 @@ public partial class OverlayWindow : Window
             {
                 DrawTool.Pen => _cursorHelper.CreateColoredPencilCursor(settings.ActiveBrush),
                 DrawTool.Line => _cursorHelper.CreateLineCursor(settings.ActiveBrush),
+                DrawTool.Eraser => _cursorHelper.CreateEraserCursor(),
                 _ => WpfCursors.Cross
             };
             
@@ -183,22 +208,10 @@ public partial class OverlayWindow : Window
     private void OverlayWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         _logger.LogDebug("MouseLeftButtonDown - isDrawing:{IsDrawing}", _isDrawing);
-        if (_isDrawing)
+        if (_isDrawing && _activeTool != null)
         {
             var position = e.GetPosition(DrawingCanvas);
-            var tool = _appSettings.CurrentSettings.ActiveTool;
-            
-            switch (tool)
-            {
-                case DrawTool.Pen:
-                    _logger.LogInformation("Starting new stroke at ({X:F0}, {Y:F0})", position.X, position.Y);
-                    StartNewStroke(position);
-                    break;
-                    
-                case DrawTool.Line:
-                    HandleLineToolClick(position);
-                    break;
-            }
+            _activeTool.OnMouseDown(position, DrawingCanvas);
         }
     }
 
@@ -206,41 +219,19 @@ public partial class OverlayWindow : Window
     {
         _logger.LogDebug("MouseLeftButtonUp - isDrawing:{IsDrawing}", _isDrawing);
         
-        // Only finalize strokes for Pen tool
-        // Line tool uses click-click, not click-drag
-        if (_isDrawing && _appSettings.CurrentSettings.ActiveTool == DrawTool.Pen && _currentStroke != null)
+        if (_isDrawing && _activeTool != null)
         {
-            _logger.LogInformation("Stroke ended with {PointCount} points", _currentStroke.Points.Count);
-            _currentStroke = null;
+            var position = e.GetPosition(DrawingCanvas);
+            _activeTool.OnMouseUp(position, DrawingCanvas);
         }
     }
 
     private void OverlayWindow_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        if (_isDrawing)
+        if (_isDrawing && _activeTool != null)
         {
             var position = e.GetPosition(DrawingCanvas);
-            var tool = _appSettings.CurrentSettings.ActiveTool;
-            
-            switch (tool)
-            {
-                case DrawTool.Pen:
-                    if (e.LeftButton == MouseButtonState.Pressed)
-                    {
-                        _logger.LogTrace("MouseMove - adding point at ({X:F0}, {Y:F0})", position.X, position.Y);
-                        AddPointToStroke(position);
-                    }
-                    break;
-                    
-                case DrawTool.Line:
-                    if (_isCreatingLine && _currentLine != null)
-                    {
-                        // Update line endpoint to follow cursor
-                        _currentLine.X2 = position.X;
-                        _currentLine.Y2 = position.Y;
-                    }
-                    break;
-            }
+            _activeTool.OnMouseMove(position, DrawingCanvas, e.LeftButton);
         }
     }
 
@@ -257,10 +248,10 @@ public partial class OverlayWindow : Window
                 // Update cursor to reflect new color
                 UpdateCursor();
 
-                // Update in-progress line color if Line tool is active
-                if (_currentLine != null)
+                // Notify active tool of color change
+                if (_activeTool != null)
                 {
-                    _currentLine.Stroke = CreateBrushFromHex(newColor);
+                    _activeTool.OnColorChanged(newColor);
                 }
 
                 // Prevent context menu from appearing
@@ -292,10 +283,10 @@ public partial class OverlayWindow : Window
                 _appSettings.SetBrushThickness(newThickness);
                 _logger.LogInformation("Brush thickness adjusted to {Thickness} via mouse wheel", newThickness);
 
-                // Update in-progress line thickness if Line tool is active
-                if (_currentLine != null)
+                // Notify active tool of thickness change
+                if (_activeTool != null)
                 {
-                    _currentLine.StrokeThickness = newThickness;
+                    _activeTool.OnThicknessChanged(newThickness);
                 }
 
                 // Show thickness indicator
@@ -311,129 +302,6 @@ public partial class OverlayWindow : Window
         }
     }
 
-    private void StartNewStroke(System.Windows.Point startPoint)
-    {
-        _logger.LogDebug("Creating polyline stroke");
-
-        // Get current brush settings
-        var settings = _appSettings.CurrentSettings;
-        System.Windows.Media.Brush strokeBrush;
-
-        try
-        {
-            strokeBrush = new SolidColorBrush(
-                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(settings.ActiveBrush));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to parse brush color {Color}, using default red", settings.ActiveBrush);
-            strokeBrush = System.Windows.Media.Brushes.Red;
-        }
-
-        _currentStroke = new Polyline
-        {
-            Stroke = strokeBrush,
-            StrokeThickness = settings.BrushThickness,
-            StrokeLineJoin = PenLineJoin.Round,
-            StrokeStartLineCap = PenLineCap.Round,
-            StrokeEndLineCap = PenLineCap.Round
-        };
-
-        _currentStroke.Points.Add(startPoint);
-        DrawingCanvas.Children.Add(_currentStroke);
-        _logger.LogDebug("Stroke added to canvas with color {Color} and thickness {Thickness}, total strokes: {StrokeCount}",
-            settings.ActiveBrush, settings.BrushThickness, DrawingCanvas.Children.Count);
-    }
-
-    private void AddPointToStroke(System.Windows.Point point)
-    {
-        if (_currentStroke != null)
-        {
-            _currentStroke.Points.Add(point);
-        }
-    }
-
-    private System.Windows.Media.Brush CreateBrushFromHex(string colorHex)
-    {
-        try
-        {
-            return new SolidColorBrush(
-                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorHex));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to parse brush color {Color}, using default red", colorHex);
-            return System.Windows.Media.Brushes.Red;
-        }
-    }
-
-    #region Line Tool Methods
-
-    private void HandleLineToolClick(System.Windows.Point position)
-    {
-        if (!_isCreatingLine)
-        {
-            // First click - start the line
-            StartNewLine(position);
-        }
-        else
-        {
-            // Second click - finish the line
-            FinishLine(position);
-        }
-    }
-
-    private void StartNewLine(System.Windows.Point startPoint)
-    {
-        _lineStartPoint = startPoint;
-        _isCreatingLine = true;
-        
-        var settings = _appSettings.CurrentSettings;
-        var brush = CreateBrushFromHex(settings.ActiveBrush);
-        
-        _currentLine = new Line
-        {
-            X1 = startPoint.X,
-            Y1 = startPoint.Y,
-            X2 = startPoint.X,  // Initially same as start
-            Y2 = startPoint.Y,
-            Stroke = brush,
-            StrokeThickness = settings.BrushThickness,
-            StrokeStartLineCap = PenLineCap.Round,
-            StrokeEndLineCap = PenLineCap.Round
-        };
-        
-        DrawingCanvas.Children.Add(_currentLine);
-        _logger.LogInformation("Line started at ({X:F0}, {Y:F0})", startPoint.X, startPoint.Y);
-    }
-
-    private void FinishLine(System.Windows.Point endPoint)
-    {
-        if (_currentLine != null)
-        {
-            _currentLine.X2 = endPoint.X;
-            _currentLine.Y2 = endPoint.Y;
-            
-            _logger.LogInformation("Line finished at ({X:F0}, {Y:F0})", endPoint.X, endPoint.Y);
-        }
-        
-        _currentLine = null;
-        _lineStartPoint = null;
-        _isCreatingLine = false;
-    }
-
-    private void CancelCurrentLine()
-    {
-        if (_currentLine != null)
-        {
-            DrawingCanvas.Children.Remove(_currentLine);
-            _currentLine = null;
-            _lineStartPoint = null;
-            _isCreatingLine = false;
-            _logger.LogDebug("In-progress line cancelled");
-        }
-    }
-
     /// <summary>
     /// Called when the active tool changes
     /// </summary>
@@ -441,8 +309,27 @@ public partial class OverlayWindow : Window
     {
         try
         {
-            // Cancel any in-progress line when switching tools
-            CancelCurrentLine();
+            // Deactivate current tool and cancel any in-progress operations
+            if (_activeTool != null)
+            {
+                _activeTool.Cancel(DrawingCanvas);
+                _activeTool.OnDeactivated();
+            }
+            
+            // Switch to new tool
+            _activeTool = newTool switch
+            {
+                DrawTool.Pen => _penTool,
+                DrawTool.Line => _lineTool,
+                DrawTool.Eraser => _eraserTool,
+                _ => _penTool
+            };
+
+            // Activate new tool
+            var settings = _appSettings.CurrentSettings;
+            _activeTool.OnActivated();
+            _activeTool.OnColorChanged(settings.ActiveBrush);
+            _activeTool.OnThicknessChanged(settings.BrushThickness);
             
             // Update cursor for new tool
             UpdateCursor();
@@ -455,8 +342,6 @@ public partial class OverlayWindow : Window
         }
     }
 
-    #endregion
-
     private void ClearDrawing()
     {
         int childCount = DrawingCanvas.Children.Count;
@@ -465,10 +350,6 @@ public partial class OverlayWindow : Window
             _logger.LogDebug("Clearing {ChildCount} strokes from canvas", childCount);
         }
         DrawingCanvas.Children.Clear();
-        _currentStroke = null;
-        _currentLine = null;
-        _lineStartPoint = null;
-        _isCreatingLine = false;
     }
 
     /// <summary>

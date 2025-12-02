@@ -57,6 +57,12 @@ public static class ServiceConfiguration
         // Register application services (order matters for dependencies)
         services.AddSingleton<AppSettingsService>();
         services.AddSingleton<CursorHelper>();
+        
+        // Register drawing tools
+        services.AddSingleton<GhostDraw.Tools.PenTool>();
+        services.AddSingleton<GhostDraw.Tools.LineTool>();
+        services.AddSingleton<GhostDraw.Tools.EraserTool>();
+        
         services.AddSingleton<OverlayWindow>();
         services.AddSingleton<GlobalKeyboardHook>();
         services.AddSingleton<DrawingManager>();
