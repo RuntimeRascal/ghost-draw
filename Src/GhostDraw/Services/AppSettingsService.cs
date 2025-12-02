@@ -1,7 +1,5 @@
 using GhostDraw.Core;
 using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Text.Json;
 
 namespace GhostDraw.Services;
 
@@ -11,7 +9,7 @@ namespace GhostDraw.Services;
 public class AppSettingsService
 {
     private readonly ILogger<AppSettingsService> _logger;
-    private readonly string _settingsFilePath;
+    private readonly ISettingsStore _settingsStore;
     private AppSettings _currentSettings;
 
     // Events for real-time UI updates
@@ -22,17 +20,12 @@ public class AppSettingsService
     public event EventHandler<List<int>>? HotkeyChanged;
     public event EventHandler<List<string>>? ColorPaletteChanged;
 
-    public AppSettingsService(ILogger<AppSettingsService> logger)
+    public AppSettingsService(ILogger<AppSettingsService> logger, ISettingsStore settingsStore)
     {
         _logger = logger;
+        _settingsStore = settingsStore;
 
-        // Store settings in LocalApplicationData folder
-        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string settingsDirectory = Path.Combine(appData, "GhostDraw");
-        Directory.CreateDirectory(settingsDirectory);
-
-        _settingsFilePath = Path.Combine(settingsDirectory, "settings.json");
-        _logger.LogInformation("Settings file path: {SettingsPath}", _settingsFilePath);
+        _logger.LogInformation("Settings store location: {Location}", _settingsStore.Location);
 
         // Load or create default settings
         _currentSettings = LoadSettings();
@@ -44,103 +37,48 @@ public class AppSettingsService
     public AppSettings CurrentSettings => _currentSettings.Clone();
 
     /// <summary>
-    /// Loads settings from disk, or creates default settings if file doesn't exist
+    /// Loads settings from the store, or creates default settings if not found
     /// </summary>
     private AppSettings LoadSettings()
     {
         try
         {
-            if (File.Exists(_settingsFilePath))
-            {
-                _logger.LogInformation("Loading settings from {Path}", _settingsFilePath);
-                string json = File.ReadAllText(_settingsFilePath);
-                
-                // Try to deserialize as current format
-                var settings = JsonSerializer.Deserialize<AppSettings>(json);
+            var settings = _settingsStore.Load();
 
-                if (settings != null)
-                {
-                    // Migrate old settings format if needed
-                    settings = MigrateSettings(json, settings);
-                    
-                    _logger.LogInformation("Settings loaded successfully");
-                    _logger.LogDebug("Active Brush: {Color}, Thickness: {Thickness}, Hotkey: {Hotkey}",
-                        settings.ActiveBrush, settings.BrushThickness, settings.HotkeyDisplayName);
-                    
-                    // Save migrated settings to update file format
-                    SaveSettings(settings);
-                    return settings;
-                }
+            if (settings != null)
+            {
+                _logger.LogInformation("Settings loaded successfully");
+                
+                // Save to ensure latest format
+                _settingsStore.Save(settings);
+                return settings;
             }
 
-            _logger.LogInformation("Settings file not found or invalid, creating default settings");
+            _logger.LogInformation("Settings not found, creating default settings");
             var defaultSettings = new AppSettings();
-            SaveSettings(defaultSettings);
+            _settingsStore.Save(defaultSettings);
             return defaultSettings;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load settings from {Path}, using defaults", _settingsFilePath);
+            _logger.LogError(ex, "Failed to load settings, using defaults");
             return new AppSettings();
         }
     }
 
     /// <summary>
-    /// Migrates settings from old format to new format
-    /// </summary>
-    private AppSettings MigrateSettings(string json, AppSettings settings)
-    {
-        try
-        {
-            // Parse as JsonDocument to check for old properties
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            // Migrate old "brushColor" to new "activeBrush"
-            if (root.TryGetProperty("brushColor", out var brushColorProp))
-            {
-                var oldBrushColor = brushColorProp.GetString();
-                if (!string.IsNullOrEmpty(oldBrushColor))
-                {
-                    settings.ActiveBrush = oldBrushColor;
-                    _logger.LogInformation("Migrated 'brushColor' to 'activeBrush': {Color}", oldBrushColor);
-                }
-            }
-
-            // Future migrations can be added here
-            // Example: if (root.TryGetProperty("oldProperty", out var oldProp)) { ... }
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to migrate settings, using loaded values as-is");
-        }
-
-        return settings;
-    }
-
-    /// <summary>
-    /// Saves settings to disk
+    /// Saves settings to the store
     /// </summary>
     private void SaveSettings(AppSettings settings)
     {
         try
         {
-            _logger.LogDebug("Saving settings to {Path}", _settingsFilePath);
-
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-
-            string json = JsonSerializer.Serialize(settings, options);
-            File.WriteAllText(_settingsFilePath, json);
-
-            _logger.LogInformation("Settings saved successfully");
+            _settingsStore.Save(settings);
+            _logger.LogDebug("Settings saved successfully");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save settings to {Path}", _settingsFilePath);
+            _logger.LogError(ex, "Failed to save settings");
         }
     }
 
@@ -209,7 +147,7 @@ public class AppSettingsService
         }
 
         SaveSettings(_currentSettings);
-        _logger.LogDebug("Brush thickness range saved to disk: Min={Min}, Max={Max}", min, max);
+        _logger.LogDebug("Brush thickness range saved: Min={Min}, Max={Max}", min, max);
 
         // Raise event to notify UI
         BrushThicknessRangeChanged?.Invoke(this, (min, max));
@@ -320,6 +258,33 @@ public class AppSettingsService
         _currentSettings.ColorPalette = new List<string>(colors);
         SaveSettings(_currentSettings);
         ColorPaletteChanged?.Invoke(this, new List<string>(_currentSettings.ColorPalette));
+    }
+
+    /// <summary>
+    /// Gets the current active tool
+    /// </summary>
+    public DrawTool GetActiveTool() => _currentSettings.ActiveTool;
+
+    /// <summary>
+    /// Sets the active drawing tool
+    /// </summary>
+    public void SetActiveTool(DrawTool tool)
+    {
+        _currentSettings.ActiveTool = tool;
+        SaveSettings(_currentSettings);
+        _logger.LogInformation("Active tool changed to {Tool}", tool);
+    }
+
+    /// <summary>
+    /// Toggles between Pen and Line tools
+    /// </summary>
+    public DrawTool ToggleTool()
+    {
+        var newTool = _currentSettings.ActiveTool == DrawTool.Pen 
+            ? DrawTool.Line 
+            : DrawTool.Pen;
+        SetActiveTool(newTool);
+        return newTool;
     }
 
     /// <summary>

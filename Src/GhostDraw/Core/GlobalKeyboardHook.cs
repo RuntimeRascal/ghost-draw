@@ -13,6 +13,9 @@ public class GlobalKeyboardHook : IDisposable
     // Only keep VK_ESCAPE constant (emergency exit)
     private const int VK_ESCAPE = 0x1B;    // 27
     private const int VK_R = 0x52;         // 82 - 'R' key for clear canvas
+    private const int VK_L = 0x4C;         // 76 - 'L' key for line tool
+    private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
+    private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
 
     private readonly ILogger<GlobalKeyboardHook> _logger;
     private readonly LowLevelKeyboardProc _proc;
@@ -25,6 +28,9 @@ public class GlobalKeyboardHook : IDisposable
     public event EventHandler? HotkeyReleased;
     public event EventHandler? EscapePressed;
     public event EventHandler? ClearCanvasPressed;
+    public event EventHandler? PenToolPressed;
+    public event EventHandler? LineToolPressed;
+    public event EventHandler? HelpPressed;
 
     // NEW: Raw key events for recorder
     public event EventHandler<KeyEventArgs>? KeyPressed;
@@ -188,6 +194,27 @@ public class GlobalKeyboardHook : IDisposable
                 {
                     _logger.LogDebug("R key pressed - clear canvas request");
                     ClearCanvasPressed?.Invoke(this, EventArgs.Empty);
+                }
+
+                // Check for L key press (line tool)
+                if (vkCode == VK_L && isKeyDown)
+                {
+                    _logger.LogDebug("L key pressed - line tool request");
+                    LineToolPressed?.Invoke(this, EventArgs.Empty);
+                }
+
+                // Check for P key press (pen tool)
+                if (vkCode == VK_P && isKeyDown)
+                {
+                    _logger.LogDebug("P key pressed - pen tool request");
+                    PenToolPressed?.Invoke(this, EventArgs.Empty);
+                }
+
+                // Check for F1 key press (help)
+                if (vkCode == VK_F1 && isKeyDown)
+                {
+                    _logger.LogDebug("F1 key pressed - help request");
+                    HelpPressed?.Invoke(this, EventArgs.Empty);
                 }
 
                 // Track hotkey state

@@ -1,3 +1,4 @@
+using GhostDraw.Core;
 using GhostDraw.Services;
 using GhostDraw.Views;
 using Microsoft.Extensions.Logging;
@@ -161,6 +162,105 @@ public class DrawingManager
         {
             _logger.LogError(ex, "Failed in DisableDrawingMode");
             // Don't throw - this is for emergency cleanup
+        }
+    }
+
+    /// <summary>
+    /// Toggles between Pen and Line drawing tools
+    /// </summary>
+    public void ToggleTool()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                var newTool = _appSettings.ToggleTool();
+                _overlayWindow.OnToolChanged(newTool);
+                _logger.LogInformation("Tool toggled to {Tool}", newTool);
+            }
+            else
+            {
+                _logger.LogDebug("ToggleTool ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to toggle tool");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
+    /// Sets the active tool to Pen
+    /// </summary>
+    public void SetPenTool()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _appSettings.SetActiveTool(DrawTool.Pen);
+                _overlayWindow.OnToolChanged(DrawTool.Pen);
+                _logger.LogInformation("Tool set to Pen");
+            }
+            else
+            {
+                _logger.LogDebug("SetPenTool ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set pen tool");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
+    /// Sets the active tool to Line
+    /// </summary>
+    public void SetLineTool()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _appSettings.SetActiveTool(DrawTool.Line);
+                _overlayWindow.OnToolChanged(DrawTool.Line);
+                _logger.LogInformation("Tool set to Line");
+            }
+            else
+            {
+                _logger.LogDebug("SetLineTool ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set line tool");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
+    /// Shows the help popup with keyboard shortcuts
+    /// </summary>
+    public void ShowHelp()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _overlayWindow.ShowHelp();
+                _logger.LogInformation("Help popup shown");
+            }
+            else
+            {
+                _logger.LogDebug("ShowHelp ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to show help");
+            // Don't re-throw - not critical
         }
     }
 

@@ -90,5 +90,159 @@
                        Foreground="#B0B0B0"
                        Text="Press R to clear canvas  |  ESC to exit"/>
         </Border>
+
+        <!-- Help Popup (center of screen, shows keyboard shortcuts) -->
+        <Border x:Name="HelpPopupBorder"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Padding="32,24"
+                Background="#0F1419"
+                BorderBrush="#00FFFF"
+                BorderThickness="2"
+                CornerRadius="8"
+                Opacity="0"
+                IsHitTestVisible="False">
+            <Border.Effect>
+                <DropShadowEffect Color="#00FFFF" 
+                                  Opacity="0.8" 
+                                  BlurRadius="25" 
+                                  ShadowDepth="0"/>
+            </Border.Effect>
+            <StackPanel>
+                <!-- Header -->
+                <TextBlock FontFamily="Consolas"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="#00FFFF"
+                           Text="KEYBOARD SHORTCUTS"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,16"/>
+                
+                <!-- Activation Hotkey -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#FF0080"
+                               Text="{Binding HotkeyDisplayName, RelativeSource={RelativeSource AncestorType=Window}}"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Activate / Deactivate Draw Mode"/>
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#404040" Margin="0,8,0,12"/>
+
+                <!-- Drawing Tools -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="P"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Select Pen Tool"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="L"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Select Line Tool"/>
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#404040" Margin="0,8,0,12"/>
+
+                <!-- Drawing Actions -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#FFAA00"
+                               Text="Right Click"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Cycle Brush Color"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#FFAA00"
+                               Text="Mouse Wheel"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Adjust Brush Thickness"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#FFAA00"
+                               Text="R"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Clear Canvas"/>
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#404040" Margin="0,8,0,12"/>
+
+                <!-- System -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#FF4444"
+                               Text="ESC"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Exit Draw Mode"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FFFF"
+                               Text="F1"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Show This Help"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>
