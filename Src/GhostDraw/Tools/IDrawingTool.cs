@@ -43,4 +43,9 @@ public interface IDrawingTool
     /// Called when the brush thickness changes
     /// </summary>
     void OnThicknessChanged(double thickness);
+    
+    /// <summary>
+    /// Cancels any in-progress operation (e.g., line drawing)
+    /// </summary>
+    void Cancel(Canvas canvas);
 }

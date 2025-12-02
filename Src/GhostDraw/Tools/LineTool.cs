@@ -128,18 +128,7 @@ public class LineTool : IDrawingTool
         _isCreatingLine = false;
     }
 
-    private void CancelCurrentLine()
-    {
-        if (_currentLine != null)
-        {
-            // Note: We can't remove from canvas here without reference
-            // This will be handled by OverlayWindow maintaining the canvas reference
-            _currentLine = null;
-            _lineStartPoint = null;
-            _isCreatingLine = false;
-            _logger.LogDebug("In-progress line cancelled");
-        }
-    }
+
 
     private Brush CreateBrushFromHex(string colorHex)
     {
@@ -155,15 +144,7 @@ public class LineTool : IDrawingTool
         }
     }
 
-    /// <summary>
-    /// Gets the current in-progress line (for external cancellation)
-    /// </summary>
-    public Line? GetCurrentLine() => _currentLine;
-
-    /// <summary>
-    /// Cancels the current line and removes it from the provided canvas
-    /// </summary>
-    public void CancelCurrentLine(Canvas canvas)
+    public void Cancel(Canvas canvas)
     {
         if (_currentLine != null)
         {

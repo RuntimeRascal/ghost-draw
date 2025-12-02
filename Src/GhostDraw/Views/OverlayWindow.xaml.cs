@@ -163,14 +163,12 @@ public partial class OverlayWindow : Window
         _logger.LogInformation("?? Drawing disabled");
         _isDrawing = false;
 
-        // Deactivate current tool
+        // Deactivate current tool and cancel any in-progress operations
         if (_activeTool != null)
         {
+            _activeTool.Cancel(DrawingCanvas);
             _activeTool.OnDeactivated();
         }
-
-        // Cancel any in-progress line
-        _lineTool.CancelCurrentLine(DrawingCanvas);
 
         // Hide all indicators and toasts
         HideThicknessIndicator();
@@ -311,14 +309,12 @@ public partial class OverlayWindow : Window
     {
         try
         {
-            // Deactivate current tool
+            // Deactivate current tool and cancel any in-progress operations
             if (_activeTool != null)
             {
+                _activeTool.Cancel(DrawingCanvas);
                 _activeTool.OnDeactivated();
             }
-
-            // Cancel any in-progress line when switching tools
-            _lineTool.CancelCurrentLine(DrawingCanvas);
             
             // Switch to new tool
             _activeTool = newTool switch

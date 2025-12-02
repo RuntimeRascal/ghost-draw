@@ -94,4 +94,10 @@ public class PenTool : IDrawingTool
         _currentThickness = thickness;
         _logger.LogDebug("Pen thickness changed to {Thickness}", thickness);
     }
+
+    public void Cancel(Canvas canvas)
+    {
+        // Pen tool doesn't have in-progress operations to cancel
+        _currentStroke = null;
+    }
 }

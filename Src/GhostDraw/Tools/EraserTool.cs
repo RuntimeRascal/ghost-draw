@@ -16,6 +16,9 @@ public class EraserTool : IDrawingTool
     private bool _isErasing = false;
     private double _currentThickness = 3.0;
     private readonly HashSet<UIElement> _erasedElements = new();
+    
+    // Tolerance for parallel line detection in intersection algorithm
+    private const double PARALLEL_LINE_TOLERANCE = 0.001;
 
     public EraserTool(ILogger<EraserTool> logger)
     {
@@ -71,6 +74,13 @@ public class EraserTool : IDrawingTool
         _logger.LogDebug("Eraser size changed to {Thickness}", thickness);
     }
 
+    public void Cancel(Canvas canvas)
+    {
+        // Eraser tool doesn't have in-progress operations to cancel
+        _isErasing = false;
+        _erasedElements.Clear();
+    }
+
     private void EraseAtPosition(Point position, Canvas canvas)
     {
         try
@@ -86,6 +96,10 @@ public class EraserTool : IDrawingTool
             );
 
             // Find all elements that intersect with the eraser
+            // NOTE: For very complex drawings with many points, consider implementing
+            // spatial indexing (e.g., quad-tree) or bounding box pre-filtering
+            // for improved performance. Current implementation is O(n*m) where n is
+            // number of shapes and m is points per shape.
             List<UIElement> elementsToRemove = new();
 
             foreach (UIElement element in canvas.Children)
@@ -169,7 +183,7 @@ public class EraserTool : IDrawingTool
     {
         // Check if line segment p1-p2 intersects with line segment p3-p4
         double d = (p2.X - p1.X) * (p4.Y - p3.Y) - (p2.Y - p1.Y) * (p4.X - p3.X);
-        if (Math.Abs(d) < 0.001) // Parallel or coincident
+        if (Math.Abs(d) < PARALLEL_LINE_TOLERANCE) // Parallel or coincident
             return false;
 
         double t = ((p3.X - p1.X) * (p4.Y - p3.Y) - (p3.Y - p1.Y) * (p4.X - p3.X)) / d;
