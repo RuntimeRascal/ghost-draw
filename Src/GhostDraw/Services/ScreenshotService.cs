@@ -95,7 +95,7 @@ public class ScreenshotService
         {
             _logger.LogInformation("Opening Windows Snipping Tool");
 
-            // Try SnippingTool.exe first (Windows 10)
+            // Try SnippingTool.exe first (Windows 7, 8, 10)
             var snippingToolPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.System),
                 "SnippingTool.exe");

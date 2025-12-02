@@ -43,11 +43,19 @@ public partial class ScreenshotSettingsControl : WpfUserControl
 
     private void LoadSettings(AppSettingsService appSettings)
     {
-        var settings = appSettings.CurrentSettings;
-        SavePathTextBox.Text = settings.ScreenshotSavePath;
-        CopyToClipboardCheckBox.IsChecked = settings.CopyScreenshotToClipboard;
-        OpenFolderCheckBox.IsChecked = settings.OpenFolderAfterScreenshot;
-        PlaySoundCheckBox.IsChecked = settings.PlayShutterSound;
+        _updateNestingLevel++;
+        try
+        {
+            var settings = appSettings.CurrentSettings;
+            SavePathTextBox.Text = settings.ScreenshotSavePath;
+            CopyToClipboardCheckBox.IsChecked = settings.CopyScreenshotToClipboard;
+            OpenFolderCheckBox.IsChecked = settings.OpenFolderAfterScreenshot;
+            PlaySoundCheckBox.IsChecked = settings.PlayShutterSound;
+        }
+        finally
+        {
+            _updateNestingLevel--;
+        }
     }
 
     private void BrowseButton_Click(object sender, RoutedEventArgs e)

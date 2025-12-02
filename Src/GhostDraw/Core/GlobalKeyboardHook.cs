@@ -46,7 +46,7 @@ public class GlobalKeyboardHook : IDisposable
     private List<int> _hotkeyVKs = new() { 0xA2, 0xA4, 0x44 };  // Default: Ctrl+Alt+D
     private Dictionary<int, bool> _keyStates = new();
     private bool _wasHotkeyActive = false;
-    private bool _isControlPressed = false;
+    private volatile bool _isControlPressed = false;
 
     public GlobalKeyboardHook(ILogger<GlobalKeyboardHook> logger)
     {
