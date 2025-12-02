@@ -76,6 +76,7 @@ public partial class App : Application
             _keyboardHook.ClearCanvasPressed += OnClearCanvasPressed;
             _keyboardHook.PenToolPressed += OnPenToolPressed;
             _keyboardHook.LineToolPressed += OnLineToolPressed;
+            _keyboardHook.EraserToolPressed += OnEraserToolPressed;
             _keyboardHook.HelpPressed += OnHelpPressed;
             _keyboardHook.Start();
 
@@ -285,6 +286,23 @@ public partial class App : Application
         catch (Exception ex)
         {
             _exceptionHandler?.HandleException(ex, "Line tool handler");
+        }
+    }
+
+    private void OnEraserToolPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Only switch to eraser tool if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("E pressed - selecting eraser tool");
+                _drawingManager?.SetEraserTool();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Eraser tool handler");
         }
     }
 

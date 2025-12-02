@@ -15,6 +15,7 @@ public class GlobalKeyboardHook : IDisposable
     private const int VK_R = 0x52;         // 82 - 'R' key for clear canvas
     private const int VK_L = 0x4C;         // 76 - 'L' key for line tool
     private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
+    private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
     private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
 
     private readonly ILogger<GlobalKeyboardHook> _logger;
@@ -30,6 +31,7 @@ public class GlobalKeyboardHook : IDisposable
     public event EventHandler? ClearCanvasPressed;
     public event EventHandler? PenToolPressed;
     public event EventHandler? LineToolPressed;
+    public event EventHandler? EraserToolPressed;
     public event EventHandler? HelpPressed;
 
     // NEW: Raw key events for recorder
@@ -208,6 +210,13 @@ public class GlobalKeyboardHook : IDisposable
                 {
                     _logger.LogDebug("P key pressed - pen tool request");
                     PenToolPressed?.Invoke(this, EventArgs.Empty);
+                }
+
+                // Check for E key press (eraser tool)
+                if (vkCode == VK_E && isKeyDown)
+                {
+                    _logger.LogDebug("E key pressed - eraser tool request");
+                    EraserToolPressed?.Invoke(this, EventArgs.Empty);
                 }
 
                 // Check for F1 key press (help)

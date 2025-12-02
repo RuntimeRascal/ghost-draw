@@ -148,6 +148,118 @@ public class CursorHelper(ILogger<CursorHelper> logger) : IDisposable
     }
 
     /// <summary>
+    /// Creates an eraser cursor
+    /// </summary>
+    /// <returns>Custom eraser cursor</returns>
+    public WpfCursor CreateEraserCursor()
+    {
+        lock (_cursorLock)
+        {
+            if (_disposed)
+            {
+                _logger.LogWarning("CreateEraserCursor called on disposed CursorHelper");
+                return WpfCursors.Cross;
+            }
+
+            try
+            {
+                _logger.LogDebug("Creating eraser cursor");
+
+                // Destroy previous cursor handle to prevent leaks
+                if (_currentCursorHandle != nint.Zero)
+                {
+                    try
+                    {
+                        DestroyCursor(_currentCursorHandle);
+                        _logger.LogDebug("Destroyed previous cursor handle");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to destroy previous cursor handle");
+                    }
+                    _currentCursorHandle = nint.Zero;
+                }
+
+                // Create a bitmap for the cursor (32x32 pixels)
+                int size = 32;
+                using (Bitmap bitmap = new Bitmap(size, size))
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.Clear(Color.Transparent);
+
+                    // Draw eraser shape (rectangle with slight perspective)
+                    int eraserWidth = 16;
+                    int eraserHeight = 12;
+                    int eraserLeft = (size - eraserWidth) / 2;
+                    int eraserTop = (size - eraserHeight) / 2 - 2;
+
+                    // Draw eraser body (pink/beige color like a traditional eraser)
+                    using (LinearGradientBrush eraserBrush = new LinearGradientBrush(
+                        new Rectangle(eraserLeft, eraserTop, eraserWidth, eraserHeight),
+                        Color.FromArgb(255, 220, 220),
+                        Color.FromArgb(255, 180, 180),
+                        45f))
+                    {
+                        g.FillRectangle(eraserBrush, eraserLeft, eraserTop, eraserWidth, eraserHeight);
+                    }
+
+                    // Draw eraser outline
+                    using (Pen outlinePen = new Pen(Color.Black, 1.5f))
+                    {
+                        g.DrawRectangle(outlinePen, eraserLeft, eraserTop, eraserWidth, eraserHeight);
+                    }
+
+                    // Draw diagonal lines to give texture
+                    using (Pen texturePen = new Pen(Color.FromArgb(100, 200, 150, 150), 1))
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            int offset = i * 5;
+                            g.DrawLine(texturePen, 
+                                eraserLeft + offset, eraserTop, 
+                                eraserLeft + offset + 6, eraserTop + eraserHeight);
+                        }
+                    }
+
+                    // Add highlight for depth
+                    using (Pen highlight = new Pen(Color.White, 1))
+                    {
+                        g.DrawLine(highlight, eraserLeft + 2, eraserTop + 2, eraserLeft + eraserWidth - 4, eraserTop + 2);
+                    }
+
+                    // Draw small "eraser particles" below to indicate erasing action
+                    using (SolidBrush particleBrush = new SolidBrush(Color.FromArgb(150, 180, 180, 180)))
+                    {
+                        g.FillEllipse(particleBrush, eraserLeft + 3, eraserTop + eraserHeight + 2, 2, 2);
+                        g.FillEllipse(particleBrush, eraserLeft + 8, eraserTop + eraserHeight + 4, 2, 2);
+                        g.FillEllipse(particleBrush, eraserLeft + 12, eraserTop + eraserHeight + 3, 2, 2);
+                    }
+
+                    // Convert bitmap to cursor with hotspot at center
+                    nint hCursor = CreateCursorFromBitmap(bitmap, size / 2, size / 2);
+
+                    if (hCursor != nint.Zero)
+                    {
+                        _currentCursorHandle = hCursor;
+                        _logger.LogDebug("Successfully created eraser cursor (handle: {Handle})", hCursor);
+
+                        return System.Windows.Interop.CursorInteropHelper.Create(new SafeCursorHandle(hCursor));
+                    }
+                }
+
+                _logger.LogWarning("Failed to create eraser cursor, returning default");
+                return WpfCursors.Cross;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating eraser cursor, using default");
+                return WpfCursors.Cross;
+            }
+        }
+    }
+
+    /// <summary>
     /// Creates a crosshair cursor with color indicator for the Line tool
     /// </summary>
     /// <param name="colorHex">Hex color for the line (e.g., "#FF0000")</param>
