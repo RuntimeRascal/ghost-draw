@@ -5,6 +5,23 @@ All notable changes to GhostDraw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## v1.0.7
+
+### Added
+- **Screenshot Capture** - Capture your drawings as images
+  - Press `Ctrl+S` to capture full screen with drawings (saved to Pictures\GhostDraw)
+  - Key suppression prevents Windows from intercepting Ctrl+S during drawing mode
+  - Optional: Copy to clipboard, open folder, play shutter sound (configurable in settings)
+- **Screenshot Settings Panel** - New UI section in Settings window
+  - Toggle clipboard copy, folder opening, and sound effects
+  - Configurable save location
+- **Key Legend Documentation** - Comprehensive keyboard shortcut reference (`docs/KEY-LEGEND.md`)
+
+### Fixed
+- Screenshot hotkey (`Ctrl+S`) now correctly detects Control key by tracking both left (VK_LCONTROL) and right (VK_RCONTROL) control keys instead of generic VK_CONTROL
+- Thread safety improvements with volatile field for update nesting level
+
 ## v1.0.6
 
 ### Added
@@ -16,10 +33,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Works with both polylines (pen strokes) and lines (straight line tool)
   - Custom eraser cursor with visual feedback
 - **Improved Code Quality**
+  - Added explicit type aliases to resolve WPF/WinForms namespace conflicts
+  - Fixed `Point`, `Brush`, `Color`, `ColorConverter`, and `Brushes` type ambiguities
   - Enhanced tool interface consistency
 
 ### Fixed
+- Ambiguous reference errors caused by both WPF (`System.Windows`) and WinForms (`System.Drawing`) being enabled
 - LineTool's `OnDeactivated` method now properly resets state without calling non-existent method
+- Build errors related to namespace conflicts in drawing tool implementations
 
 ## v1.0.5
 

@@ -288,6 +288,46 @@ public class AppSettingsService
     }
 
     /// <summary>
+    /// Sets the screenshot save path
+    /// </summary>
+    public void SetScreenshotSavePath(string path)
+    {
+        _logger.LogInformation("Setting screenshot save path to: {Path}", path);
+        _currentSettings.ScreenshotSavePath = path;
+        SaveSettings(_currentSettings);
+    }
+
+    /// <summary>
+    /// Sets whether to copy screenshot to clipboard
+    /// </summary>
+    public void SetCopyScreenshotToClipboard(bool copyToClipboard)
+    {
+        _logger.LogInformation("Setting copy screenshot to clipboard: {Value}", copyToClipboard);
+        _currentSettings.CopyScreenshotToClipboard = copyToClipboard;
+        SaveSettings(_currentSettings);
+    }
+
+    /// <summary>
+    /// Sets whether to play shutter sound on screenshot
+    /// </summary>
+    public void SetPlayShutterSound(bool playSound)
+    {
+        _logger.LogInformation("Setting play shutter sound: {Value}", playSound);
+        _currentSettings.PlayShutterSound = playSound;
+        SaveSettings(_currentSettings);
+    }
+
+    /// <summary>
+    /// Sets whether to open folder after screenshot
+    /// </summary>
+    public void SetOpenFolderAfterScreenshot(bool openFolder)
+    {
+        _logger.LogInformation("Setting open folder after screenshot: {Value}", openFolder);
+        _currentSettings.OpenFolderAfterScreenshot = openFolder;
+        SaveSettings(_currentSettings);
+    }
+
+    /// <summary>
     /// Resets all settings to default values
     /// </summary>
     public void ResetToDefaults()

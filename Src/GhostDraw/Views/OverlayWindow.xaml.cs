@@ -51,6 +51,11 @@ public partial class OverlayWindow : Window
     private readonly TimeSpan _helpDisplayDuration = TimeSpan.FromSeconds(4.0);
     private readonly TimeSpan _helpFadeOutDuration = TimeSpan.FromMilliseconds(500);
 
+    // Screenshot saved toast animation
+    private readonly DispatcherTimer _screenshotSavedToastTimer;
+    private readonly TimeSpan _screenshotToastDisplayDuration = TimeSpan.FromSeconds(1.5);
+    private readonly TimeSpan _screenshotToastFadeOutDuration = TimeSpan.FromMilliseconds(300);
+
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
         PenTool penTool, LineTool lineTool, EraserTool eraserTool)
     {
@@ -92,6 +97,13 @@ public partial class OverlayWindow : Window
         };
         _helpPopupTimer.Tick += HelpPopupTimer_Tick;
 
+        // Initialize screenshot saved toast timer
+        _screenshotSavedToastTimer = new DispatcherTimer
+        {
+            Interval = _screenshotToastDisplayDuration
+        };
+        _screenshotSavedToastTimer.Tick += ScreenshotSavedToastTimer_Tick;
+
         // Make window span all monitors
         Left = SystemParameters.VirtualScreenLeft;
         Top = SystemParameters.VirtualScreenTop;
@@ -121,6 +133,7 @@ public partial class OverlayWindow : Window
             _canvasClearedToastTimer.Stop();
             _drawingModeHintTimer.Stop();
             _helpPopupTimer.Stop();
+            _screenshotSavedToastTimer.Stop();
         };
 
         _logger.LogDebug("Mouse events wired up");
@@ -175,6 +188,7 @@ public partial class OverlayWindow : Window
         HideCanvasClearedToast();
         HideDrawingModeHint();
         HideHelpPopup();
+        HideScreenshotSavedToast();
 
         // Clear canvas when exiting drawing mode too
         ClearDrawing();
@@ -695,6 +709,82 @@ public partial class OverlayWindow : Window
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to hide help popup");
+        }
+    }
+
+    #endregion
+
+    #region Screenshot Saved Toast
+
+    /// <summary>
+    /// Shows the "Screenshot Saved" toast with animation
+    /// </summary>
+    public void ShowScreenshotSaved()
+    {
+        try
+        {
+            // Stop any existing animations and timer
+            _screenshotSavedToastTimer.Stop();
+            ScreenshotSavedToastBorder.BeginAnimation(OpacityProperty, null);
+
+            // Show the toast immediately
+            ScreenshotSavedToastBorder.Opacity = 1.0;
+
+            // Start the timer for fade-out
+            _screenshotSavedToastTimer.Start();
+
+            _logger.LogDebug("Screenshot saved toast shown");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to show screenshot saved toast");
+        }
+    }
+
+    /// <summary>
+    /// Timer tick handler that starts the fade-out animation for the screenshot toast
+    /// </summary>
+    private void ScreenshotSavedToastTimer_Tick(object? sender, EventArgs e)
+    {
+        try
+        {
+            _screenshotSavedToastTimer.Stop();
+
+            // Create and start fade-out animation
+            var fadeOutAnimation = new DoubleAnimation
+            {
+                From = 1.0,
+                To = 0.0,
+                Duration = new Duration(_screenshotToastFadeOutDuration),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            ScreenshotSavedToastBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
+
+            _logger.LogDebug("Screenshot saved toast fade-out started");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to fade out screenshot saved toast");
+            // Ensure toast is hidden even if animation fails
+            ScreenshotSavedToastBorder.Opacity = 0;
+        }
+    }
+
+    /// <summary>
+    /// Immediately hides the screenshot saved toast
+    /// </summary>
+    private void HideScreenshotSavedToast()
+    {
+        try
+        {
+            _screenshotSavedToastTimer.Stop();
+            ScreenshotSavedToastBorder.BeginAnimation(OpacityProperty, null);
+            ScreenshotSavedToastBorder.Opacity = 0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to hide screenshot saved toast");
         }
     }
 

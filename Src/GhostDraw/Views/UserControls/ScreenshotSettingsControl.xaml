@@ -1,0 +1,134 @@
+<UserControl x:Class="GhostDraw.Views.UserControls.ScreenshotSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <GroupBox Header="// SCREENSHOT">
+        <StackPanel>
+            <!-- Save Path Section -->
+            <TextBlock Text="SAVE LOCATION"
+                      Foreground="#00FFFF"
+                      FontWeight="Bold"
+                      FontFamily="Consolas"
+                      FontSize="11"
+                      Margin="0,0,0,8"/>
+            
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBox x:Name="SavePathTextBox"
+                        Grid.Column="0"
+                        Background="#0A0E27"
+                        BorderBrush="#404040"
+                        BorderThickness="1"
+                        Foreground="#B0B0B0"
+                        FontFamily="Consolas"
+                        FontSize="11"
+                        Padding="8"
+                        IsReadOnly="True"
+                        Margin="0,0,8,0"/>
+                
+                <Button x:Name="BrowseButton"
+                       Grid.Column="1"
+                       Content="BROWSE..."
+                       Background="#1A1A2E"
+                       BorderBrush="#00FFFF"
+                       BorderThickness="1"
+                       Foreground="#00FFFF"
+                       FontFamily="Consolas"
+                       FontSize="10"
+                       FontWeight="Bold"
+                       Padding="12,6"
+                       Click="BrowseButton_Click"
+                       Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#1A1A2E"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                               BorderBrush="{TemplateBinding BorderBrush}"
+                                               BorderThickness="{TemplateBinding BorderThickness}"
+                                               Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#2A2A3E"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+
+            <!-- Options Section -->
+            <TextBlock Text="OPTIONS"
+                      Foreground="#00FFFF"
+                      FontWeight="Bold"
+                      FontFamily="Consolas"
+                      FontSize="11"
+                      Margin="0,0,0,8"/>
+            
+            <CheckBox x:Name="CopyToClipboardCheckBox"
+                     Content="Copy to clipboard after capture"
+                     Foreground="#B0B0B0"
+                     FontFamily="Consolas"
+                     FontSize="11"
+                     Checked="CopyToClipboardCheckBox_Changed"
+                     Unchecked="CopyToClipboardCheckBox_Changed"
+                     Margin="0,0,0,8"/>
+            
+            <CheckBox x:Name="OpenFolderCheckBox"
+                     Content="Open folder after capture"
+                     Foreground="#B0B0B0"
+                     FontFamily="Consolas"
+                     FontSize="11"
+                     Checked="OpenFolderCheckBox_Changed"
+                     Unchecked="OpenFolderCheckBox_Changed"
+                     Margin="0,0,0,8"/>
+            
+            <CheckBox x:Name="PlaySoundCheckBox"
+                     Content="Play shutter sound"
+                     Foreground="#B0B0B0"
+                     FontFamily="Consolas"
+                     FontSize="11"
+                     Checked="PlaySoundCheckBox_Changed"
+                     Unchecked="PlaySoundCheckBox_Changed"
+                     Margin="0,0,0,16"/>
+
+            <!-- Info Section -->
+            <Border Background="#0A0E27"
+                   BorderBrush="#404040"
+                   BorderThickness="1"
+                   Padding="16">
+                <StackPanel>
+                    <TextBlock Foreground="#B0B0B0"
+                              FontSize="11"
+                              FontFamily="Consolas"
+                              TextWrapping="Wrap"
+                              Margin="0,0,0,8"
+                              LineHeight="16">
+                        <Run Text="[Ctrl+S]" Foreground="#00FF00" FontWeight="Bold"/>
+                        <Run Text=" Capture full screen with overlay"/>
+                    </TextBlock>
+                    <TextBlock Foreground="#B0B0B0"
+                              FontSize="11"
+                              FontFamily="Consolas"
+                              TextWrapping="Wrap"
+                              LineHeight="16">
+                        <Run Text="[S]" Foreground="#00FF00" FontWeight="Bold"/>
+                        <Run Text=" Open Windows Snipping Tool"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </GroupBox>
+</UserControl>

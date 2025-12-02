@@ -91,6 +91,32 @@
                        Text="Press R to clear canvas  |  ESC to exit"/>
         </Border>
 
+        <!-- Screenshot Saved Toast (top-center of screen, cyberpunk style) -->
+        <Border x:Name="ScreenshotSavedToastBorder"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Margin="0,30,0,0"
+                Padding="24,16"
+                Background="#1A1A2E"
+                BorderBrush="#00FFFF"
+                BorderThickness="2"
+                CornerRadius="4"
+                Opacity="0"
+                IsHitTestVisible="False">
+            <Border.Effect>
+                <DropShadowEffect Color="#00FFFF" 
+                                  Opacity="0.7" 
+                                  BlurRadius="20" 
+                                  ShadowDepth="0"/>
+            </Border.Effect>
+            <TextBlock x:Name="ScreenshotSavedToastText"
+                       FontFamily="Segoe UI"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       Foreground="#00FFFF"
+                       Text="📸 Screenshot Saved!"/>
+        </Border>
+
         <!-- Help Popup (center of screen, shows keyboard shortcuts) -->
         <Border x:Name="HelpPopupBorder"
                 HorizontalAlignment="Center"
@@ -223,6 +249,34 @@
                                FontSize="16"
                                Foreground="#B0B0B0"
                                Text="Clear Canvas"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#FFAA00"
+                               Text="Ctrl+S"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Full Screenshot"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#FFAA00"
+                               Text="S"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Open Snip Tool"/>
                 </StackPanel>
 
                 <!-- Separator -->

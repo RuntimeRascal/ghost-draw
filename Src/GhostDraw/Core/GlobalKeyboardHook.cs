@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +17,9 @@ public class GlobalKeyboardHook : IDisposable
     private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
     private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
     private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
+    private const int VK_S = 0x53;         // 83 - 'S' key for screenshot (Ctrl+S only)
+    private const int VK_LCONTROL = 0xA2;  // 162 - Left Control key
+    private const int VK_RCONTROL = 0xA3;  // 163 - Right Control key
 
     private readonly ILogger<GlobalKeyboardHook> _logger;
     private readonly LowLevelKeyboardProc _proc;
@@ -33,6 +36,7 @@ public class GlobalKeyboardHook : IDisposable
     public event EventHandler? LineToolPressed;
     public event EventHandler? EraserToolPressed;
     public event EventHandler? HelpPressed;
+    public event EventHandler? ScreenshotFullPressed;
 
     // NEW: Raw key events for recorder
     public event EventHandler<KeyEventArgs>? KeyPressed;
@@ -42,6 +46,10 @@ public class GlobalKeyboardHook : IDisposable
     private List<int> _hotkeyVKs = new() { 0xA2, 0xA4, 0x44 };  // Default: Ctrl+Alt+D
     private Dictionary<int, bool> _keyStates = new();
     private bool _wasHotkeyActive = false;
+    private volatile bool _isControlPressed = false;
+    
+    // Drawing mode state - used to determine if we should suppress keys
+    private volatile bool _isDrawingModeActive = false;
 
     public GlobalKeyboardHook(ILogger<GlobalKeyboardHook> logger)
     {
@@ -53,7 +61,7 @@ public class GlobalKeyboardHook : IDisposable
         foreach (var vk in _hotkeyVKs)
             _keyStates[vk] = false;
     }
-
+    
     /// <summary>
     /// Configures the hotkey combination
     /// </summary>
@@ -171,6 +179,8 @@ public class GlobalKeyboardHook : IDisposable
 
     private nint HookCallback(int nCode, nint wParam, nint lParam)
     {
+        bool shouldSuppressKey = false;
+        
         try
         {
             if (nCode >= 0)
@@ -184,10 +194,19 @@ public class GlobalKeyboardHook : IDisposable
                 else
                     KeyReleased?.Invoke(this, new KeyEventArgs(vkCode));
 
+                // Track Control key state (both left and right control keys)
+                if (vkCode == VK_LCONTROL || vkCode == VK_RCONTROL)
+                {
+                    _isControlPressed = isKeyDown;
+                    _logger.LogDebug("Control key ({Type}) {State}", 
+                        vkCode == VK_LCONTROL ? "Left" : "Right", 
+                        isKeyDown ? "PRESSED" : "RELEASED");
+                }
+
                 // Check for ESC key press (emergency exit)
                 if (vkCode == VK_ESCAPE && isKeyDown)
                 {
-                    _logger.LogInformation("?? ESC pressed - emergency exit");
+                    _logger.LogInformation("🔴 ESC pressed - emergency exit");
                     EscapePressed?.Invoke(this, EventArgs.Empty);
                 }
 
@@ -226,6 +245,32 @@ public class GlobalKeyboardHook : IDisposable
                     HelpPressed?.Invoke(this, EventArgs.Empty);
                 }
 
+                // Check for Ctrl+S key press (full screenshot only - no snipping tool)
+                if (vkCode == VK_S && isKeyDown && _isControlPressed)
+                {
+                    _logger.LogInformation("====== CTRL+S DETECTED ======");
+                    _logger.LogInformation("Control key state: {IsControlPressed}", _isControlPressed);
+                    _logger.LogInformation("Drawing mode active: {IsDrawingModeActive}", _isDrawingModeActive);
+                    
+                    _logger.LogInformation("Ctrl+S pressed - firing ScreenshotFullPressed event");
+                    ScreenshotFullPressed?.Invoke(this, EventArgs.Empty);
+                    _logger.LogInformation("ScreenshotFullPressed event fired, subscribers: {Count}", 
+                        ScreenshotFullPressed?.GetInvocationList().Length ?? 0);
+                    
+                    // Suppress Ctrl+S when drawing mode is active to prevent Windows Snipping Tool
+                    if (_isDrawingModeActive)
+                    {
+                        shouldSuppressKey = true;
+                        _logger.LogInformation("KEY WILL BE SUPPRESSED - Drawing mode is active");
+                    }
+                    else
+                    {
+                        _logger.LogInformation("KEY WILL NOT BE SUPPRESSED - Drawing mode is inactive");
+                    }
+                    
+                    _logger.LogInformation("====== END CTRL+S HANDLING ======");
+                }
+
                 // Track hotkey state
                 if (_hotkeyVKs.Contains(vkCode))
                 {
@@ -239,12 +284,12 @@ public class GlobalKeyboardHook : IDisposable
                     // Fire events on state changes
                     if (allPressed && !_wasHotkeyActive)
                     {
-                        _logger.LogInformation("?? HOTKEY PRESSED");
+                        _logger.LogInformation("🟢 HOTKEY PRESSED");
                         HotkeyPressed?.Invoke(this, EventArgs.Empty);
                     }
                     else if (!allPressed && _wasHotkeyActive)
                     {
-                        _logger.LogInformation("?? HOTKEY RELEASED");
+                        _logger.LogInformation("🟢 HOTKEY RELEASED");
                         HotkeyReleased?.Invoke(this, EventArgs.Empty);
                     }
 
@@ -258,7 +303,15 @@ public class GlobalKeyboardHook : IDisposable
             _logger.LogError(ex, "Exception in keyboard hook callback");
         }
 
-        // MUST ALWAYS call CallNextHookEx to allow other applications to process the hook
+        // If we want to suppress the key, return 1 to block it from reaching other applications
+        // Otherwise, call CallNextHookEx to allow other applications to process the hook
+        if (shouldSuppressKey)
+        {
+            _logger.LogTrace("Key suppressed - not calling CallNextHookEx");
+            return (nint)1;
+        }
+        
+        // MUST call CallNextHookEx for non-suppressed keys to allow other applications to process them
         return CallNextHookEx(_hookID, nCode, wParam, lParam);
     }
 
@@ -277,6 +330,27 @@ public class GlobalKeyboardHook : IDisposable
 
             // Stop will check _disposed flag and handle cleanup safely
             Stop();
+        }
+    }
+
+    /// <summary>
+    /// Sets the drawing mode state. When active, certain keys (like Ctrl+S) will be suppressed
+    /// to prevent Windows from intercepting them.
+    /// </summary>
+    public void SetDrawingModeActive(bool isActive)
+    {
+        var previousState = _isDrawingModeActive;
+        _isDrawingModeActive = isActive;
+        
+        if (previousState != isActive)
+        {
+            _logger.LogInformation("====== DRAWING MODE STATE CHANGED ======");
+            _logger.LogInformation("Previous state: {PreviousState}, New state: {NewState}", previousState, isActive);
+            _logger.LogInformation("Timestamp: {Timestamp}", DateTime.Now.ToString("HH:mm:ss.fff"));
+        }
+        else
+        {
+            _logger.LogDebug("Drawing mode state set to: {IsActive} (no change)", isActive);
         }
     }
 

@@ -10,15 +10,24 @@ public class DrawingManager
     private readonly ILogger<DrawingManager> _logger;
     private readonly OverlayWindow _overlayWindow;
     private readonly AppSettingsService _appSettings;
+    private readonly ScreenshotService _screenshotService;
+    private readonly GlobalKeyboardHook _keyboardHook;
     private bool _isDrawingLocked = false;
+
+    // Delay in milliseconds before re-showing overlay after opening snipping tool
+    private const int SnippingToolOverlayDelayMs = 500;
 
     public bool IsDrawingMode => _overlayWindow.IsVisible || _isDrawingLocked;
 
-    public DrawingManager(ILogger<DrawingManager> logger, OverlayWindow overlayWindow, AppSettingsService appSettings)
+    public DrawingManager(ILogger<DrawingManager> logger, OverlayWindow overlayWindow, 
+        AppSettingsService appSettings, ScreenshotService screenshotService,
+        GlobalKeyboardHook keyboardHook)
     {
         _logger = logger;
         _overlayWindow = overlayWindow;
         _appSettings = appSettings;
+        _screenshotService = screenshotService;
+        _keyboardHook = keyboardHook;
 
         // Initialize lock mode state from saved settings
         _isDrawingLocked = _appSettings.CurrentSettings.LockDrawingMode;
@@ -41,6 +50,9 @@ public class DrawingManager
                     _isDrawingLocked = false;
                     _overlayWindow.DisableDrawing();
                     _overlayWindow.Hide();
+                    
+                    // Notify hook that drawing mode is inactive
+                    _keyboardHook.SetDrawingModeActive(false);
                 }
                 else
                 {
@@ -50,6 +62,9 @@ public class DrawingManager
                     _overlayWindow.Show();
                     _overlayWindow.Activate();
                     _overlayWindow.Focus();
+                    
+                    // Notify hook that drawing mode is active
+                    _keyboardHook.SetDrawingModeActive(true);
                 }
             }
             else
@@ -60,6 +75,9 @@ public class DrawingManager
                 _overlayWindow.Show();
                 _overlayWindow.Activate();
                 _overlayWindow.Focus();
+                
+                // Notify hook that drawing mode is active
+                _keyboardHook.SetDrawingModeActive(true);
             }
 
             _logger.LogDebug("Overlay shown - IsVisible={IsVisible}, IsActive={IsActive}, IsFocused={IsFocused}",
@@ -74,6 +92,7 @@ public class DrawingManager
                 _overlayWindow.DisableDrawing();
                 _overlayWindow.Hide();
                 _isDrawingLocked = false;
+                _keyboardHook.SetDrawingModeActive(false);
             }
             catch (Exception cleanupEx)
             {
@@ -102,6 +121,10 @@ public class DrawingManager
             _logger.LogInformation("Disabling drawing mode (hold released)");
             _overlayWindow.DisableDrawing();
             _overlayWindow.Hide();
+            
+            // Notify hook that drawing mode is inactive
+            _keyboardHook.SetDrawingModeActive(false);
+            
             _logger.LogDebug("Overlay hidden");
         }
         catch (Exception ex)
@@ -111,6 +134,7 @@ public class DrawingManager
             try
             {
                 _overlayWindow.Hide();
+                _keyboardHook.SetDrawingModeActive(false);
             }
             catch (Exception hideEx)
             {
@@ -128,6 +152,10 @@ public class DrawingManager
             _isDrawingLocked = false;
             _overlayWindow.DisableDrawing();
             _overlayWindow.Hide();
+            
+            // Notify hook that drawing mode is inactive
+            _keyboardHook.SetDrawingModeActive(false);
+            
             _logger.LogDebug("Drawing mode force disabled");
         }
         catch (Exception ex)
@@ -138,6 +166,7 @@ public class DrawingManager
             {
                 _isDrawingLocked = false;
                 _overlayWindow.Hide();
+                _keyboardHook.SetDrawingModeActive(false);
             }
             catch
             {
@@ -157,6 +186,9 @@ public class DrawingManager
             _isDrawingLocked = false;
             _overlayWindow.DisableDrawing();
             _overlayWindow.Hide();
+            
+            // Notify hook that drawing mode is inactive
+            _keyboardHook.SetDrawingModeActive(false);
         }
         catch (Exception ex)
         {
@@ -309,6 +341,45 @@ public class DrawingManager
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to clear canvas");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
+    /// Captures a fullscreen screenshot (Ctrl+S)
+    /// </summary>
+    public void CaptureFullScreenshot()
+    {
+        try
+        {
+            _logger.LogInformation("====== CaptureFullScreenshot CALLED ======");
+            _logger.LogInformation("Overlay visible: {IsVisible}", _overlayWindow.IsVisible);
+            
+            if (_overlayWindow.IsVisible)
+            {
+                _logger.LogInformation("Capturing full screenshot (Ctrl+S) - calling ScreenshotService");
+                var filePath = _screenshotService.CaptureFullScreen(_overlayWindow);
+                _logger.LogInformation("ScreenshotService returned file path: {FilePath}", filePath ?? "(null)");
+                
+                if (filePath != null)
+                {
+                    _logger.LogInformation("Screenshot saved successfully, showing toast notification");
+                    _overlayWindow.ShowScreenshotSaved();
+                }
+                else
+                {
+                    _logger.LogWarning("Screenshot capture failed - file path is null");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("CaptureFullScreenshot ignored - overlay not visible");
+            }
+            _logger.LogInformation("====== CaptureFullScreenshot COMPLETED ======");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to capture full screenshot");
             // Don't re-throw - not critical
         }
     }

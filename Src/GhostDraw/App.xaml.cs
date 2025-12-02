@@ -78,6 +78,7 @@ public partial class App : Application
             _keyboardHook.LineToolPressed += OnLineToolPressed;
             _keyboardHook.EraserToolPressed += OnEraserToolPressed;
             _keyboardHook.HelpPressed += OnHelpPressed;
+            _keyboardHook.ScreenshotFullPressed += OnScreenshotFullPressed;
             _keyboardHook.Start();
 
             // Setup system tray icon
@@ -320,6 +321,34 @@ public partial class App : Application
         catch (Exception ex)
         {
             _exceptionHandler?.HandleException(ex, "Help pressed handler");
+        }
+    }
+
+    private void OnScreenshotFullPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            _logger?.LogInformation("====== OnScreenshotFullPressed CALLED ======");
+            _logger?.LogInformation("DrawingManager null: {IsNull}", _drawingManager == null);
+            _logger?.LogInformation("DrawingManager.IsDrawingMode: {IsDrawingMode}", _drawingManager?.IsDrawingMode);
+            
+            // Capture full screenshot if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("Ctrl+S pressed - capturing full screenshot (calling DrawingManager.CaptureFullScreenshot)");
+                _drawingManager?.CaptureFullScreenshot();
+                _logger?.LogInformation("DrawingManager.CaptureFullScreenshot call completed");
+            }
+            else
+            {
+                _logger?.LogWarning("Screenshot ignored - drawing mode is NOT active");
+            }
+            _logger?.LogInformation("====== OnScreenshotFullPressed COMPLETED ======");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Exception in OnScreenshotFullPressed");
+            _exceptionHandler?.HandleException(ex, "Screenshot full pressed handler");
         }
     }
 
