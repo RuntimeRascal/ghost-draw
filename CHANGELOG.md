@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## v1.0.7
 
 ### Added
+- **Rectangle Tool** - Draw rectangles by clicking two points
+  - Press `U` to activate Rectangle tool
+  - First click sets one corner, second click finalizes the rectangle
+  - Live preview updates as you move the mouse
+  - Respects current color and thickness settings
+  - Custom rectangle cursor with corner markers
+  - Supports right-click color cycling and mouse wheel thickness adjustment
 - **Screenshot Capture** - Capture your drawings as images
   - Press `Ctrl+S` to capture full screen with drawings (saved to Pictures\GhostDraw)
   - Key suppression prevents Windows from intercepting Ctrl+S during drawing mode

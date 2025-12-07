@@ -26,6 +26,7 @@ This document serves as the **single source of truth** for all keyboard and mous
 | `P` | `0x50` (80)      | Select Pen Tool (freehand drawing) | **IN USE** | `VK_P` in `GlobalKeyboardHook.cs` |
 | `L` | `0x4C` (76)      | Select Line Tool (straight lines)  | **IN USE** | `VK_L` in `GlobalKeyboardHook.cs` |
 | `E` | `0x45` (69)      | Select Eraser Tool                 | **IN USE** | `VK_E` in `GlobalKeyboardHook.cs` |
+| `U` | `0x55` (85)      | Select Rectangle Tool              | **IN USE** | `VK_U` in `GlobalKeyboardHook.cs` |
 
 ### Drawing Mode - Actions
 
@@ -83,11 +84,11 @@ These keys are **reserved** for future functionality or should be avoided to pre
 
 This table shows which inputs are active in different application states:
 
-| Input              | System Tray    | Settings Window  | Drawing Mode Inactive | Drawing Mode Active |
-| ------------------ | -------------- | ---------------- | --------------------- | ------------------- |
-| Activation Hotkey  | ✓ Triggers     | ✗ Disabled       | ✓ Triggers            | ✓ Toggles Off       |
-| `P`, `L`, `E` keys | ✗              | ✗                | ✗                     | ✓ Tool Selection    |
-| `R` key            | ✗              | ✗                | ✗                     | ✓ Clear Canvas      |
+| Input                  | System Tray    | Settings Window  | Drawing Mode Inactive | Drawing Mode Active |
+| ---------------------- | -------------- | ---------------- | --------------------- | ------------------- |
+| Activation Hotkey      | ✓ Triggers     | ✗ Disabled       | ✓ Triggers            | ✓ Toggles Off       |
+| `P`, `L`, `E`, `U` keys | ✗              | ✗                | ✗                     | ✓ Tool Selection    |
+| `R` key                | ✗              | ✗                | ✗                     | ✓ Clear Canvas      |
 | `ESC` key          | ✗              | ✓ Closes Window  | ✗                     | ✓ Exit Drawing      |
 | `F1` key           | ✗              | ✗                | ✗                     | ✓ Show Help         |
 | Left Click         | ✗              | ✓ UI Interaction | ✗                     | ✓ Draw              |
@@ -111,6 +112,7 @@ private const int VK_R = 0x52;         // 82 - 'R' key for clear canvas
 private const int VK_L = 0x4C;         // 76 - 'L' key for line tool
 private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
 private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
+private const int VK_U = 0x55;         // 85 - 'U' key for rectangle tool
 private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
 ```
 
@@ -124,6 +126,7 @@ private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
 - `GlobalKeyboardHook.PenToolPressed` - P key
 - `GlobalKeyboardHook.LineToolPressed` - L key
 - `GlobalKeyboardHook.EraserToolPressed` - E key
+- `GlobalKeyboardHook.RectangleToolPressed` - U key
 - `GlobalKeyboardHook.HelpPressed` - F1 key
 
 **Mouse Events:**
@@ -160,7 +163,6 @@ Before adding a new keyboard shortcut:
 | Redo Stroke         | `Ctrl+Y`                | High     | Not Implemented |
 | Save Drawing        | `Ctrl+S`                | Medium   | Not Implemented |
 | Load Drawing        | `Ctrl+O`                | Medium   | Not Implemented |
-| Rectangle Tool      | `U` (Box)               | Low      | Not Implemented |
 | Circle/Ellipse Tool | `C`                     | Low      | Not Implemented |
 | Text Tool           | `T`                     | Low      | Not Implemented |
 | Color Picker        | Middle Click or `I`     | Low      | Not Implemented |
@@ -182,6 +184,7 @@ Reserve these keys for high-priority future features:
 
 | Version | Date | Changes                                                       |
 | ------- | ---- | ------------------------------------------------------------- |
+| v1.0.7  | 2024 | Added Rectangle tool (`U` key)                                |
 | v1.0.6  | 2024 | Initial key legend. Added Eraser tool (`E` key)               |
 | v1.0.5  | 2024 | Added Line tool (`L` key), Pen tool (`P` key), F1 help        |
 | v1.0.0  | 2024 | Initial release with activation hotkey, `R` clear, `ESC` exit |
@@ -207,5 +210,5 @@ Reserve these keys for high-priority future features:
 
 ---
 
-*Last Updated: v1.0.6*
+*Last Updated: v1.0.7*
 *Maintained by: GhostDraw Development Team*
