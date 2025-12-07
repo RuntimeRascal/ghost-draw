@@ -77,6 +77,7 @@ public partial class App : Application
             _keyboardHook.PenToolPressed += OnPenToolPressed;
             _keyboardHook.LineToolPressed += OnLineToolPressed;
             _keyboardHook.EraserToolPressed += OnEraserToolPressed;
+            _keyboardHook.RectangleToolPressed += OnRectangleToolPressed;
             _keyboardHook.HelpPressed += OnHelpPressed;
             _keyboardHook.ScreenshotFullPressed += OnScreenshotFullPressed;
             _keyboardHook.Start();
@@ -304,6 +305,23 @@ public partial class App : Application
         catch (Exception ex)
         {
             _exceptionHandler?.HandleException(ex, "Eraser tool handler");
+        }
+    }
+
+    private void OnRectangleToolPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Only switch to rectangle tool if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("U pressed - selecting rectangle tool");
+                _drawingManager?.SetRectangleTool();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Rectangle tool handler");
         }
     }
 

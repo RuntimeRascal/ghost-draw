@@ -260,6 +260,108 @@ public class CursorHelper(ILogger<CursorHelper> logger) : IDisposable
     }
 
     /// <summary>
+    /// Creates a cursor for the Rectangle tool with color indicator
+    /// </summary>
+    /// <param name="colorHex">Hex color for the rectangle (e.g., "#FF0000")</param>
+    /// <returns>Custom cursor</returns>
+    public WpfCursor CreateRectangleCursor(string colorHex)
+    {
+        lock (_cursorLock)
+        {
+            if (_disposed)
+            {
+                _logger.LogWarning("CreateRectangleCursor called on disposed CursorHelper");
+                return WpfCursors.Cross;
+            }
+
+            try
+            {
+                _logger.LogDebug("Creating rectangle cursor with color {Color}", colorHex);
+
+                // Destroy previous cursor handle to prevent leaks
+                if (_currentCursorHandle != nint.Zero)
+                {
+                    try
+                    {
+                        DestroyCursor(_currentCursorHandle);
+                        _logger.LogDebug("Destroyed previous cursor handle");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to destroy previous cursor handle");
+                    }
+                    _currentCursorHandle = nint.Zero;
+                }
+
+                // Create a bitmap for the cursor (32x32 pixels)
+                int size = 32;
+                using (Bitmap bitmap = new Bitmap(size, size))
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.Clear(Color.Transparent);
+
+                    // Parse the rectangle color
+                    Color rectColor = ColorTranslator.FromHtml(colorHex);
+
+                    // Draw a small rectangle preview with corner markers
+                    int rectSize = 12;
+                    int rectLeft = 6;
+                    int rectTop = (size - rectSize) / 2;
+
+                    // Draw rectangle outline with the active color
+                    using (Pen rectPen = new Pen(rectColor, 2))
+                    {
+                        g.DrawRectangle(rectPen, rectLeft, rectTop, rectSize, rectSize);
+                    }
+
+                    // Draw corner markers (small filled squares at corners)
+                    int cornerSize = 3;
+                    using (SolidBrush cornerBrush = new SolidBrush(Color.White))
+                    {
+                        // Top-left corner (this is the hotspot)
+                        g.FillRectangle(cornerBrush, rectLeft - 1, rectTop - 1, cornerSize, cornerSize);
+                        // Top-right corner
+                        g.FillRectangle(cornerBrush, rectLeft + rectSize - 1, rectTop - 1, cornerSize, cornerSize);
+                        // Bottom-left corner
+                        g.FillRectangle(cornerBrush, rectLeft - 1, rectTop + rectSize - 1, cornerSize, cornerSize);
+                        // Bottom-right corner
+                        g.FillRectangle(cornerBrush, rectLeft + rectSize - 1, rectTop + rectSize - 1, cornerSize, cornerSize);
+                    }
+
+                    // Draw black outlines for corner markers
+                    using (Pen cornerOutline = new Pen(Color.Black, 1))
+                    {
+                        g.DrawRectangle(cornerOutline, rectLeft - 1, rectTop - 1, cornerSize, cornerSize);
+                        g.DrawRectangle(cornerOutline, rectLeft + rectSize - 1, rectTop - 1, cornerSize, cornerSize);
+                        g.DrawRectangle(cornerOutline, rectLeft - 1, rectTop + rectSize - 1, cornerSize, cornerSize);
+                        g.DrawRectangle(cornerOutline, rectLeft + rectSize - 1, rectTop + rectSize - 1, cornerSize, cornerSize);
+                    }
+
+                    // Convert bitmap to cursor with hotspot at top-left corner marker
+                    nint hCursor = CreateCursorFromBitmap(bitmap, rectLeft, rectTop);
+
+                    if (hCursor != nint.Zero)
+                    {
+                        _currentCursorHandle = hCursor;
+                        _logger.LogDebug("Successfully created rectangle cursor (handle: {Handle})", hCursor);
+
+                        return System.Windows.Interop.CursorInteropHelper.Create(new SafeCursorHandle(hCursor));
+                    }
+                }
+
+                _logger.LogWarning("Failed to create rectangle cursor, returning default");
+                return WpfCursors.Cross;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating rectangle cursor, using default");
+                return WpfCursors.Cross;
+            }
+        }
+    }
+
+    /// <summary>
     /// Creates a crosshair cursor with color indicator for the Line tool
     /// </summary>
     /// <param name="colorHex">Hex color for the line (e.g., "#FF0000")</param>

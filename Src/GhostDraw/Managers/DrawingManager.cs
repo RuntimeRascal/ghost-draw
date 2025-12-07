@@ -298,6 +298,31 @@ public class DrawingManager
     }
 
     /// <summary>
+    /// Sets the active tool to Rectangle
+    /// </summary>
+    public void SetRectangleTool()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _appSettings.SetActiveTool(DrawTool.Rectangle);
+                _overlayWindow.OnToolChanged(DrawTool.Rectangle);
+                _logger.LogInformation("Tool set to Rectangle");
+            }
+            else
+            {
+                _logger.LogDebug("SetRectangleTool ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set rectangle tool");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
     /// Shows the help popup with keyboard shortcuts
     /// </summary>
     public void ShowHelp()
