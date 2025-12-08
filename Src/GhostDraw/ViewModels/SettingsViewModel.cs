@@ -14,6 +14,8 @@ public class SettingsViewModel(
     LoggingSettingsService loggingSettings,
     ILoggerFactory loggerFactory)
 {
+    private const string DefaultVersion = "v1.0.0";
+
     /// <summary>
     /// Service for managing application settings (brush, hotkey, mode, etc.)
     /// </summary>
@@ -37,7 +39,7 @@ public class SettingsViewModel(
         get
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version;
-            return version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v1.0.0";
+            return version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : DefaultVersion;
         }
     }
 }
