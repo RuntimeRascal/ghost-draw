@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## v1.0.11
+
+### Added
+- **Rectangle Tool: Shift Modifier for Perfect Squares**
+  - Hold Shift while drawing rectangles to constrain to perfect squares
+  - Uses `Math.Min(width, height)` to fit square within dragged bounds
+  - Works during both preview and finalization
+  - Consistent with Circle tool's Shift modifier behavior
+
+### Fixed
+- **Eraser Tool Now Erases All Shape Types**
+  - Eraser now properly removes Rectangle shapes
+  - Eraser now properly removes Circle/Ellipse shapes
+  - Added bounds intersection detection using `IntersectsWith()` for shape types
+  - Added NaN guards for `Canvas.GetLeft/GetTop` to handle uninitialized attached properties
+  - Previously only removed Polylines (pen strokes) and Lines
+
 ## v1.0.10
 
 ### Added
