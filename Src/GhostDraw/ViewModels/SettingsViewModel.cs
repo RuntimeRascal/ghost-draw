@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using GhostDraw.Services;
+using System.Reflection;
 
 namespace GhostDraw.ViewModels;
 
@@ -13,6 +14,8 @@ public class SettingsViewModel(
     LoggingSettingsService loggingSettings,
     ILoggerFactory loggerFactory)
 {
+    private const string DefaultVersion = "v1.0.0";
+
     /// <summary>
     /// Service for managing application settings (brush, hotkey, mode, etc.)
     /// </summary>
@@ -27,4 +30,16 @@ public class SettingsViewModel(
     /// Factory for creating loggers for child controls
     /// </summary>
     public ILoggerFactory LoggerFactory { get; } = loggerFactory;
+
+    /// <summary>
+    /// Gets the application version from the assembly
+    /// </summary>
+    public string Version
+    {
+        get
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            return version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : DefaultVersion;
+        }
+    }
 }
