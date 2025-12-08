@@ -137,11 +137,35 @@ public class CircleTool(ILogger<CircleTool> logger) : IDrawingTool
         {
             double maxDimension = Math.Max(width, height);
             
-            // Adjust left/top based on which direction we're dragging
-            if (currentPoint.X < startPoint.X)
+            // Adjust left/top based on which quadrant we're dragging to
+            // Determine the quadrant based on current position relative to start
+            bool isDraggingLeft = currentPoint.X < startPoint.X;
+            bool isDraggingUp = currentPoint.Y < startPoint.Y;
+            
+            if (isDraggingLeft && isDraggingUp)
+            {
+                // Top-left quadrant
                 left = startPoint.X - maxDimension;
-            if (currentPoint.Y < startPoint.Y)
                 top = startPoint.Y - maxDimension;
+            }
+            else if (isDraggingLeft && !isDraggingUp)
+            {
+                // Bottom-left quadrant
+                left = startPoint.X - maxDimension;
+                top = startPoint.Y;
+            }
+            else if (!isDraggingLeft && isDraggingUp)
+            {
+                // Top-right quadrant
+                left = startPoint.X;
+                top = startPoint.Y - maxDimension;
+            }
+            else
+            {
+                // Bottom-right quadrant
+                left = startPoint.X;
+                top = startPoint.Y;
+            }
             
             width = maxDimension;
             height = maxDimension;
