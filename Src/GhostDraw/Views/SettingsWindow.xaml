@@ -187,6 +187,15 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
+                        <!-- Version Number in Bottom-Left -->
+                        <TextBlock Grid.Column="0"
+                                  Text="{Binding Version, StringFormat='GhostDraw {0}'}"
+                                  FontSize="11"
+                                  FontFamily="Consolas"
+                                  Foreground="#606060"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Left"/>
+
                         <Button Grid.Column="1"
                                Content="RESET"
                                Click="ResetButton_Click"
