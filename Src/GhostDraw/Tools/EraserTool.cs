@@ -136,6 +136,30 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
                         }
                     }
                 }
+                else if (element is System.Windows.Shapes.Rectangle rectangle)
+                {
+                    // Check if eraser intersects with rectangle bounds
+                    double left = Canvas.GetLeft(rectangle);
+                    double top = Canvas.GetTop(rectangle);
+                    Rect shapeRect = new Rect(left, top, rectangle.Width, rectangle.Height);
+                    
+                    if (eraserRect.IntersectsWith(shapeRect))
+                    {
+                        shouldErase = true;
+                    }
+                }
+                else if (element is Ellipse ellipse)
+                {
+                    // Check if eraser intersects with ellipse bounds
+                    double left = Canvas.GetLeft(ellipse);
+                    double top = Canvas.GetTop(ellipse);
+                    Rect ellipseRect = new Rect(left, top, ellipse.Width, ellipse.Height);
+                    
+                    if (eraserRect.IntersectsWith(ellipseRect))
+                    {
+                        shouldErase = true;
+                    }
+                }
 
                 if (shouldErase)
                 {

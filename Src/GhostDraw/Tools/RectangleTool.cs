@@ -42,7 +42,9 @@ public class RectangleTool(ILogger<RectangleTool> logger) : IDrawingTool
         if (_isCreatingRectangle && _currentRectangle != null && _rectangleStartPoint.HasValue)
         {
             // Update rectangle dimensions to follow cursor
-            UpdateRectangle(_rectangleStartPoint.Value, position);
+            // Check if Shift key is held down for perfect square
+            bool isShiftPressed = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+            UpdateRectangle(_rectangleStartPoint.Value, position, isShiftPressed);
         }
     }
 
@@ -117,7 +119,7 @@ public class RectangleTool(ILogger<RectangleTool> logger) : IDrawingTool
         _logger.LogInformation("Rectangle started at ({X:F0}, {Y:F0})", startPoint.X, startPoint.Y);
     }
 
-    private void UpdateRectangle(Point startPoint, Point currentPoint)
+    private void UpdateRectangle(Point startPoint, Point currentPoint, bool isPerfectSquare = false)
     {
         if (_currentRectangle == null)
             return;
@@ -127,6 +129,14 @@ public class RectangleTool(ILogger<RectangleTool> logger) : IDrawingTool
         double top = Math.Min(startPoint.Y, currentPoint.Y);
         double width = Math.Abs(currentPoint.X - startPoint.X);
         double height = Math.Abs(currentPoint.Y - startPoint.Y);
+
+        // If Shift is held, make it a perfect square (width = height = min dimension)
+        if (isPerfectSquare)
+        {
+            double size = Math.Min(width, height);
+            width = size;
+            height = size;
+        }
 
         Canvas.SetLeft(_currentRectangle, left);
         Canvas.SetTop(_currentRectangle, top);
@@ -138,7 +148,9 @@ public class RectangleTool(ILogger<RectangleTool> logger) : IDrawingTool
     {
         if (_currentRectangle != null && _rectangleStartPoint.HasValue)
         {
-            UpdateRectangle(_rectangleStartPoint.Value, endPoint);
+            // Check if Shift was held on the final click
+            bool isShiftPressed = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+            UpdateRectangle(_rectangleStartPoint.Value, endPoint, isShiftPressed);
             _logger.LogInformation("Rectangle finished at ({X:F0}, {Y:F0})", endPoint.X, endPoint.Y);
         }
 
