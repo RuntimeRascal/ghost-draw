@@ -24,6 +24,7 @@ public partial class OverlayWindow : Window
     private readonly PenTool _penTool;
     private readonly LineTool _lineTool;
     private readonly EraserTool _eraserTool;
+    private readonly RectangleTool _rectangleTool;
     private IDrawingTool? _activeTool;
 
     /// <summary>
@@ -57,7 +58,7 @@ public partial class OverlayWindow : Window
     private readonly TimeSpan _screenshotToastFadeOutDuration = TimeSpan.FromMilliseconds(300);
 
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
-        PenTool penTool, LineTool lineTool, EraserTool eraserTool)
+        PenTool penTool, LineTool lineTool, EraserTool eraserTool, RectangleTool rectangleTool)
     {
         _logger = logger;
         _appSettings = appSettings;
@@ -65,6 +66,7 @@ public partial class OverlayWindow : Window
         _penTool = penTool;
         _lineTool = lineTool;
         _eraserTool = eraserTool;
+        _rectangleTool = rectangleTool;
         _logger.LogDebug("OverlayWindow constructor called");
 
         InitializeComponent();
@@ -155,6 +157,7 @@ public partial class OverlayWindow : Window
             DrawTool.Pen => _penTool,
             DrawTool.Line => _lineTool,
             DrawTool.Eraser => _eraserTool,
+            DrawTool.Rectangle => _rectangleTool,
             _ => _penTool
         };
 
@@ -207,6 +210,7 @@ public partial class OverlayWindow : Window
                 DrawTool.Pen => _cursorHelper.CreateColoredPencilCursor(settings.ActiveBrush),
                 DrawTool.Line => _cursorHelper.CreateLineCursor(settings.ActiveBrush),
                 DrawTool.Eraser => _cursorHelper.CreateEraserCursor(),
+                DrawTool.Rectangle => _cursorHelper.CreateRectangleCursor(settings.ActiveBrush),
                 _ => WpfCursors.Cross
             };
             
@@ -336,6 +340,7 @@ public partial class OverlayWindow : Window
                 DrawTool.Pen => _penTool,
                 DrawTool.Line => _lineTool,
                 DrawTool.Eraser => _eraserTool,
+                DrawTool.Rectangle => _rectangleTool,
                 _ => _penTool
             };
 

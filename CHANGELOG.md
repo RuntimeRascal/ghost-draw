@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## v1.0.8
+
+### Added
+- **Rectangle Tool** - Draw rectangles by clicking two points
+  - Press `U` to activate Rectangle tool
+  - First click sets one corner, second click finalizes the rectangle
+  - Live preview updates as you move the mouse
+  - Respects current color and thickness settings
+  - Custom rectangle cursor with corner markers
+  - Supports right-click color cycling and mouse wheel thickness adjustment
+  - Works seamlessly with Eraser tool
+
 ## v1.0.7
 
 ### Added
@@ -21,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Screenshot hotkey (`Ctrl+S`) now correctly detects Control key by tracking both left (VK_LCONTROL) and right (VK_RCONTROL) control keys instead of generic VK_CONTROL
 - Thread safety improvements with volatile field for update nesting level
+
+### Changed
+- Snipping tool (`S` key) now properly exits drawing mode to allow user interaction
+- User must manually reactivate drawing mode after using snipping tool (press hotkey)
 
 ## v1.0.6
 

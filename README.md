@@ -23,6 +23,7 @@
 ## ✨ Features
 
 ### 🎨 **Drawing Tools**
+- **Multiple Drawing Tools** - Switch between Pen (freehand), Line (straight lines), Rectangle (boxes), and Eraser tools with keyboard shortcuts
 - **Customizable Color Palette** - Create your own color collection and cycle through them while drawing
 - **Variable Brush Thickness** - Adjust brush size from 1-100px with configurable min/max ranges
 - **Smooth Drawing** - High-performance rendering for fluid strokes

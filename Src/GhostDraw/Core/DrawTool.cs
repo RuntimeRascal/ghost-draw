@@ -21,5 +21,10 @@ public enum DrawTool
     /// <summary>
     /// Eraser tool - removes drawing objects underneath the cursor
     /// </summary>
-    Eraser
+    Eraser,
+    
+    /// <summary>
+    /// Rectangle tool - click two points to draw a rectangle
+    /// </summary>
+    Rectangle
 }
