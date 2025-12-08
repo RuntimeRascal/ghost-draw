@@ -141,11 +141,17 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
                     // Check if eraser intersects with rectangle bounds
                     double left = Canvas.GetLeft(rectangle);
                     double top = Canvas.GetTop(rectangle);
-                    Rect shapeRect = new Rect(left, top, rectangle.Width, rectangle.Height);
                     
-                    if (eraserRect.IntersectsWith(shapeRect))
+                    // Handle NaN values (shouldn't happen, but be defensive)
+                    if (!double.IsNaN(left) && !double.IsNaN(top) && 
+                        !double.IsNaN(rectangle.Width) && !double.IsNaN(rectangle.Height))
                     {
-                        shouldErase = true;
+                        Rect shapeRect = new Rect(left, top, rectangle.Width, rectangle.Height);
+                        
+                        if (eraserRect.IntersectsWith(shapeRect))
+                        {
+                            shouldErase = true;
+                        }
                     }
                 }
                 else if (element is Ellipse ellipse)
@@ -153,11 +159,17 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
                     // Check if eraser intersects with ellipse bounds
                     double left = Canvas.GetLeft(ellipse);
                     double top = Canvas.GetTop(ellipse);
-                    Rect ellipseRect = new Rect(left, top, ellipse.Width, ellipse.Height);
                     
-                    if (eraserRect.IntersectsWith(ellipseRect))
+                    // Handle NaN values (shouldn't happen, but be defensive)
+                    if (!double.IsNaN(left) && !double.IsNaN(top) && 
+                        !double.IsNaN(ellipse.Width) && !double.IsNaN(ellipse.Height))
                     {
-                        shouldErase = true;
+                        Rect ellipseRect = new Rect(left, top, ellipse.Width, ellipse.Height);
+                        
+                        if (eraserRect.IntersectsWith(ellipseRect))
+                        {
+                            shouldErase = true;
+                        }
                     }
                 }
 
