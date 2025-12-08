@@ -26,5 +26,10 @@ public enum DrawTool
     /// <summary>
     /// Rectangle tool - click two points to draw a rectangle
     /// </summary>
-    Rectangle
+    Rectangle,
+    
+    /// <summary>
+    /// Circle tool - click two points to draw a circle/ellipse
+    /// </summary>
+    Circle
 }

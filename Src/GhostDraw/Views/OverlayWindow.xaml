@@ -219,6 +219,20 @@
                                Text="Select Rectangle Tool"/>
                 </StackPanel>
 
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="C"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Select Circle Tool"/>
+                </StackPanel>
+
                 <!-- Separator -->
                 <Border Height="1" Background="#404040" Margin="0,8,0,12"/>
 

@@ -64,6 +64,7 @@ public static class ServiceConfiguration
         services.AddSingleton<GhostDraw.Tools.LineTool>();
         services.AddSingleton<GhostDraw.Tools.EraserTool>();
         services.AddSingleton<GhostDraw.Tools.RectangleTool>();
+        services.AddSingleton<GhostDraw.Tools.CircleTool>();
         
         services.AddSingleton<OverlayWindow>();
         services.AddSingleton<GlobalKeyboardHook>();

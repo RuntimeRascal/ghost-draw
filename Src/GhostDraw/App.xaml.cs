@@ -78,6 +78,7 @@ public partial class App : Application
             _keyboardHook.LineToolPressed += OnLineToolPressed;
             _keyboardHook.EraserToolPressed += OnEraserToolPressed;
             _keyboardHook.RectangleToolPressed += OnRectangleToolPressed;
+            _keyboardHook.CircleToolPressed += OnCircleToolPressed;
             _keyboardHook.HelpPressed += OnHelpPressed;
             _keyboardHook.ScreenshotFullPressed += OnScreenshotFullPressed;
             _keyboardHook.Start();
@@ -322,6 +323,23 @@ public partial class App : Application
         catch (Exception ex)
         {
             _exceptionHandler?.HandleException(ex, "Rectangle tool handler");
+        }
+    }
+
+    private void OnCircleToolPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Only switch to circle tool if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("C pressed - selecting circle tool");
+                _drawingManager?.SetCircleTool();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Circle tool handler");
         }
     }
 
