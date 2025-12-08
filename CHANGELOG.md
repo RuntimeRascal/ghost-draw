@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## v1.0.9 (Unreleased)
+
+### Added
+- **Circle/Ellipse Tool** - Draw circles and ellipses by defining a bounding box
+  - Press `C` to activate Circle tool
+  - Uses bounding box approach: first click sets one corner, second click defines the opposite corner
+  - **Hold Shift** while drawing to create perfect circles (equal width and height)
+  - Live preview updates as you move the mouse
+  - Respects current color and thickness settings
+  - Custom circle cursor with corner markers
+  - Supports right-click color cycling and mouse wheel thickness adjustment
+  - Works seamlessly with Eraser tool
+  - Consistent with Rectangle tool behavior for intuitive shape creation
+
 ## v1.0.8
 
 ### Added
