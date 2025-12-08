@@ -25,6 +25,7 @@ public partial class OverlayWindow : Window
     private readonly LineTool _lineTool;
     private readonly EraserTool _eraserTool;
     private readonly RectangleTool _rectangleTool;
+    private readonly CircleTool _circleTool;
     private IDrawingTool? _activeTool;
 
     /// <summary>
@@ -58,7 +59,7 @@ public partial class OverlayWindow : Window
     private readonly TimeSpan _screenshotToastFadeOutDuration = TimeSpan.FromMilliseconds(300);
 
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
-        PenTool penTool, LineTool lineTool, EraserTool eraserTool, RectangleTool rectangleTool)
+        PenTool penTool, LineTool lineTool, EraserTool eraserTool, RectangleTool rectangleTool, CircleTool circleTool)
     {
         _logger = logger;
         _appSettings = appSettings;
@@ -67,6 +68,7 @@ public partial class OverlayWindow : Window
         _lineTool = lineTool;
         _eraserTool = eraserTool;
         _rectangleTool = rectangleTool;
+        _circleTool = circleTool;
         _logger.LogDebug("OverlayWindow constructor called");
 
         InitializeComponent();
@@ -158,6 +160,7 @@ public partial class OverlayWindow : Window
             DrawTool.Line => _lineTool,
             DrawTool.Eraser => _eraserTool,
             DrawTool.Rectangle => _rectangleTool,
+            DrawTool.Circle => _circleTool,
             _ => _penTool
         };
 
@@ -211,6 +214,7 @@ public partial class OverlayWindow : Window
                 DrawTool.Line => _cursorHelper.CreateLineCursor(settings.ActiveBrush),
                 DrawTool.Eraser => _cursorHelper.CreateEraserCursor(),
                 DrawTool.Rectangle => _cursorHelper.CreateRectangleCursor(settings.ActiveBrush),
+                DrawTool.Circle => _cursorHelper.CreateCircleCursor(settings.ActiveBrush),
                 _ => WpfCursors.Cross
             };
             
@@ -341,6 +345,7 @@ public partial class OverlayWindow : Window
                 DrawTool.Line => _lineTool,
                 DrawTool.Eraser => _eraserTool,
                 DrawTool.Rectangle => _rectangleTool,
+                DrawTool.Circle => _circleTool,
                 _ => _penTool
             };
 

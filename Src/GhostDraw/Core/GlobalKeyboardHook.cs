@@ -17,6 +17,7 @@ public class GlobalKeyboardHook : IDisposable
     private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
     private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
     private const int VK_U = 0x55;         // 85 - 'U' key for rectangle tool
+    private const int VK_C = 0x43;         // 67 - 'C' key for circle tool
     private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
     private const int VK_S = 0x53;         // 83 - 'S' key for screenshot (Ctrl+S only)
     private const int VK_LCONTROL = 0xA2;  // 162 - Left Control key
@@ -37,6 +38,7 @@ public class GlobalKeyboardHook : IDisposable
     public event EventHandler? LineToolPressed;
     public event EventHandler? EraserToolPressed;
     public event EventHandler? RectangleToolPressed;
+    public event EventHandler? CircleToolPressed;
     public event EventHandler? HelpPressed;
     public event EventHandler? ScreenshotFullPressed;
 
@@ -245,6 +247,13 @@ public class GlobalKeyboardHook : IDisposable
                 {
                     _logger.LogDebug("U key pressed - rectangle tool request");
                     RectangleToolPressed?.Invoke(this, EventArgs.Empty);
+                }
+
+                // Check for C key press (circle tool)
+                if (vkCode == VK_C && isKeyDown)
+                {
+                    _logger.LogDebug("C key pressed - circle tool request");
+                    CircleToolPressed?.Invoke(this, EventArgs.Empty);
                 }
 
                 // Check for F1 key press (help)

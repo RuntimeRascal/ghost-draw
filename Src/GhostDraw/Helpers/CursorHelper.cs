@@ -480,6 +480,108 @@ public class CursorHelper(ILogger<CursorHelper> logger) : IDisposable
         }
     }
 
+    /// <summary>
+    /// Creates a cursor for the Circle tool with color indicator
+    /// </summary>
+    /// <param name="colorHex">Hex color for the circle (e.g., "#FF0000")</param>
+    /// <returns>Custom cursor</returns>
+    public WpfCursor CreateCircleCursor(string colorHex)
+    {
+        lock (_cursorLock)
+        {
+            if (_disposed)
+            {
+                _logger.LogWarning("CreateCircleCursor called on disposed CursorHelper");
+                return WpfCursors.Cross;
+            }
+
+            try
+            {
+                _logger.LogDebug("Creating circle cursor with color {Color}", colorHex);
+
+                // Destroy previous cursor handle to prevent leaks
+                if (_currentCursorHandle != nint.Zero)
+                {
+                    try
+                    {
+                        DestroyCursor(_currentCursorHandle);
+                        _logger.LogDebug("Destroyed previous cursor handle");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to destroy previous cursor handle");
+                    }
+                    _currentCursorHandle = nint.Zero;
+                }
+
+                // Create a bitmap for the cursor (32x32 pixels)
+                int size = 32;
+                using (Bitmap bitmap = new Bitmap(size, size))
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.Clear(Color.Transparent);
+
+                    // Parse the circle color
+                    Color circleColor = ColorTranslator.FromHtml(colorHex);
+
+                    // Draw a small circle preview
+                    int circleRadius = 6;
+                    int circleLeft = 6;
+                    int circleTop = (size - circleRadius * 2) / 2;
+
+                    // Draw circle outline with the active color
+                    using (Pen circlePen = new Pen(circleColor, 2))
+                    {
+                        g.DrawEllipse(circlePen, circleLeft, circleTop, circleRadius * 2, circleRadius * 2);
+                    }
+
+                    // Draw corner markers (small filled squares at key points - top-left, top-right, bottom-left, bottom-right)
+                    int cornerSize = 3;
+                    using (SolidBrush cornerBrush = new SolidBrush(Color.White))
+                    {
+                        // Top-left (this is the hotspot - represents bounding box corner)
+                        g.FillRectangle(cornerBrush, circleLeft - 1, circleTop - 1, cornerSize, cornerSize);
+                        // Top-right
+                        g.FillRectangle(cornerBrush, circleLeft + circleRadius * 2 - 1, circleTop - 1, cornerSize, cornerSize);
+                        // Bottom-left
+                        g.FillRectangle(cornerBrush, circleLeft - 1, circleTop + circleRadius * 2 - 1, cornerSize, cornerSize);
+                        // Bottom-right
+                        g.FillRectangle(cornerBrush, circleLeft + circleRadius * 2 - 1, circleTop + circleRadius * 2 - 1, cornerSize, cornerSize);
+                    }
+
+                    // Draw black outlines for corner markers
+                    using (Pen cornerOutline = new Pen(Color.Black, 1))
+                    {
+                        g.DrawRectangle(cornerOutline, circleLeft - 1, circleTop - 1, cornerSize, cornerSize);
+                        g.DrawRectangle(cornerOutline, circleLeft + circleRadius * 2 - 1, circleTop - 1, cornerSize, cornerSize);
+                        g.DrawRectangle(cornerOutline, circleLeft - 1, circleTop + circleRadius * 2 - 1, cornerSize, cornerSize);
+                        g.DrawRectangle(cornerOutline, circleLeft + circleRadius * 2 - 1, circleTop + circleRadius * 2 - 1, cornerSize, cornerSize);
+                    }
+
+                    // Convert bitmap to cursor with hotspot at top-left corner marker
+                    nint hCursor = CreateCursorFromBitmap(bitmap, circleLeft, circleTop);
+
+                    if (hCursor != nint.Zero)
+                    {
+                        _currentCursorHandle = hCursor;
+                        _logger.LogDebug("Successfully created circle cursor (handle: {Handle})", hCursor);
+
+                        return System.Windows.Interop.CursorInteropHelper.Create(new SafeCursorHandle(hCursor));
+                    }
+                }
+
+                _logger.LogWarning("Failed to create circle cursor, returning default");
+                return WpfCursors.Cross;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating circle cursor, using default");
+                return WpfCursors.Cross;
+            }
+        }
+    }
+
     private nint CreateCursorFromBitmap(Bitmap bitmap, int hotspotX, int hotspotY)
     {
         nint hIcon = nint.Zero;
