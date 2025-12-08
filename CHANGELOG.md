@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## v1.0.10
+
+### Added
+- **Version Display in Settings Window** - Shows current application version in footer
+  - Version number appears in bottom-left corner of Settings window
+  - Formatted as "Version X.Y.Z"
+  - Retrieved from assembly information for accuracy
+  - Helps users verify which version they're running
+
+### Changed
+- Settings window footer now includes version information for better user awareness
+
 ## v1.0.9
 
 ### Added
