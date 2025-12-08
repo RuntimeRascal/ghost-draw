@@ -131,6 +131,9 @@ public class RectangleTool(ILogger<RectangleTool> logger) : IDrawingTool
         double height = Math.Abs(currentPoint.Y - startPoint.Y);
 
         // If Shift is held, make it a perfect square (width = height = min dimension)
+        // Note: Uses Math.Min (not Math.Max like CircleTool) so the square fits within
+        // the dragged bounding box, making the final size more predictable and visible
+        // to the user as they drag. This matches the behavior specified in the issue.
         if (isPerfectSquare)
         {
             double size = Math.Min(width, height);
