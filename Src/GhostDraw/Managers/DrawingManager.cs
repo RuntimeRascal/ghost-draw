@@ -156,7 +156,7 @@ public class DrawingManager
             if (shouldExitDrawingMode)
             {
                 // Help was not visible, or user wants to exit - force disable drawing mode
-                _logger.LogInformation("Force disabling drawing mode");
+                _logger.LogDebug("Force disabling drawing mode");
                 _isDrawingLocked = false;
                 _overlayWindow.DisableDrawing();
                 _overlayWindow.Hide();

@@ -757,14 +757,14 @@ public partial class OverlayWindow : Window
             if (_isHelpVisible)
             {
                 // Help is visible - only hide help, don't exit drawing mode
-                _logger.LogInformation("ESC pressed while help visible - closing help only");
+                _logger.LogDebug("ESC pressed while help visible - closing help only");
                 HideHelp();
                 return false; // Don't exit drawing mode
             }
             else
             {
                 // Help is not visible - exit drawing mode
-                _logger.LogInformation("ESC pressed - exiting drawing mode");
+                _logger.LogDebug("ESC pressed - exiting drawing mode");
                 return true; // Exit drawing mode
             }
         }
