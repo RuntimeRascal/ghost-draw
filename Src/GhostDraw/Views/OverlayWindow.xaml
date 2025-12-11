@@ -322,7 +322,7 @@
                     <TextBlock FontFamily="Segoe UI"
                                FontSize="16"
                                Foreground="#B0B0B0"
-                               Text="Exit Draw Mode"/>
+                               Text="Close Help / Exit Draw Mode"/>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
@@ -336,7 +336,7 @@
                     <TextBlock FontFamily="Segoe UI"
                                FontSize="16"
                                Foreground="#B0B0B0"
-                               Text="Show This Help"/>
+                               Text="Toggle This Help"/>
                 </StackPanel>
             </StackPanel>
         </Border>

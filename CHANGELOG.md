@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## v1.0.12
+
+### Added
+- **F1 Help Toggle Behavior**
+  - `F1` now toggles the keyboard shortcuts help overlay on and off instead of auto-hiding after a timeout
+  - Help overlay stays visible until explicitly closed with `F1` or `ESC`
+  - New tests cover help toggle and ESC behavior to prevent regressions
+
+### Changed
+- **ESC Key Behavior with Help Open**
+  - Pressing `ESC` while help is visible now only closes the help overlay and **does not** exit drawing mode
+  - Pressing `ESC` when help is hidden still performs the normal emergency exit from drawing mode
+  - Centralized ESC handling in `OverlayWindow` so drawing manager respects whether it should actually exit
+- **Docs**
+  - Updated the project README
+  - Added CONTRIBUTING document
+
+
 ## v1.0.11
 
 ### Added
