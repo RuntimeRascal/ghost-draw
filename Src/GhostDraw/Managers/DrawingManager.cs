@@ -371,7 +371,7 @@ public class DrawingManager
             if (_overlayWindow.IsVisible)
             {
                 _overlayWindow.ToggleHelp();
-                _logger.LogInformation("Help popup toggled");
+                _logger.LogDebug("Help popup toggled");
             }
             else
             {

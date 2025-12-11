@@ -683,7 +683,7 @@ public partial class OverlayWindow : Window
             
             _isHelpVisible = true;
 
-            _logger.LogInformation("Help popup shown (toggle mode)");
+            _logger.LogDebug("Help popup shown (toggle mode)");
         }
         catch (Exception ex)
         {
@@ -704,7 +704,7 @@ public partial class OverlayWindow : Window
             // Create and start fade-out animation
             var fadeOutAnimation = new DoubleAnimation
             {
-                From = HelpPopupBorder.Opacity,
+                From = 0.95,
                 To = 0.0,
                 Duration = new Duration(_helpFadeOutDuration),
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
@@ -714,7 +714,7 @@ public partial class OverlayWindow : Window
             
             _isHelpVisible = false;
 
-            _logger.LogInformation("Help popup hidden");
+            _logger.LogDebug("Help popup hidden");
         }
         catch (Exception ex)
         {

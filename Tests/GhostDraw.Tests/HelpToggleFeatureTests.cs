@@ -26,6 +26,50 @@ public class HelpToggleFeatureTests
         _mockManagerLogger = new Mock<ILogger<DrawingManager>>();
     }
 
+    /// <summary>
+    /// Helper method to create a DrawingManager with mocked dependencies
+    /// </summary>
+    private DrawingManager CreateDrawingManager(Mock<OverlayWindow> mockOverlayWindow)
+    {
+        var mockAppSettings = new Mock<AppSettingsService>(
+            Mock.Of<ILogger<AppSettingsService>>()
+        );
+        var mockScreenshotService = new Mock<ScreenshotService>(
+            Mock.Of<ILogger<ScreenshotService>>(),
+            mockAppSettings.Object
+        );
+        var mockKeyboardHook = new Mock<GlobalKeyboardHook>(_mockHookLogger.Object);
+
+        return new DrawingManager(
+            _mockManagerLogger.Object,
+            mockOverlayWindow.Object,
+            mockAppSettings.Object,
+            mockScreenshotService.Object,
+            mockKeyboardHook.Object
+        );
+    }
+
+    /// <summary>
+    /// Helper method to create a mock OverlayWindow
+    /// </summary>
+    private Mock<OverlayWindow> CreateMockOverlayWindow()
+    {
+        var mockAppSettings = new Mock<AppSettingsService>(
+            Mock.Of<ILogger<AppSettingsService>>()
+        );
+        
+        return new Mock<OverlayWindow>(
+            _mockOverlayLogger.Object,
+            mockAppSettings.Object,
+            Mock.Of<CursorHelper>(),
+            Mock.Of<PenTool>(),
+            Mock.Of<LineTool>(),
+            Mock.Of<EraserTool>(),
+            Mock.Of<RectangleTool>(),
+            Mock.Of<CircleTool>()
+        );
+    }
+
     [Fact]
     public void GlobalKeyboardHook_ShouldHaveHelpPressedEvent()
     {
@@ -100,35 +144,10 @@ public class HelpToggleFeatureTests
     public void DrawingManager_ShouldHaveToggleHelpMethod()
     {
         // Arrange
-        var mockAppSettings = new Mock<AppSettingsService>(
-            Mock.Of<ILogger<AppSettingsService>>()
-        );
-        var mockScreenshotService = new Mock<ScreenshotService>(
-            Mock.Of<ILogger<ScreenshotService>>(),
-            mockAppSettings.Object
-        );
-        var mockOverlayWindow = new Mock<OverlayWindow>(
-            _mockOverlayLogger.Object,
-            mockAppSettings.Object,
-            Mock.Of<CursorHelper>(),
-            Mock.Of<PenTool>(),
-            Mock.Of<LineTool>(),
-            Mock.Of<EraserTool>(),
-            Mock.Of<RectangleTool>(),
-            Mock.Of<CircleTool>()
-        );
-        var mockKeyboardHook = new Mock<GlobalKeyboardHook>(_mockHookLogger.Object);
+        var mockOverlayWindow = CreateMockOverlayWindow();
+        var manager = CreateDrawingManager(mockOverlayWindow);
 
-        // Act
-        var manager = new DrawingManager(
-            _mockManagerLogger.Object,
-            mockOverlayWindow.Object,
-            mockAppSettings.Object,
-            mockScreenshotService.Object,
-            mockKeyboardHook.Object
-        );
-
-        // Assert - ToggleHelp method should exist and be callable
+        // Act & Assert - ToggleHelp method should exist and be callable
         var exception = Record.Exception(() => manager.ToggleHelp());
         Assert.Null(exception); // Should not throw
     }
@@ -137,35 +156,9 @@ public class HelpToggleFeatureTests
     public void DrawingManager_ToggleHelp_ShouldCallOverlayToggleHelp_WhenVisible()
     {
         // Arrange
-        var mockAppSettings = new Mock<AppSettingsService>(
-            Mock.Of<ILogger<AppSettingsService>>()
-        );
-        var mockScreenshotService = new Mock<ScreenshotService>(
-            Mock.Of<ILogger<ScreenshotService>>(),
-            mockAppSettings.Object
-        );
-        var mockOverlayWindow = new Mock<OverlayWindow>(
-            _mockOverlayLogger.Object,
-            mockAppSettings.Object,
-            Mock.Of<CursorHelper>(),
-            Mock.Of<PenTool>(),
-            Mock.Of<LineTool>(),
-            Mock.Of<EraserTool>(),
-            Mock.Of<RectangleTool>(),
-            Mock.Of<CircleTool>()
-        );
-        var mockKeyboardHook = new Mock<GlobalKeyboardHook>(_mockHookLogger.Object);
-        
-        // Setup overlay as visible
+        var mockOverlayWindow = CreateMockOverlayWindow();
         mockOverlayWindow.Setup(x => x.IsVisible).Returns(true);
-
-        var manager = new DrawingManager(
-            _mockManagerLogger.Object,
-            mockOverlayWindow.Object,
-            mockAppSettings.Object,
-            mockScreenshotService.Object,
-            mockKeyboardHook.Object
-        );
+        var manager = CreateDrawingManager(mockOverlayWindow);
 
         // Act
         manager.ToggleHelp();
@@ -178,35 +171,9 @@ public class HelpToggleFeatureTests
     public void DrawingManager_ToggleHelp_ShouldNotCallOverlayToggleHelp_WhenNotVisible()
     {
         // Arrange
-        var mockAppSettings = new Mock<AppSettingsService>(
-            Mock.Of<ILogger<AppSettingsService>>()
-        );
-        var mockScreenshotService = new Mock<ScreenshotService>(
-            Mock.Of<ILogger<ScreenshotService>>(),
-            mockAppSettings.Object
-        );
-        var mockOverlayWindow = new Mock<OverlayWindow>(
-            _mockOverlayLogger.Object,
-            mockAppSettings.Object,
-            Mock.Of<CursorHelper>(),
-            Mock.Of<PenTool>(),
-            Mock.Of<LineTool>(),
-            Mock.Of<EraserTool>(),
-            Mock.Of<RectangleTool>(),
-            Mock.Of<CircleTool>()
-        );
-        var mockKeyboardHook = new Mock<GlobalKeyboardHook>(_mockHookLogger.Object);
-        
-        // Setup overlay as not visible
+        var mockOverlayWindow = CreateMockOverlayWindow();
         mockOverlayWindow.Setup(x => x.IsVisible).Returns(false);
-
-        var manager = new DrawingManager(
-            _mockManagerLogger.Object,
-            mockOverlayWindow.Object,
-            mockAppSettings.Object,
-            mockScreenshotService.Object,
-            mockKeyboardHook.Object
-        );
+        var manager = CreateDrawingManager(mockOverlayWindow);
 
         // Act
         manager.ToggleHelp();
@@ -219,35 +186,9 @@ public class HelpToggleFeatureTests
     public void DrawingManager_ForceDisableDrawing_ShouldCallHandleEscapeKey()
     {
         // Arrange
-        var mockAppSettings = new Mock<AppSettingsService>(
-            Mock.Of<ILogger<AppSettingsService>>()
-        );
-        var mockScreenshotService = new Mock<ScreenshotService>(
-            Mock.Of<ILogger<ScreenshotService>>(),
-            mockAppSettings.Object
-        );
-        var mockOverlayWindow = new Mock<OverlayWindow>(
-            _mockOverlayLogger.Object,
-            mockAppSettings.Object,
-            Mock.Of<CursorHelper>(),
-            Mock.Of<PenTool>(),
-            Mock.Of<LineTool>(),
-            Mock.Of<EraserTool>(),
-            Mock.Of<RectangleTool>(),
-            Mock.Of<CircleTool>()
-        );
-        var mockKeyboardHook = new Mock<GlobalKeyboardHook>(_mockHookLogger.Object);
-        
-        // Setup HandleEscapeKey to return true (exit drawing mode)
+        var mockOverlayWindow = CreateMockOverlayWindow();
         mockOverlayWindow.Setup(x => x.HandleEscapeKey()).Returns(true);
-
-        var manager = new DrawingManager(
-            _mockManagerLogger.Object,
-            mockOverlayWindow.Object,
-            mockAppSettings.Object,
-            mockScreenshotService.Object,
-            mockKeyboardHook.Object
-        );
+        var manager = CreateDrawingManager(mockOverlayWindow);
 
         // Act
         manager.ForceDisableDrawing();
@@ -260,6 +201,10 @@ public class HelpToggleFeatureTests
     public void DrawingManager_ForceDisableDrawing_ShouldExitDrawingMode_WhenHandleEscapeKeyReturnsTrue()
     {
         // Arrange
+        var mockOverlayWindow = CreateMockOverlayWindow();
+        var mockKeyboardHook = new Mock<GlobalKeyboardHook>(_mockHookLogger.Object);
+        mockOverlayWindow.Setup(x => x.HandleEscapeKey()).Returns(true);
+        
         var mockAppSettings = new Mock<AppSettingsService>(
             Mock.Of<ILogger<AppSettingsService>>()
         );
@@ -267,21 +212,7 @@ public class HelpToggleFeatureTests
             Mock.Of<ILogger<ScreenshotService>>(),
             mockAppSettings.Object
         );
-        var mockOverlayWindow = new Mock<OverlayWindow>(
-            _mockOverlayLogger.Object,
-            mockAppSettings.Object,
-            Mock.Of<CursorHelper>(),
-            Mock.Of<PenTool>(),
-            Mock.Of<LineTool>(),
-            Mock.Of<EraserTool>(),
-            Mock.Of<RectangleTool>(),
-            Mock.Of<CircleTool>()
-        );
-        var mockKeyboardHook = new Mock<GlobalKeyboardHook>(_mockHookLogger.Object);
         
-        // Setup HandleEscapeKey to return true (help not visible - should exit)
-        mockOverlayWindow.Setup(x => x.HandleEscapeKey()).Returns(true);
-
         var manager = new DrawingManager(
             _mockManagerLogger.Object,
             mockOverlayWindow.Object,
@@ -303,6 +234,10 @@ public class HelpToggleFeatureTests
     public void DrawingManager_ForceDisableDrawing_ShouldNotExitDrawingMode_WhenHandleEscapeKeyReturnsFalse()
     {
         // Arrange
+        var mockOverlayWindow = CreateMockOverlayWindow();
+        var mockKeyboardHook = new Mock<GlobalKeyboardHook>(_mockHookLogger.Object);
+        mockOverlayWindow.Setup(x => x.HandleEscapeKey()).Returns(false);
+        
         var mockAppSettings = new Mock<AppSettingsService>(
             Mock.Of<ILogger<AppSettingsService>>()
         );
@@ -310,21 +245,7 @@ public class HelpToggleFeatureTests
             Mock.Of<ILogger<ScreenshotService>>(),
             mockAppSettings.Object
         );
-        var mockOverlayWindow = new Mock<OverlayWindow>(
-            _mockOverlayLogger.Object,
-            mockAppSettings.Object,
-            Mock.Of<CursorHelper>(),
-            Mock.Of<PenTool>(),
-            Mock.Of<LineTool>(),
-            Mock.Of<EraserTool>(),
-            Mock.Of<RectangleTool>(),
-            Mock.Of<CircleTool>()
-        );
-        var mockKeyboardHook = new Mock<GlobalKeyboardHook>(_mockHookLogger.Object);
         
-        // Setup HandleEscapeKey to return false (help was visible - only close help)
-        mockOverlayWindow.Setup(x => x.HandleEscapeKey()).Returns(false);
-
         var manager = new DrawingManager(
             _mockManagerLogger.Object,
             mockOverlayWindow.Object,
