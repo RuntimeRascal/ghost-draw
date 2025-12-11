@@ -49,8 +49,14 @@ public partial class OverlayWindow : Window
     private readonly TimeSpan _hintDisplayDuration = TimeSpan.FromSeconds(3.0);
     private readonly TimeSpan _hintFadeOutDuration = TimeSpan.FromMilliseconds(500);
 
-    // Help popup animation (timer removed - help now stays visible until manually toggled)
+    /// <summary>
+    /// Duration for help popup fade-out animation (used when hiding help)
+    /// </summary>
     private readonly TimeSpan _helpFadeOutDuration = TimeSpan.FromMilliseconds(500);
+    
+    /// <summary>
+    /// Duration for help popup fade-in animation (used when showing help)
+    /// </summary>
     private readonly TimeSpan _helpFadeInDuration = TimeSpan.FromMilliseconds(200);
 
     // Screenshot saved toast animation
