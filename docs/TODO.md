@@ -12,10 +12,11 @@
 
 ## Phase Two
 - [X] Get the settings window glow effect working.
-- [ ] Add feature to allow erasing. while in drawing mode, pressing and releasing `e` activated eraser mode.cursor needs to change to a custom eraser cursor.
-- [ ] Add feature to allow drawing a line. while in drawing mode, pressing and releasing `l` activated drawLine mode.
-- [ ] Add feature to allow drawing a square. while in drawing mode, pressing and releasing `s` activated drawSquare mode.
-- [ ] Add feature to allow drawing a circle. while in drawing mode, pressing and releasing `c` activated drawCircle mode.
+- [X] Add feature to allow erasing. while in drawing mode, pressing and releasing `e` activated eraser mode.cursor needs to change to a custom eraser cursor.
+- [X] Add feature to allow drawing a line. while in drawing mode, pressing and releasing `l` activated drawLine mode.
+- [X] Add feature to allow drawing a square. while in drawing mode, pressing and releasing `s` activated drawSquare mode.
+- [X] Add feature to allow drawing a circle. while in drawing mode, pressing and releasing `c` activated drawCircle mode.
+- [X] Add feature to allow typing text.
 
 ## Phase Three
 - [ ] Create a installer.
@@ -24,14 +25,8 @@
 	- [ ] Installer should optionally add the app to startup so it runs when user logs in.
 	- [X] Installer should be able to uninstall the app cleanly removing all files and registry entries.
 	- [X] Installer should be able to update the app to a new version if run again and a current version is already installed.
-- [ ] Create github actions workflow to build and package the installer. And publish to realeases on github.
+- [X] Create github actions workflow to build and package the installer. And publish to releases on github.
 
+**New plan**
+- Create MSIX and publish to MS Store. This will prevent needing a expensive software sign cert in order to self sign the product and prevent looking like a sus product from win security messaging during download and install. Publishing to ms store is a 1-time $10 charge.
 
-
-
-## Settings
-Seams like my settings file settings sometimes get overwritten. I set the key combo to Ctrl + Shift + x but sometimes it gets reset to Ctrl + Shift + D.
-
-Create a default settings json file that we use as defaults for non set settings and for re-creating the settings file if it is corrupted.
-
-On startup load settings, if there is an error loading settings, show user via toast or message dialog that the settings file is corupted and will be re-recreated with defaults. Update the settings file content with default settings.
