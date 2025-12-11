@@ -19,6 +19,7 @@ public partial class OverlayWindow : Window
     private readonly AppSettingsService _appSettings;
     private readonly CursorHelper _cursorHelper;
     private bool _isDrawing = false;
+    private bool _isHelpVisible = false;
 
     // Tool instances
     private readonly PenTool _penTool;
@@ -48,10 +49,9 @@ public partial class OverlayWindow : Window
     private readonly TimeSpan _hintDisplayDuration = TimeSpan.FromSeconds(3.0);
     private readonly TimeSpan _hintFadeOutDuration = TimeSpan.FromMilliseconds(500);
 
-    // Help popup animation
-    private readonly DispatcherTimer _helpPopupTimer;
-    private readonly TimeSpan _helpDisplayDuration = TimeSpan.FromSeconds(4.0);
+    // Help popup animation (timer removed - help now stays visible until manually toggled)
     private readonly TimeSpan _helpFadeOutDuration = TimeSpan.FromMilliseconds(500);
+    private readonly TimeSpan _helpFadeInDuration = TimeSpan.FromMilliseconds(200);
 
     // Screenshot saved toast animation
     private readonly DispatcherTimer _screenshotSavedToastTimer;
@@ -94,12 +94,7 @@ public partial class OverlayWindow : Window
         };
         _drawingModeHintTimer.Tick += DrawingModeHintTimer_Tick;
 
-        // Initialize help popup timer
-        _helpPopupTimer = new DispatcherTimer
-        {
-            Interval = _helpDisplayDuration
-        };
-        _helpPopupTimer.Tick += HelpPopupTimer_Tick;
+        // Note: Help popup timer removed - help now stays visible until manually toggled
 
         // Initialize screenshot saved toast timer
         _screenshotSavedToastTimer = new DispatcherTimer
@@ -136,7 +131,6 @@ public partial class OverlayWindow : Window
             _thicknessIndicatorTimer.Stop();
             _canvasClearedToastTimer.Stop();
             _drawingModeHintTimer.Stop();
-            _helpPopupTimer.Stop();
             _screenshotSavedToastTimer.Stop();
         };
 
@@ -643,14 +637,37 @@ public partial class OverlayWindow : Window
     #region Help Popup
 
     /// <summary>
-    /// Shows the help popup with all keyboard shortcuts
+    /// Toggles the help popup with all keyboard shortcuts
     /// </summary>
-    public void ShowHelp()
+    public void ToggleHelp()
     {
         try
         {
-            // Stop any existing animations and timer
-            _helpPopupTimer.Stop();
+            if (_isHelpVisible)
+            {
+                // Help is currently visible, hide it
+                HideHelp();
+            }
+            else
+            {
+                // Help is currently hidden, show it
+                ShowHelp();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to toggle help popup");
+        }
+    }
+
+    /// <summary>
+    /// Shows the help popup with all keyboard shortcuts (no auto-hide)
+    /// </summary>
+    private void ShowHelp()
+    {
+        try
+        {
+            // Stop any existing animations
             HelpPopupBorder.BeginAnimation(OpacityProperty, null);
 
             // Show the help with fade-in animation
@@ -658,16 +675,15 @@ public partial class OverlayWindow : Window
             {
                 From = 0.0,
                 To = 0.95,
-                Duration = new Duration(TimeSpan.FromMilliseconds(200)),
+                Duration = new Duration(_helpFadeInDuration),
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
             };
 
             HelpPopupBorder.BeginAnimation(OpacityProperty, fadeInAnimation);
+            
+            _isHelpVisible = true;
 
-            // Start the timer for fade-out
-            _helpPopupTimer.Start();
-
-            _logger.LogDebug("Help popup shown");
+            _logger.LogInformation("Help popup shown (toggle mode)");
         }
         catch (Exception ex)
         {
@@ -676,49 +692,87 @@ public partial class OverlayWindow : Window
     }
 
     /// <summary>
-    /// Timer tick handler that starts the fade-out animation for the help popup
+    /// Hides the help popup with fade-out animation
     /// </summary>
-    private void HelpPopupTimer_Tick(object? sender, EventArgs e)
+    private void HideHelp()
     {
         try
         {
-            _helpPopupTimer.Stop();
+            // Stop any existing animations
+            HelpPopupBorder.BeginAnimation(OpacityProperty, null);
 
             // Create and start fade-out animation
             var fadeOutAnimation = new DoubleAnimation
             {
-                From = 0.95,
+                From = HelpPopupBorder.Opacity,
                 To = 0.0,
                 Duration = new Duration(_helpFadeOutDuration),
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
             };
 
             HelpPopupBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
+            
+            _isHelpVisible = false;
 
-            _logger.LogDebug("Help popup fade-out started");
+            _logger.LogInformation("Help popup hidden");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to fade out help popup");
+            _logger.LogError(ex, "Failed to hide help popup");
             // Ensure popup is hidden even if animation fails
             HelpPopupBorder.Opacity = 0;
+            _isHelpVisible = false;
         }
     }
 
     /// <summary>
-    /// Immediately hides the help popup
+    /// Immediately hides the help popup (called when drawing mode is disabled)
     /// </summary>
     private void HideHelpPopup()
     {
         try
         {
-            _helpPopupTimer.Stop();
             HelpPopupBorder.BeginAnimation(OpacityProperty, null);
             HelpPopupBorder.Opacity = 0;
+            _isHelpVisible = false;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to hide help popup");
+        }
+    }
+
+    #endregion
+
+    #region ESC Key Handling
+
+    /// <summary>
+    /// Handles ESC key press. If help is visible, only closes help. Otherwise, signals to exit drawing mode.
+    /// </summary>
+    /// <returns>True if ESC should exit drawing mode, False if it only closed help</returns>
+    public bool HandleEscapeKey()
+    {
+        try
+        {
+            if (_isHelpVisible)
+            {
+                // Help is visible - only hide help, don't exit drawing mode
+                _logger.LogInformation("ESC pressed while help visible - closing help only");
+                HideHelp();
+                return false; // Don't exit drawing mode
+            }
+            else
+            {
+                // Help is not visible - exit drawing mode
+                _logger.LogInformation("ESC pressed - exiting drawing mode");
+                return true; // Exit drawing mode
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to handle ESC key");
+            // On error, always exit drawing mode for safety
+            return true;
         }
     }
 

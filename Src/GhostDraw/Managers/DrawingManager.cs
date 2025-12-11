@@ -148,15 +148,29 @@ public class DrawingManager
     {
         try
         {
-            _logger.LogInformation("Force disabling drawing mode (ESC pressed)");
-            _isDrawingLocked = false;
-            _overlayWindow.DisableDrawing();
-            _overlayWindow.Hide();
+            _logger.LogInformation("ESC pressed - checking help visibility");
             
-            // Notify hook that drawing mode is inactive
-            _keyboardHook.SetDrawingModeActive(false);
+            // Check if help is visible and handle accordingly
+            bool shouldExitDrawingMode = _overlayWindow.HandleEscapeKey();
             
-            _logger.LogDebug("Drawing mode force disabled");
+            if (shouldExitDrawingMode)
+            {
+                // Help was not visible, or user wants to exit - force disable drawing mode
+                _logger.LogInformation("Force disabling drawing mode");
+                _isDrawingLocked = false;
+                _overlayWindow.DisableDrawing();
+                _overlayWindow.Hide();
+                
+                // Notify hook that drawing mode is inactive
+                _keyboardHook.SetDrawingModeActive(false);
+                
+                _logger.LogDebug("Drawing mode force disabled");
+            }
+            else
+            {
+                // Help was visible and has been closed - stay in drawing mode
+                _logger.LogDebug("ESC only closed help - remaining in drawing mode");
+            }
         }
         catch (Exception ex)
         {
@@ -348,25 +362,25 @@ public class DrawingManager
     }
 
     /// <summary>
-    /// Shows the help popup with keyboard shortcuts
+    /// Toggles the help popup with keyboard shortcuts
     /// </summary>
-    public void ShowHelp()
+    public void ToggleHelp()
     {
         try
         {
             if (_overlayWindow.IsVisible)
             {
-                _overlayWindow.ShowHelp();
-                _logger.LogInformation("Help popup shown");
+                _overlayWindow.ToggleHelp();
+                _logger.LogInformation("Help popup toggled");
             }
             else
             {
-                _logger.LogDebug("ShowHelp ignored - overlay not visible");
+                _logger.LogDebug("ToggleHelp ignored - overlay not visible");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to show help");
+            _logger.LogError(ex, "Failed to toggle help");
             // Don't re-throw - not critical
         }
     }

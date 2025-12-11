@@ -347,11 +347,11 @@ public partial class App : Application
     {
         try
         {
-            // Show help overlay if drawing mode is active
+            // Toggle help overlay if drawing mode is active
             if (_drawingManager?.IsDrawingMode == true)
             {
-                _logger?.LogInformation("F1 pressed - showing help");
-                _drawingManager?.ShowHelp();
+                _logger?.LogInformation("F1 pressed - toggling help");
+                _drawingManager?.ToggleHelp();
             }
         }
         catch (Exception ex)
