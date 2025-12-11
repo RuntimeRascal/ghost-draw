@@ -13,8 +13,7 @@
 
 [**Download Latest Release**](https://github.com/RuntimeRascal/ghost-draw/releases) | [**Report Bug**](https://github.com/RuntimeRascal/ghost-draw/issues) | [**Request Feature**](https://github.com/RuntimeRascal/ghost-draw/issues)
 
-![GhostDraw Demo](docs/Demo.gif)
-<!-- TODO: Add animated GIF showing drawing on screen -->
+![GhostDraw Demo](docs/GhostDrawDemo.gif)
 
 </div>
 
@@ -44,12 +43,6 @@
 - **Right-Click Color Cycling** - Quickly switch between your palette colors
 - **Position-Numbered Palette** - Easily organize and reorder your favorite colors
 
-### 🛡️ **Safety & Stability**
-- **Fail-Safe Design** - Won't lock you out of your system if it crashes
-- **Fast Input Processing** - All hooks complete in < 5ms for responsive system
-- **Graceful Error Handling** - Protected critical paths ensure stability
-- **Proper Resource Cleanup** - Memory and hooks always released properly
-
 ---
 
 ## 📸 Screenshots
@@ -59,22 +52,19 @@
 
 Customize every aspect of GhostDraw with the intuitive settings panel:
 - Color palette management with add/remove/reorder
+- ![Color Cycling](docs/ColorPalette.png)
 - Brush thickness range configuration
 - Hotkey customization
 - Drawing mode selection
 - Logging level control
 
-### Active Drawing Mode
-![Drawing Mode](docs/DrawingMode.png)
-<!-- TODO: Add screenshot of drawing overlay in action with colored strokes -->
+### Help (F1)
+![Drawing Mode](docs/Help.png)
 
-### Color Palette Cycling
-![Color Cycling](docs/ColorCycling.png)
-<!-- TODO: Add screenshot showing color palette with active color indicator -->
+
 
 ### System Tray Integration
-![System Tray](docs/SystemTray.png)
-<!-- TODO: Add screenshot of system tray icon and context menu -->
+![System Tray](docs/Tray.png)
 
 ---
 
