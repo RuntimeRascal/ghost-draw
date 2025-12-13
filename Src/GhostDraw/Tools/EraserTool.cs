@@ -8,6 +8,19 @@ using Point = System.Windows.Point;
 namespace GhostDraw.Tools;
 
 /// <summary>
+/// Event args for when an element is erased
+/// </summary>
+public class ElementErasedEventArgs : EventArgs
+{
+    public UIElement Element { get; }
+    
+    public ElementErasedEventArgs(UIElement element)
+    {
+        Element = element;
+    }
+}
+
+/// <summary>
 /// Eraser tool - removes drawing objects underneath the cursor
 /// </summary>
 public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
@@ -16,6 +29,13 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
     private bool _isErasing = false;
     private double _currentThickness = 3.0;
     private readonly HashSet<UIElement> _erasedElements = new();
+
+    public event EventHandler<DrawingActionCompletedEventArgs>? ActionCompleted;
+    
+    /// <summary>
+    /// Event fired when elements are erased (for history removal)
+    /// </summary>
+    public event EventHandler<ElementErasedEventArgs>? ElementErased;
 
     // Tolerance for parallel line detection in intersection algorithm
     private const double PARALLEL_LINE_TOLERANCE = 0.001;
@@ -185,6 +205,9 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
             {
                 canvas.Children.Remove(element);
                 _logger.LogTrace("Erased element at position ({X:F0}, {Y:F0})", position.X, position.Y);
+                
+                // Fire ElementErased event for history removal
+                ElementErased?.Invoke(this, new ElementErasedEventArgs(element));
             }
         }
         catch (Exception ex)

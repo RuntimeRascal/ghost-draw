@@ -21,6 +21,8 @@ public class PenTool(ILogger<PenTool> logger) : IDrawingTool
     private string _currentColor = "#FF0000";
     private double _currentThickness = 3.0;
 
+    public event EventHandler<DrawingActionCompletedEventArgs>? ActionCompleted;
+
     public void OnMouseDown(Point position, Canvas canvas)
     {
         _logger.LogInformation("Starting new stroke at ({X:F0}, {Y:F0})", position.X, position.Y);
@@ -67,6 +69,10 @@ public class PenTool(ILogger<PenTool> logger) : IDrawingTool
         if (_currentStroke != null)
         {
             _logger.LogInformation("Stroke ended with {PointCount} points", _currentStroke.Points.Count);
+            
+            // Fire ActionCompleted event for history tracking
+            ActionCompleted?.Invoke(this, new DrawingActionCompletedEventArgs(_currentStroke));
+            
             _currentStroke = null;
         }
     }

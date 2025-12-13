@@ -20,6 +20,7 @@ public class GlobalKeyboardHook : IDisposable
     private const int VK_C = 0x43;         // 67 - 'C' key for circle tool
     private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
     private const int VK_S = 0x53;         // 83 - 'S' key for screenshot (Ctrl+S only)
+    private const int VK_Z = 0x5A;         // 90 - 'Z' key for undo (Ctrl+Z only)
     private const int VK_LCONTROL = 0xA2;  // 162 - Left Control key
     private const int VK_RCONTROL = 0xA3;  // 163 - Right Control key
 
@@ -41,6 +42,7 @@ public class GlobalKeyboardHook : IDisposable
     public event EventHandler? CircleToolPressed;
     public event EventHandler? HelpPressed;
     public event EventHandler? ScreenshotFullPressed;
+    public event EventHandler? UndoPressed;
 
     // NEW: Raw key events for recorder
     public event EventHandler<KeyEventArgs>? KeyPressed;
@@ -287,6 +289,17 @@ public class GlobalKeyboardHook : IDisposable
                     }
                     
                     _logger.LogInformation("====== END CTRL+S HANDLING ======");
+                }
+
+                // Check for Ctrl+Z key press (undo - only when drawing mode is active)
+                if (vkCode == VK_Z && isKeyDown && _isControlPressed && _isDrawingModeActive)
+                {
+                    _logger.LogInformation("Ctrl+Z pressed - firing UndoPressed event");
+                    UndoPressed?.Invoke(this, EventArgs.Empty);
+                    
+                    // Suppress Ctrl+Z when drawing mode is active to prevent underlying apps from receiving it
+                    shouldSuppressKey = true;
+                    _logger.LogDebug("Ctrl+Z suppressed - drawing mode is active");
                 }
 
                 // Track hotkey state

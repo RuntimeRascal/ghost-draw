@@ -58,6 +58,7 @@ public static class ServiceConfiguration
         services.AddSingleton<AppSettingsService>();
         services.AddSingleton<CursorHelper>();
         services.AddSingleton<ScreenshotService>();
+        services.AddSingleton<DrawingHistory>();
 
         // Register drawing tools
         services.AddSingleton<GhostDraw.Tools.PenTool>();

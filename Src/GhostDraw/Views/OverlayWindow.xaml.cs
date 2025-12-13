@@ -18,6 +18,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     private readonly ILogger<OverlayWindow> _logger;
     private readonly AppSettingsService _appSettings;
     private readonly CursorHelper _cursorHelper;
+    private readonly DrawingHistory _drawingHistory;
     private bool _isDrawing = false;
     private bool _isHelpVisible = false;
 
@@ -65,11 +66,13 @@ public partial class OverlayWindow : Window, IOverlayWindow
     private readonly TimeSpan _screenshotToastFadeOutDuration = TimeSpan.FromMilliseconds(300);
 
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
-        PenTool penTool, LineTool lineTool, EraserTool eraserTool, RectangleTool rectangleTool, CircleTool circleTool)
+        DrawingHistory drawingHistory, PenTool penTool, LineTool lineTool, EraserTool eraserTool, 
+        RectangleTool rectangleTool, CircleTool circleTool)
     {
         _logger = logger;
         _appSettings = appSettings;
         _cursorHelper = cursorHelper;
+        _drawingHistory = drawingHistory;
         _penTool = penTool;
         _lineTool = lineTool;
         _eraserTool = eraserTool;
@@ -78,6 +81,13 @@ public partial class OverlayWindow : Window, IOverlayWindow
         _logger.LogDebug("OverlayWindow constructor called");
 
         InitializeComponent();
+        
+        // Subscribe to tool events for history tracking
+        _penTool.ActionCompleted += OnToolActionCompleted;
+        _lineTool.ActionCompleted += OnToolActionCompleted;
+        _rectangleTool.ActionCompleted += OnToolActionCompleted;
+        _circleTool.ActionCompleted += OnToolActionCompleted;
+        _eraserTool.ElementErased += OnElementErased;
 
         // Initialize thickness indicator timer
         _thicknessIndicatorTimer = new DispatcherTimer
@@ -198,6 +208,9 @@ public partial class OverlayWindow : Window, IOverlayWindow
 
         // Clear canvas when exiting drawing mode too
         ClearDrawing();
+        
+        // Clear history when exiting drawing mode
+        _drawingHistory.Clear();
 
         this.Cursor = WpfCursors.Arrow;
     }
@@ -470,6 +483,9 @@ public partial class OverlayWindow : Window, IOverlayWindow
             {
                 _logger.LogDebug("Canvas already empty, clear acknowledged");
             }
+            
+            // Clear history when canvas is cleared
+            _drawingHistory.Clear();
 
             // Always show feedback so user knows R key was recognized
             ShowCanvasClearedToast();
@@ -855,6 +871,71 @@ public partial class OverlayWindow : Window, IOverlayWindow
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to hide screenshot saved toast");
+        }
+    }
+
+    #endregion
+
+    #region Undo/Redo
+
+    /// <summary>
+    /// Handles when a tool completes a drawing action
+    /// </summary>
+    private void OnToolActionCompleted(object? sender, DrawingActionCompletedEventArgs e)
+    {
+        try
+        {
+            _drawingHistory.RecordAction(e.Element);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to record action in history");
+        }
+    }
+
+    /// <summary>
+    /// Handles when the eraser removes an element
+    /// </summary>
+    private void OnElementErased(object? sender, ElementErasedEventArgs e)
+    {
+        try
+        {
+            _drawingHistory.RemoveFromHistory(e.Element);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to remove element from history");
+        }
+    }
+
+    /// <summary>
+    /// Undoes the last drawing action (called via Ctrl+Z)
+    /// </summary>
+    public void UndoLastAction()
+    {
+        try
+        {
+            if (_isDrawing)
+            {
+                var elementToRemove = _drawingHistory.UndoLastAction();
+                if (elementToRemove != null)
+                {
+                    DrawingCanvas.Children.Remove(elementToRemove);
+                    _logger.LogInformation("Undo: Removed element from canvas");
+                }
+                else
+                {
+                    _logger.LogDebug("Undo: No more actions to undo");
+                }
+            }
+            else
+            {
+                _logger.LogDebug("UndoLastAction ignored - drawing mode not active");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to undo last action");
         }
     }
 

@@ -81,6 +81,7 @@ public partial class App : Application
             _keyboardHook.CircleToolPressed += OnCircleToolPressed;
             _keyboardHook.HelpPressed += OnHelpPressed;
             _keyboardHook.ScreenshotFullPressed += OnScreenshotFullPressed;
+            _keyboardHook.UndoPressed += OnUndoPressed;
             _keyboardHook.Start();
 
             // Setup system tray icon
@@ -385,6 +386,29 @@ public partial class App : Application
         {
             _logger?.LogError(ex, "Exception in OnScreenshotFullPressed");
             _exceptionHandler?.HandleException(ex, "Screenshot full pressed handler");
+        }
+    }
+
+    private void OnUndoPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            _logger?.LogInformation("Ctrl+Z pressed - undoing last action");
+            
+            // Undo last action if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _drawingManager?.UndoLastAction();
+            }
+            else
+            {
+                _logger?.LogDebug("Undo ignored - drawing mode is NOT active");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Exception in OnUndoPressed");
+            _exceptionHandler?.HandleException(ex, "Undo pressed handler");
         }
     }
 
