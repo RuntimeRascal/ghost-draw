@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## v1.0.16
+
+### Added
+- **Multi-Monitor Overlays**
+  - Drawing overlay now appears on every monitor
+  - Clear canvas confirmation modal is shown on all overlays
+  - Undo (`Ctrl+Z`) is global across monitors; Clear canvas clears all overlays
+
+### Changed
+- Arrow tool now uses an arrow-specific cursor
+
+### Fixed
+- Tool settings (color/thickness) now stay in sync across monitors
+- Cursor behavior is now consistent when crossing monitor boundaries
+
+
 ## v1.0.15
 
 ### Added
