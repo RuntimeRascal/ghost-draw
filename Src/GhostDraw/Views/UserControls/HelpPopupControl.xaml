@@ -46,88 +46,203 @@
             <Border Height="1" Background="#404040" Margin="0,8,0,12"/>
 
             <!-- Drawing Tools -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                <TextBlock FontFamily="Consolas"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           Foreground="#00FF88"
-                           Text="P"
-                           MinWidth="120"
-                           Margin="0,0,16,0"/>
-                <TextBlock FontFamily="Segoe UI"
-                           FontSize="16"
-                           Foreground="#B0B0B0"
-                           Text="Select Pen Tool"/>
-            </StackPanel>
+            <!-- Drawing Tools with aligned usage guidance -->
+            <StackPanel Margin="0,0,0,10">
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="P"
+                               Grid.Column="0"/>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <TextBlock FontFamily="Segoe UI"
+                                   FontSize="16"
+                                   Foreground="#B0B0B0"
+                                   Text="Select Pen Tool"/>
+                        <Border Margin="0,6,0,0" Padding="10,6" Background="#0A0E27" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[start: click &amp; hold]"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#FFAA00" Text="[drag]" Margin="6,0,0,0"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[end: release]" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
 
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                <TextBlock FontFamily="Consolas"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           Foreground="#00FF88"
-                           Text="L"
-                           MinWidth="120"
-                           Margin="0,0,16,0"/>
-                <TextBlock FontFamily="Segoe UI"
-                           FontSize="16"
-                           Foreground="#B0B0B0"
-                           Text="Select Line Tool"/>
-            </StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="L"
+                               Grid.Column="0"/>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <TextBlock FontFamily="Segoe UI"
+                                   FontSize="16"
+                                   Foreground="#B0B0B0"
+                                   Text="Select Line Tool"/>
+                        <Border Margin="0,6,0,0" Padding="10,6" Background="#0A0E27" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[start: click]"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#FFAA00" Text="[drag]" Margin="6,0,0,0"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[end: click]" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
 
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                <TextBlock FontFamily="Consolas"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           Foreground="#00FF88"
-                           Text="A"
-                           MinWidth="120"
-                           Margin="0,0,16,0"/>
-                <TextBlock FontFamily="Segoe UI"
-                           FontSize="16"
-                           Foreground="#B0B0B0"
-                           Text="Select Arrow Tool"/>
-            </StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="A"
+                               Grid.Column="0"/>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <TextBlock FontFamily="Segoe UI"
+                                   FontSize="16"
+                                   Foreground="#B0B0B0"
+                                   Text="Select Arrow Tool"/>
+                        <Border Margin="0,6,0,0" Padding="10,6" Background="#0A0E27" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[start: click]"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#FFAA00" Text="[drag]" Margin="6,0,0,0"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[end: click]" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
 
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                <TextBlock FontFamily="Consolas"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           Foreground="#00FF88"
-                           Text="E"
-                           MinWidth="120"
-                           Margin="0,0,16,0"/>
-                <TextBlock FontFamily="Segoe UI"
-                           FontSize="16"
-                           Foreground="#B0B0B0"
-                           Text="Select Eraser Tool"/>
-            </StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="E"
+                               Grid.Column="0"/>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <TextBlock FontFamily="Segoe UI"
+                                   FontSize="16"
+                                   Foreground="#B0B0B0"
+                                   Text="Select Eraser Tool"/>
+                        <Border Margin="0,6,0,0" Padding="10,6" Background="#0A0E27" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[start: click &amp; hold]"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#FFAA00" Text="[drag to erase]" Margin="6,0,0,0"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[end: release]" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
 
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                <TextBlock FontFamily="Consolas"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           Foreground="#00FF88"
-                           Text="U"
-                           MinWidth="120"
-                           Margin="0,0,16,0"/>
-                <TextBlock FontFamily="Segoe UI"
-                           FontSize="16"
-                           Foreground="#B0B0B0"
-                           Text="Select Rectangle Tool"/>
-            </StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="U"
+                               Grid.Column="0"/>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <TextBlock FontFamily="Segoe UI"
+                                   FontSize="16"
+                                   Foreground="#B0B0B0"
+                                   Text="Select Rectangle Tool"/>
+                        <Border Margin="0,6,0,0" Padding="10,6" Background="#0A0E27" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[start: click]"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#FFAA00" Text="[drag]" Margin="6,0,0,0"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[end: release]" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
 
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                <TextBlock FontFamily="Consolas"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           Foreground="#00FF88"
-                           Text="C"
-                           MinWidth="120"
-                           Margin="0,0,16,0"/>
-                <TextBlock FontFamily="Segoe UI"
-                           FontSize="16"
-                           Foreground="#B0B0B0"
-                           Text="Select Circle Tool"/>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="C"
+                               Grid.Column="0"/>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <TextBlock FontFamily="Segoe UI"
+                                   FontSize="16"
+                                   Foreground="#B0B0B0"
+                                   Text="Select Circle Tool"/>
+                        <Border Margin="0,6,0,0" Padding="10,6" Background="#0A0E27" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[start: click]"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#FFAA00" Text="[drag]" Margin="6,0,0,0"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[end: release]" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#00FF88"
+                               Text="T"
+                               Grid.Column="0"/>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <TextBlock FontFamily="Segoe UI"
+                                   FontSize="16"
+                                   Foreground="#B0B0B0"
+                                   Text="Select Text Tool"/>
+                        <Border Margin="0,6,0,0" Padding="10,6" Background="#0A0E27" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[start: click]"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#FFAA00" Text="[type]" Margin="6,0,0,0"/>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#FFFFFF" Text="&#xE76C;" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="#00FF88" Text="[end: click]" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
 
             <!-- Separator -->
