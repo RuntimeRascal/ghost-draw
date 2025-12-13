@@ -15,7 +15,7 @@ public class SettingsViewModelTests
         var appSettingsService = new AppSettingsService(mockLogger.Object, inMemoryStore);
         var loggingSettingsService = new LoggingSettingsService(appSettingsService);
         var loggerFactory = NullLoggerFactory.Instance;
-        
+
         return new SettingsViewModel(appSettingsService, loggingSettingsService, loggerFactory);
     }
 

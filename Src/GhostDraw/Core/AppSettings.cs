@@ -86,7 +86,7 @@ public class AppSettings
     /// </summary>
     [JsonPropertyName("screenshotSavePath")]
     public string ScreenshotSavePath { get; set; } = System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), 
+        Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
         "GhostDraw");
 
     /// <summary>

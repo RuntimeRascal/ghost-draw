@@ -23,6 +23,8 @@ public class RectangleTool(ILogger<RectangleTool> logger) : IDrawingTool
     private string _currentColor = "#FF0000";
     private double _currentThickness = 3.0;
 
+    public event EventHandler<DrawingActionCompletedEventArgs>? ActionCompleted;
+
     public void OnMouseDown(Point position, Canvas canvas)
     {
         if (!_isCreatingRectangle)
@@ -155,6 +157,9 @@ public class RectangleTool(ILogger<RectangleTool> logger) : IDrawingTool
             bool isShiftPressed = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
             UpdateRectangle(_rectangleStartPoint.Value, endPoint, isShiftPressed);
             _logger.LogInformation("Rectangle finished at ({X:F0}, {Y:F0})", endPoint.X, endPoint.Y);
+
+            // Fire ActionCompleted event for history tracking
+            ActionCompleted?.Invoke(this, new DrawingActionCompletedEventArgs(_currentRectangle));
         }
 
         _currentRectangle = null;

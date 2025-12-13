@@ -120,7 +120,7 @@ public class CircleToolTests
 
         // Assert - The setting should be retrievable
         Assert.Equal(DrawTool.Circle, service.GetActiveTool());
-        
+
         // Create new service instance to verify persistence
         var newService = CreateService();
         Assert.Equal(DrawTool.Circle, newService.GetActiveTool());
@@ -151,10 +151,10 @@ public class CircleToolTests
     {
         // Arrange
         var values = Enum.GetValues<DrawTool>();
-        
+
         // Act
         var uniqueValues = values.Distinct().ToArray();
-        
+
         // Assert
         Assert.Equal(values.Length, uniqueValues.Length);
     }
@@ -164,7 +164,7 @@ public class CircleToolTests
     {
         // Arrange & Act
         var toolCount = Enum.GetValues<DrawTool>().Length;
-        
+
         // Assert
         Assert.Equal(5, toolCount);
     }
@@ -174,10 +174,10 @@ public class CircleToolTests
     {
         // Arrange
         var values = Enum.GetValues<DrawTool>();
-        
+
         // Act
         var lastTool = values[values.Length - 1];
-        
+
         // Assert
         Assert.Equal(DrawTool.Circle, lastTool);
     }

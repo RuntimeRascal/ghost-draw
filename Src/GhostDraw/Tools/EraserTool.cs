@@ -8,6 +8,19 @@ using Point = System.Windows.Point;
 namespace GhostDraw.Tools;
 
 /// <summary>
+/// Event args for when an element is erased
+/// </summary>
+public class ElementErasedEventArgs : EventArgs
+{
+    public UIElement Element { get; }
+
+    public ElementErasedEventArgs(UIElement element)
+    {
+        Element = element;
+    }
+}
+
+/// <summary>
 /// Eraser tool - removes drawing objects underneath the cursor
 /// </summary>
 public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
@@ -16,6 +29,16 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
     private bool _isErasing = false;
     private double _currentThickness = 3.0;
     private readonly HashSet<UIElement> _erasedElements = new();
+
+    // ActionCompleted event required by IDrawingTool but not used by eraser.
+    // Eraser uses ElementErased event instead since it removes existing elements
+    // rather than creating new ones.
+    public event EventHandler<DrawingActionCompletedEventArgs>? ActionCompleted;
+
+    /// <summary>
+    /// Event fired when elements are erased (for history removal)
+    /// </summary>
+    public event EventHandler<ElementErasedEventArgs>? ElementErased;
 
     // Tolerance for parallel line detection in intersection algorithm
     private const double PARALLEL_LINE_TOLERANCE = 0.001;
@@ -141,13 +164,13 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
                     // Check if eraser intersects with rectangle bounds
                     double left = Canvas.GetLeft(rectangle);
                     double top = Canvas.GetTop(rectangle);
-                    
+
                     // Handle NaN values (shouldn't happen, but be defensive)
-                    if (!double.IsNaN(left) && !double.IsNaN(top) && 
+                    if (!double.IsNaN(left) && !double.IsNaN(top) &&
                         !double.IsNaN(rectangle.Width) && !double.IsNaN(rectangle.Height))
                     {
                         Rect shapeRect = new Rect(left, top, rectangle.Width, rectangle.Height);
-                        
+
                         if (eraserRect.IntersectsWith(shapeRect))
                         {
                             shouldErase = true;
@@ -159,13 +182,13 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
                     // Check if eraser intersects with ellipse bounds
                     double left = Canvas.GetLeft(ellipse);
                     double top = Canvas.GetTop(ellipse);
-                    
+
                     // Handle NaN values (shouldn't happen, but be defensive)
-                    if (!double.IsNaN(left) && !double.IsNaN(top) && 
+                    if (!double.IsNaN(left) && !double.IsNaN(top) &&
                         !double.IsNaN(ellipse.Width) && !double.IsNaN(ellipse.Height))
                     {
                         Rect ellipseRect = new Rect(left, top, ellipse.Width, ellipse.Height);
-                        
+
                         if (eraserRect.IntersectsWith(ellipseRect))
                         {
                             shouldErase = true;
@@ -185,6 +208,9 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
             {
                 canvas.Children.Remove(element);
                 _logger.LogTrace("Erased element at position ({X:F0}, {Y:F0})", position.X, position.Y);
+
+                // Fire ElementErased event for history removal
+                ElementErased?.Invoke(this, new ElementErasedEventArgs(element));
             }
         }
         catch (Exception ex)

@@ -447,4 +447,28 @@ public class DrawingManager
             // Don't re-throw - not critical
         }
     }
+
+    /// <summary>
+    /// Undoes the last drawing action (called via Ctrl+Z)
+    /// </summary>
+    public void UndoLastAction()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _logger.LogInformation("Undo last action (Ctrl+Z)");
+                _overlayWindow.UndoLastAction();
+            }
+            else
+            {
+                _logger.LogDebug("UndoLastAction ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to undo last action");
+            // Don't re-throw - not critical
+        }
+    }
 }

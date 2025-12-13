@@ -180,7 +180,7 @@ public class LineToolTests
 
         // Assert - The setting should be retrievable
         Assert.Equal(DrawTool.Line, service.GetActiveTool());
-        
+
         // Create new service instance to verify persistence
         var newService = CreateService();
         Assert.Equal(DrawTool.Line, newService.GetActiveTool());

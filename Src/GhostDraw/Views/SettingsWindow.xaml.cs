@@ -12,7 +12,7 @@ public partial class SettingsWindow : Window
     {
         _viewModel = viewModel;
         InitializeComponent();
-        
+
         // Set DataContext to enable XAML bindings
         DataContext = _viewModel;
     }
@@ -34,7 +34,7 @@ public partial class SettingsWindow : Window
         if (result == MessageBoxResult.Yes)
         {
             _viewModel.AppSettings.ResetToDefaults();
-            
+
             System.Windows.MessageBox.Show(
                 "Settings have been reset to defaults.",
                 "Reset Complete",

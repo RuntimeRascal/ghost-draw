@@ -23,6 +23,8 @@ public class LineTool(ILogger<LineTool> logger) : IDrawingTool
     private string _currentColor = "#FF0000";
     private double _currentThickness = 3.0;
 
+    public event EventHandler<DrawingActionCompletedEventArgs>? ActionCompleted;
+
     public void OnMouseDown(Point position, Canvas canvas)
     {
         if (!_isCreatingLine)
@@ -125,6 +127,9 @@ public class LineTool(ILogger<LineTool> logger) : IDrawingTool
             _currentLine.Y2 = endPoint.Y;
 
             _logger.LogInformation("Line finished at ({X:F0}, {Y:F0})", endPoint.X, endPoint.Y);
+
+            // Fire ActionCompleted event for history tracking
+            ActionCompleted?.Invoke(this, new DrawingActionCompletedEventArgs(_currentLine));
         }
 
         _currentLine = null;

@@ -41,7 +41,7 @@ public class ClearCanvasFeatureTests
         // Arrange
         var hook = new GlobalKeyboardHook(_mockLogger.Object);
         var handlerCalled = false;
-        
+
         hook.ClearCanvasPressed += (s, e) =>
         {
             handlerCalled = true;
@@ -79,13 +79,13 @@ public class ClearCanvasFeatureTests
         // VK_R should be 0x52 (82 in decimal)
         // We can't access private constants directly, but we can verify
         // the hook initializes correctly which implies constants are valid
-        
+
         // Arrange & Act
         var hook = new GlobalKeyboardHook(_mockLogger.Object);
 
         // Assert - Hook should initialize without error
         Assert.NotNull(hook);
-        
+
         // Cleanup
         hook.Dispose();
     }

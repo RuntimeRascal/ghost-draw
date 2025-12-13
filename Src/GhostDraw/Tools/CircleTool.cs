@@ -25,6 +25,8 @@ public class CircleTool(ILogger<CircleTool> logger) : IDrawingTool
     private string _currentColor = "#FF0000";
     private double _currentThickness = 3.0;
 
+    public event EventHandler<DrawingActionCompletedEventArgs>? ActionCompleted;
+
     public void OnMouseDown(Point position, Canvas canvas)
     {
         if (!_isCreatingCircle)
@@ -136,12 +138,12 @@ public class CircleTool(ILogger<CircleTool> logger) : IDrawingTool
         if (isPerfectCircle)
         {
             double maxDimension = Math.Max(width, height);
-            
+
             // Adjust left/top based on which quadrant we're dragging to
             // Determine the quadrant based on current position relative to start
             bool isDraggingLeft = currentPoint.X < startPoint.X;
             bool isDraggingUp = currentPoint.Y < startPoint.Y;
-            
+
             if (isDraggingLeft && isDraggingUp)
             {
                 // Top-left quadrant
@@ -166,7 +168,7 @@ public class CircleTool(ILogger<CircleTool> logger) : IDrawingTool
                 left = startPoint.X;
                 top = startPoint.Y;
             }
-            
+
             width = maxDimension;
             height = maxDimension;
         }
@@ -185,6 +187,9 @@ public class CircleTool(ILogger<CircleTool> logger) : IDrawingTool
             bool isShiftPressed = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
             UpdateCircle(_circleStartPoint.Value, endPoint, isShiftPressed);
             _logger.LogInformation("Circle finished at ({X:F0}, {Y:F0})", endPoint.X, endPoint.Y);
+
+            // Fire ActionCompleted event for history tracking
+            ActionCompleted?.Invoke(this, new DrawingActionCompletedEventArgs(_currentCircle));
         }
 
         _currentCircle = null;

@@ -50,7 +50,7 @@ public class ScreenshotFeatureTests
         // Arrange
         var hook = new GlobalKeyboardHook(_mockHookLogger.Object);
         var handlerCalled = false;
-        
+
         hook.ScreenshotFullPressed += (s, e) =>
         {
             handlerCalled = true;
