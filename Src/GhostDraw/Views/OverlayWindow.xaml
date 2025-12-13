@@ -88,7 +88,7 @@
             <TextBlock FontFamily="Segoe UI"
                        FontSize="16"
                        Foreground="#B0B0B0"
-                       Text="Press R to clear canvas  |  ESC to exit"/>
+                       Text="Press Delete to clear canvas  |  ESC to exit"/>
         </Border>
 
         <!-- Screenshot Saved Toast (top-center of screen, cyberpunk style) -->
@@ -116,6 +116,115 @@
                        Foreground="#00FFFF"
                        Text="📸 Screenshot Saved!"/>
         </Border>
+
+        <!-- Clear Canvas Confirmation Modal (center of screen, dimmed background) -->
+        <Grid x:Name="ClearCanvasModalGrid"
+              Visibility="Collapsed">
+            <!-- Dimmed background -->
+            <Border Background="Black" Opacity="0.7"/>
+            
+            <!-- Modal dialog -->
+            <Border HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Padding="40,32"
+                    Background="#0F1419"
+                    BorderBrush="#FF0080"
+                    BorderThickness="2"
+                    CornerRadius="8">
+                <Border.Effect>
+                    <DropShadowEffect Color="#FF0080" 
+                                      Opacity="0.8" 
+                                      BlurRadius="30" 
+                                      ShadowDepth="0"/>
+                </Border.Effect>
+                <StackPanel>
+                    <!-- Question -->
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="#FFFFFF"
+                               Text="Clear canvas?"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,24"/>
+                    
+                    <!-- Buttons -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <!-- Yes Button -->
+                        <Button x:Name="ClearCanvasYesButton"
+                                Content="Yes"
+                                FontFamily="Segoe UI"
+                                FontSize="18"
+                                FontWeight="Bold"
+                                Padding="32,12"
+                                Margin="0,0,16,0"
+                                Background="#FF0080"
+                                Foreground="#FFFFFF"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Click="ClearCanvasYesButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#FF0080"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="4"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#FF1A99"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        
+                        <!-- No Button -->
+                        <Button x:Name="ClearCanvasNoButton"
+                                Content="No"
+                                FontFamily="Segoe UI"
+                                FontSize="18"
+                                FontWeight="Bold"
+                                Padding="32,12"
+                                Background="#404040"
+                                Foreground="#FFFFFF"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Click="ClearCanvasNoButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#404040"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="4"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#505050"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
 
         <!-- Help Popup (center of screen, shows keyboard shortcuts) -->
         <Border x:Name="HelpPopupBorder"
@@ -270,7 +379,7 @@
                                FontSize="16"
                                FontWeight="Bold"
                                Foreground="#FFAA00"
-                               Text="R"
+                               Text="Delete"
                                MinWidth="120"
                                Margin="0,0,16,0"/>
                     <TextBlock FontFamily="Segoe UI"

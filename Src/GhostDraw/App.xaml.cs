@@ -246,12 +246,9 @@ public partial class App : Application
     {
         try
         {
-            // Only clear canvas if drawing mode is active
-            if (_drawingManager?.IsDrawingMode == true)
-            {
-                _logger?.LogInformation("R pressed - clearing canvas");
-                _drawingManager?.ClearCanvas();
-            }
+            // Delete key pressed - show confirmation modal (hook already checks drawing mode is active)
+            _logger?.LogInformation("Delete pressed - requesting clear canvas confirmation");
+            _drawingManager?.RequestClearCanvas();
         }
         catch (Exception ex)
         {

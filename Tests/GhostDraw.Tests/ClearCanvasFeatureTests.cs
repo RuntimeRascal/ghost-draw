@@ -5,7 +5,7 @@ using GhostDraw.Core;
 namespace GhostDraw.Tests;
 
 /// <summary>
-/// Tests for the Clear Canvas (R key) feature.
+/// Tests for the Clear Canvas (Delete key) feature with confirmation modal.
 /// Note: Full integration tests require Windows runtime, so we test the hookable components.
 /// </summary>
 public class ClearCanvasFeatureTests
@@ -73,10 +73,10 @@ public class ClearCanvasFeatureTests
     }
 
     [Fact]
-    public void GlobalKeyboardHook_VK_R_Constant_ShouldBeCorrectValue()
+    public void GlobalKeyboardHook_VK_DELETE_Constant_ShouldBeCorrectValue()
     {
-        // This test verifies the VK_R constant is correctly defined
-        // VK_R should be 0x52 (82 in decimal)
+        // This test verifies the VK_DELETE constant is correctly defined
+        // VK_DELETE should be 0x2E (46 in decimal)
         // We can't access private constants directly, but we can verify
         // the hook initializes correctly which implies constants are valid
 

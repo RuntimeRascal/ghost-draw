@@ -199,12 +199,13 @@ public partial class OverlayWindow : Window, IOverlayWindow
             _activeTool.OnDeactivated();
         }
 
-        // Hide all indicators and toasts
+        // Hide all indicators, toasts, and modals
         HideThicknessIndicator();
         HideCanvasClearedToast();
         HideDrawingModeHint();
         HideHelpPopup();
         HideScreenshotSavedToast();
+        HideClearCanvasModal();
 
         // Clear canvas when exiting drawing mode too
         ClearDrawing();
@@ -769,14 +770,23 @@ public partial class OverlayWindow : Window, IOverlayWindow
     #region ESC Key Handling
 
     /// <summary>
-    /// Handles ESC key press. If help is visible, only closes help. Otherwise, signals to exit drawing mode.
+    /// Handles ESC key press. If help or confirmation modal is visible, only closes them. Otherwise, signals to exit drawing mode.
     /// </summary>
-    /// <returns>True if ESC should exit drawing mode, False if it only closed help</returns>
+    /// <returns>True if ESC should exit drawing mode, False if it only closed help or modal</returns>
     public bool HandleEscapeKey()
     {
         try
         {
-            if (_isHelpVisible)
+            // Check if confirmation modal is visible first (highest priority)
+            if (ClearCanvasModalGrid.Visibility == Visibility.Visible)
+            {
+                _logger.LogDebug("ESC pressed while confirmation modal visible - canceling clear");
+                HideClearCanvasModal();
+                _clearCanvasCancelCallback?.Invoke();
+                RestoreToolStateAfterModal();
+                return false; // Don't exit drawing mode
+            }
+            else if (_isHelpVisible)
             {
                 // Help is visible - only hide help, don't exit drawing mode
                 _logger.LogDebug("ESC pressed while help visible - closing help only");
@@ -871,6 +881,158 @@ public partial class OverlayWindow : Window, IOverlayWindow
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to hide screenshot saved toast");
+        }
+    }
+
+    #endregion
+
+    #region Clear Canvas Confirmation Modal
+
+    private Action? _clearCanvasConfirmCallback;
+    private Action? _clearCanvasCancelCallback;
+    private IDrawingTool? _toolBeforeModal;
+    private bool _wasDrawingBeforeModal;
+
+    /// <summary>
+    /// Shows the clear canvas confirmation modal
+    /// </summary>
+    public void ShowClearCanvasConfirmation(Action onConfirm, Action onCancel)
+    {
+        try
+        {
+            _logger.LogInformation("Showing clear canvas confirmation modal");
+            
+            // Store callbacks
+            _clearCanvasConfirmCallback = onConfirm;
+            _clearCanvasCancelCallback = onCancel;
+            
+            // Store current tool and drawing state
+            _toolBeforeModal = _activeTool;
+            _wasDrawingBeforeModal = _isDrawing;
+            
+            // Cancel any in-progress drawing
+            if (_activeTool != null)
+            {
+                _activeTool.Cancel(DrawingCanvas);
+            }
+            
+            // Temporarily disable drawing and reset cursor
+            _isDrawing = false;
+            this.Cursor = WpfCursors.Arrow;
+            
+            // Show the modal
+            ClearCanvasModalGrid.Visibility = Visibility.Visible;
+            
+            _logger.LogDebug("Clear canvas confirmation modal shown");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to show clear canvas confirmation modal");
+            // On error, call cancel callback to restore state
+            onCancel?.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Handles Yes button click in confirmation modal
+    /// </summary>
+    private void ClearCanvasYesButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            _logger.LogInformation("User confirmed clear canvas");
+            
+            // Hide the modal
+            HideClearCanvasModal();
+            
+            // Call the confirm callback
+            _clearCanvasConfirmCallback?.Invoke();
+            
+            // Restore tool state
+            RestoreToolStateAfterModal();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to handle Yes button click");
+            // Ensure modal is hidden and state is restored
+            HideClearCanvasModal();
+            RestoreToolStateAfterModal();
+        }
+    }
+
+    /// <summary>
+    /// Handles No button click in confirmation modal
+    /// </summary>
+    private void ClearCanvasNoButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            _logger.LogInformation("User canceled clear canvas");
+            
+            // Hide the modal
+            HideClearCanvasModal();
+            
+            // Call the cancel callback
+            _clearCanvasCancelCallback?.Invoke();
+            
+            // Restore tool state
+            RestoreToolStateAfterModal();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to handle No button click");
+            // Ensure modal is hidden and state is restored
+            HideClearCanvasModal();
+            RestoreToolStateAfterModal();
+        }
+    }
+
+    /// <summary>
+    /// Hides the clear canvas confirmation modal
+    /// </summary>
+    private void HideClearCanvasModal()
+    {
+        try
+        {
+            ClearCanvasModalGrid.Visibility = Visibility.Collapsed;
+            _logger.LogDebug("Clear canvas confirmation modal hidden");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to hide clear canvas confirmation modal");
+        }
+    }
+
+    /// <summary>
+    /// Restores the tool state after the modal is closed
+    /// </summary>
+    private void RestoreToolStateAfterModal()
+    {
+        try
+        {
+            // Restore drawing state
+            _isDrawing = _wasDrawingBeforeModal;
+            
+            // Restore active tool
+            if (_toolBeforeModal != null)
+            {
+                _activeTool = _toolBeforeModal;
+            }
+            
+            // Restore cursor
+            if (_isDrawing)
+            {
+                UpdateCursor();
+            }
+            
+            _logger.LogDebug("Tool state restored after modal - Drawing: {IsDrawing}, Tool: {Tool}",
+                _isDrawing, _activeTool?.GetType().Name ?? "null");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to restore tool state after modal");
+            // On error, ensure cursor is at least set to something reasonable
+            this.Cursor = _isDrawing ? WpfCursors.Cross : WpfCursors.Arrow;
         }
     }
 

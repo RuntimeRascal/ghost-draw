@@ -386,25 +386,37 @@ public class DrawingManager
     }
 
     /// <summary>
-    /// Clears the canvas while keeping drawing mode active
+    /// Requests to clear the canvas - shows confirmation modal first
     /// </summary>
-    public void ClearCanvas()
+    public void RequestClearCanvas()
     {
         try
         {
             if (_overlayWindow.IsVisible)
             {
-                _logger.LogInformation("Clearing canvas (R key)");
-                _overlayWindow.ClearCanvas();
+                _logger.LogInformation("Requesting clear canvas confirmation (Delete key)");
+                
+                // Show confirmation modal with callbacks
+                _overlayWindow.ShowClearCanvasConfirmation(
+                    onConfirm: () =>
+                    {
+                        _logger.LogInformation("Clear canvas confirmed - clearing");
+                        _overlayWindow.ClearCanvas();
+                    },
+                    onCancel: () =>
+                    {
+                        _logger.LogInformation("Clear canvas canceled - no action");
+                    }
+                );
             }
             else
             {
-                _logger.LogDebug("ClearCanvas ignored - overlay not visible");
+                _logger.LogDebug("RequestClearCanvas ignored - overlay not visible");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to clear canvas");
+            _logger.LogError(ex, "Failed to request clear canvas");
             // Don't re-throw - not critical
         }
     }
