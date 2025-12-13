@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Hardened input safety during text sessions: only activation hotkey, `F1`, and `ESC` remain active; other GhostDraw shortcuts aren’t triggered or suppressed while typing.
   - Integrated text into history/undo/clear and eraser; multi-monitor overlays record committed text with proper overlay IDs.
 
+### Fixed
+- 2 hotkey presses required to activate draw mode after startup.
+
 ## v1.0.16
 
 ### Added

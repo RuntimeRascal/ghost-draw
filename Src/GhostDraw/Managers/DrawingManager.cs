@@ -29,10 +29,11 @@ public class DrawingManager
         _screenshotService = screenshotService;
         _keyboardHook = keyboardHook;
 
-        // Initialize lock mode state from saved settings
-        _isDrawingLocked = _appSettings.CurrentSettings.LockDrawingMode;
+        // LockDrawingMode controls behavior (toggle vs hold) but the locked state should start off
+        _isDrawingLocked = false;
 
-        _logger.LogDebug("DrawingManager initialized - LockDrawingMode={LockMode}", _isDrawingLocked);
+        _logger.LogDebug("DrawingManager initialized - LockDrawingModeBehavior={LockMode} StartingLocked={IsLocked}",
+            _appSettings.CurrentSettings.LockDrawingMode, _isDrawingLocked);
     }
 
     public void EnableDrawing()
