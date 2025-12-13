@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using GhostDraw.Core;
 using GhostDraw.Helpers;
 using GhostDraw.Services;
@@ -430,6 +431,29 @@ public partial class OverlayWindow : Window, IOverlayWindow
             _logger.LogDebug("Clearing {ChildCount} strokes from canvas", childCount);
         }
         DrawingCanvas.Children.Clear();
+
+        // Push a render pass so the blank canvas is committed before we hide the overlay.
+        // Use async dispatch to avoid blocking the hook thread when this is invoked from hotkey handlers.
+        if (Dispatcher.CheckAccess())
+        {
+            TryFlushLayout();
+        }
+        else
+        {
+            _ = Dispatcher.InvokeAsync(TryFlushLayout, DispatcherPriority.Render);
+        }
+    }
+
+    private void TryFlushLayout()
+    {
+        try
+        {
+            DrawingCanvas.UpdateLayout();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Render flush after clear failed (safe to ignore)");
+        }
     }
 
     /// <summary>
