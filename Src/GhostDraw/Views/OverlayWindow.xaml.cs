@@ -783,6 +783,11 @@ public partial class OverlayWindow : Window, IOverlayWindow
                 _logger.LogDebug("ESC pressed while confirmation modal visible - canceling clear");
                 HideClearCanvasModal();
                 _clearCanvasCancelCallback?.Invoke();
+                
+                // Clear callbacks to prevent memory leaks
+                _clearCanvasConfirmCallback = null;
+                _clearCanvasCancelCallback = null;
+                
                 RestoreToolStateAfterModal();
                 return false; // Don't exit drawing mode
             }
@@ -948,6 +953,10 @@ public partial class OverlayWindow : Window, IOverlayWindow
             // Call the confirm callback
             _clearCanvasConfirmCallback?.Invoke();
             
+            // Clear callbacks to prevent memory leaks
+            _clearCanvasConfirmCallback = null;
+            _clearCanvasCancelCallback = null;
+            
             // Restore tool state
             RestoreToolStateAfterModal();
         }
@@ -956,6 +965,8 @@ public partial class OverlayWindow : Window, IOverlayWindow
             _logger.LogError(ex, "Failed to handle Yes button click");
             // Ensure modal is hidden and state is restored
             HideClearCanvasModal();
+            _clearCanvasConfirmCallback = null;
+            _clearCanvasCancelCallback = null;
             RestoreToolStateAfterModal();
         }
     }
@@ -975,6 +986,10 @@ public partial class OverlayWindow : Window, IOverlayWindow
             // Call the cancel callback
             _clearCanvasCancelCallback?.Invoke();
             
+            // Clear callbacks to prevent memory leaks
+            _clearCanvasConfirmCallback = null;
+            _clearCanvasCancelCallback = null;
+            
             // Restore tool state
             RestoreToolStateAfterModal();
         }
@@ -983,6 +998,8 @@ public partial class OverlayWindow : Window, IOverlayWindow
             _logger.LogError(ex, "Failed to handle No button click");
             // Ensure modal is hidden and state is restored
             HideClearCanvasModal();
+            _clearCanvasConfirmCallback = null;
+            _clearCanvasCancelCallback = null;
             RestoreToolStateAfterModal();
         }
     }

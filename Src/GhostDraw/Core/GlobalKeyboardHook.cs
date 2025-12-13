@@ -222,7 +222,11 @@ public class GlobalKeyboardHook : IDisposable
                     _logger.LogDebug("Delete key pressed - clear canvas confirmation request");
                     ClearCanvasPressed?.Invoke(this, EventArgs.Empty);
                     
-                    // Suppress Delete key when drawing mode is active to prevent deleting in underlying apps
+                    // INTENTIONAL: Suppress Delete key when drawing mode is active to prevent deleting 
+                    // content in underlying apps. This is different from other tool keys (P, L, E, etc.)
+                    // which are less likely to cause data loss in underlying applications.
+                    // The Delete key is specifically suppressed as per requirements to avoid accidental
+                    // deletion in text editors or other apps while the overlay is active.
                     shouldSuppressKey = true;
                     _logger.LogDebug("Delete key suppressed - drawing mode is active");
                 }
