@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## v1.0.14
+
+### Added
+- **Clear Canvas Confirmation Modal**
+  - Press `Delete` while drawing mode is active to open a Yes/No confirmation before clearing the canvas
+  - While the modal is open, drawing and tool switching are disabled; closing the modal restores the previous tool
+
+### Changed
+- **Clear Canvas Hotkey**
+  - Clear canvas hotkey changed from `R` to `Delete`
+  - `Delete` is suppressed while drawing mode is active to prevent deleting content in underlying apps
+- **UI + Docs**
+  - Updated overlay hint text and Help shortcuts to reference `Delete`
+  - Updated `docs/KEY_LEGEND.md`
+
+### Fixed
+- Updated `ClearCanvasFeatureTests` to reflect the new `Delete` hotkey + confirmation flow
+
+
 ## v1.0.13
 
 ### Added
