@@ -167,7 +167,7 @@ public class CircleToolTests
         var toolCount = Enum.GetValues<DrawTool>().Length;
 
         // Assert
-        Assert.Equal(6, toolCount);
+        Assert.Equal(7, toolCount);
     }
 
     [Fact]
@@ -180,6 +180,6 @@ public class CircleToolTests
         var lastTool = values[values.Length - 1];
 
         // Assert
-        Assert.Equal(DrawTool.Arrow, lastTool);
+        Assert.Equal(DrawTool.Text, lastTool);
     }
 }

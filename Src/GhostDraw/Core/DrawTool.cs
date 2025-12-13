@@ -36,5 +36,10 @@ public enum DrawTool
     /// <summary>
     /// Arrow tool - click two points to draw a line with an arrowhead
     /// </summary>
-    Arrow
+    Arrow,
+
+    /// <summary>
+    /// Text tool - click to start typing, click outside to commit
+    /// </summary>
+    Text
 }

@@ -1,0 +1,103 @@
+<UserControl x:Class="GhostDraw.Views.UserControls.ClearCanvasConfirmationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"
+             d:DesignHeight="160" d:DesignWidth="340">
+    <Border x:Name="Root"
+            Background="#0F1419"
+            BorderBrush="#FF0080"
+            BorderThickness="2"
+            CornerRadius="8"
+            Padding="28,24"
+            Opacity="0"
+            Visibility="Collapsed"
+            IsHitTestVisible="False">
+        <Border.Effect>
+            <DropShadowEffect Color="#FF0080" Opacity="0.8" BlurRadius="28" ShadowDepth="0"/>
+        </Border.Effect>
+        <StackPanel>
+            <TextBlock Text="Clear canvas?"
+                       FontFamily="Segoe UI"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="#FFFFFF"
+                       Margin="0,0,0,14"/>
+            <TextBlock Text="This removes all strokes permanently."
+                       FontFamily="Segoe UI"
+                       FontSize="14"
+                       Foreground="#B0B0B0"
+                       Margin="0,0,0,18"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="ConfirmButton"
+                        Content="Clear"
+                        FontFamily="Segoe UI"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        Padding="32,12"
+                        Margin="0,0,12,0"
+                        Background="#FF0080"
+                        Foreground="#FFFFFF"
+                        BorderThickness="0"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#FF0080"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FF1A99"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#CC0066"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button x:Name="CancelButton"
+                        Content="Cancel"
+                        FontFamily="Segoe UI"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        Padding="32,12"
+                        Background="#303040"
+                        Foreground="#FFFFFF"
+                        BorderThickness="0"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#303040"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#3F4050"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#2A2B36"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

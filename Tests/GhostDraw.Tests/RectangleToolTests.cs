@@ -164,7 +164,7 @@ public class RectangleToolTests
         // Arrange & Act
         var toolCount = Enum.GetValues<DrawTool>().Length;
 
-        // Assert - Updated to 6 to include Arrow tool
-        Assert.Equal(6, toolCount);
+        // Assert - Updated to 7 to include Text tool
+        Assert.Equal(7, toolCount);
     }
 }

@@ -5,6 +5,20 @@ All notable changes to GhostDraw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.0.17
+
+### Added
+- **Text Tool**
+  - Added a lock-mode-only Text tool (hotkey `T`) with multi-line entry and outside-click commit; text respects brush color/size and stays non-editable after commit.
+  - Hardened input safety during text sessions: only activation hotkey, `F1`, and `ESC` remain active; other GhostDraw shortcuts aren’t triggered or suppressed while typing.
+  - Integrated text into history/undo/clear and eraser; multi-monitor overlays record committed text with proper overlay IDs.
+
+### Changed
+- Help modal now show's tool usage instruction and is re-styled.
+
+### Fixed
+- 2 hotkey presses required to activate draw mode after startup.
+- Ghost drawings briefly appearing on re-activations.
 
 ## v1.0.16
 
