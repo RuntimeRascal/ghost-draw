@@ -778,7 +778,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
         try
         {
             // Check if confirmation modal is visible first (highest priority)
-            if (ClearCanvasModalGrid.Visibility == Visibility.Visible)
+            if (_isClearCanvasModalVisible)
             {
                 _logger.LogDebug("ESC pressed while confirmation modal visible - canceling clear");
                 HideClearCanvasModal();
@@ -897,6 +897,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     private Action? _clearCanvasCancelCallback;
     private IDrawingTool? _toolBeforeModal;
     private bool _wasDrawingBeforeModal;
+    private bool _isClearCanvasModalVisible;
 
     /// <summary>
     /// Shows the clear canvas confirmation modal
@@ -916,10 +917,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
             _wasDrawingBeforeModal = _isDrawing;
             
             // Cancel any in-progress drawing
-            if (_activeTool != null)
-            {
-                _activeTool.Cancel(DrawingCanvas);
-            }
+            CancelActiveToolSafely();
             
             // Temporarily disable drawing and reset cursor
             _isDrawing = false;
@@ -927,6 +925,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
             
             // Show the modal
             ClearCanvasModalGrid.Visibility = Visibility.Visible;
+            _isClearCanvasModalVisible = true;
             
             _logger.LogDebug("Clear canvas confirmation modal shown");
         }
@@ -1012,6 +1011,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
         try
         {
             ClearCanvasModalGrid.Visibility = Visibility.Collapsed;
+            _isClearCanvasModalVisible = false;
             _logger.LogDebug("Clear canvas confirmation modal hidden");
         }
         catch (Exception ex)
@@ -1050,6 +1050,24 @@ public partial class OverlayWindow : Window, IOverlayWindow
             _logger.LogError(ex, "Failed to restore tool state after modal");
             // On error, ensure cursor is at least set to something reasonable
             this.Cursor = _isDrawing ? WpfCursors.Cross : WpfCursors.Arrow;
+        }
+    }
+
+    /// <summary>
+    /// Safely cancels the active tool if one is active
+    /// </summary>
+    private void CancelActiveToolSafely()
+    {
+        try
+        {
+            if (_activeTool != null)
+            {
+                _activeTool.Cancel(DrawingCanvas);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to cancel active tool");
         }
     }
 

@@ -217,7 +217,7 @@ public class GlobalKeyboardHook : IDisposable
                 }
 
                 // Check for Delete key press (clear canvas - only when drawing mode is active)
-                if (vkCode == VK_DELETE && isKeyDown && _isDrawingModeActive)
+                if ((vkCode == VK_DELETE) && isKeyDown && _isDrawingModeActive)
                 {
                     _logger.LogDebug("Delete key pressed - clear canvas confirmation request");
                     ClearCanvasPressed?.Invoke(this, EventArgs.Empty);
