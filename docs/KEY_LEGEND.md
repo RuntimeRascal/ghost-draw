@@ -31,11 +31,11 @@ This document serves as the **single source of truth** for all keyboard and mous
 
 ### Drawing Mode - Actions
 
-| Key   | Virtual Key Code | Action                               | Status     | Implementation                         |
-| ----- | ---------------- | ------------------------------------ | ---------- | -------------------------------------- |
-| `R`   | `0x52` (82)      | Clear entire canvas                  | **IN USE** | `VK_R` in `GlobalKeyboardHook.cs`      |
-| `ESC` | `0x1B` (27)      | Emergency exit from drawing mode     | **IN USE** | `VK_ESCAPE` in `GlobalKeyboardHook.cs` |
-| `F1`  | `0x70` (112)     | Show keyboard shortcuts help overlay | **IN USE** | `VK_F1` in `GlobalKeyboardHook.cs`     |
+| Key      | Virtual Key Code | Action                                      | Status     | Implementation                            |
+| -------- | ---------------- | ------------------------------------------- | ---------- | ----------------------------------------- |
+| `Delete` | `0x2E` (46)      | Clear entire canvas (with confirmation)     | **IN USE** | `VK_DELETE` in `GlobalKeyboardHook.cs`    |
+| `ESC`    | `0x1B` (27)      | Close modal/help or exit from drawing mode  | **IN USE** | `VK_ESCAPE` in `GlobalKeyboardHook.cs`    |
+| `F1`     | `0x70` (112)     | Show keyboard shortcuts help overlay        | **IN USE** | `VK_F1` in `GlobalKeyboardHook.cs`        |
 
 ### Reserved Keys (Do Not Use)
 
@@ -45,9 +45,7 @@ These keys are **reserved** for future functionality or should be avoided to pre
 | ---------------------------- | ----------------------------------------------------------------- |
 | `F2` - `F12`                 | May be used for future tool shortcuts or system functions         |
 | `Ctrl+C`, `Ctrl+V`, `Ctrl+X` | Standard clipboard operations (may implement copy/paste drawings) |
-| `Ctrl+Z`, `Ctrl+Y`           | Reserved for potential Undo/Redo functionality                    |
-| `Ctrl+S`                     | Reserved for potential Save Drawing functionality                 |
-| `Delete`                     | Reserved for potential Delete Selected functionality              |
+| `Ctrl+Y`                     | Reserved for potential Redo functionality                         |
 | `Backspace`                  | Reserved for potential Undo Last Stroke                           |
 | `Space`                      | Reserved for potential Pan/Drag Canvas functionality              |
 | Arrow Keys                   | Reserved for potential Canvas Navigation                          |
@@ -89,8 +87,8 @@ This table shows which inputs are active in different application states:
 | --------------------------- | -------------- | ---------------- | --------------------- | ------------------- |
 | Activation Hotkey           | ✓ Triggers     | ✗ Disabled       | ✓ Triggers            | ✓ Toggles Off       |
 | `P`, `L`, `E`, `U`, `C` keys | ✗              | ✗                | ✗                     | ✓ Tool Selection    |
-| `R` key                     | ✗              | ✗                | ✗                     | ✓ Clear Canvas      |
-| `ESC` key               | ✗              | ✓ Closes Window  | ✗                     | ✓ Exit Drawing      |
+| `Delete` key                | ✗              | ✗                | ✗                     | ✓ Clear Canvas      |
+| `ESC` key               | ✗              | ✓ Closes Window  | ✗                     | ✓ Close Modal/Help or Exit Drawing      |
 | `F1` key                | ✗              | ✗                | ✗                     | ✓ Show Help         |
 | Left Click              | ✗              | ✓ UI Interaction | ✗                     | ✓ Draw              |
 | Right Click             | ✓ Context Menu | ✓ UI Interaction | ✗                     | ✓ Cycle Color       |
@@ -109,7 +107,7 @@ Src\GhostDraw\Core\GlobalKeyboardHook.cs
 
 ```csharp
 private const int VK_ESCAPE = 0x1B;    // 27
-private const int VK_R = 0x52;         // 82 - 'R' key for clear canvas
+private const int VK_DELETE = 0x2E;    // 46 - 'Delete' key for clear canvas
 private const int VK_L = 0x4C;         // 76 - 'L' key for line tool
 private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
 private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
@@ -124,7 +122,7 @@ private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
 - `GlobalKeyboardHook.HotkeyPressed` - Activation hotkey down
 - `GlobalKeyboardHook.HotkeyReleased` - Activation hotkey up
 - `GlobalKeyboardHook.EscapePressed` - ESC key
-- `GlobalKeyboardHook.ClearCanvasPressed` - R key
+- `GlobalKeyboardHook.ClearCanvasPressed` - Delete key
 - `GlobalKeyboardHook.PenToolPressed` - P key
 - `GlobalKeyboardHook.LineToolPressed` - L key
 - `GlobalKeyboardHook.EraserToolPressed` - E key
@@ -162,9 +160,9 @@ Before adding a new keyboard shortcut:
 
 | Feature             | Suggested Key           | Priority | Status        |
 | ------------------- | ----------------------- | -------- | ------------- |
-| Undo Last Stroke    | `Ctrl+Z` or `Backspace` | High     | Not Implemented |
+| Undo Last Stroke    | `Ctrl+Z`                | High     | ✅ **Implemented** |
 | Redo Stroke         | `Ctrl+Y`                | High     | Not Implemented |
-| Save Drawing        | `Ctrl+S`                | Medium   | Not Implemented |
+| Save Drawing        | `Ctrl+S`                | Medium   | ✅ **Implemented** (Screenshot) |
 | Load Drawing        | `Ctrl+O`                | Medium   | Not Implemented |
 | Circle/Ellipse Tool | `C`                     | Low      | ✅ **Implemented** |
 | Text Tool           | `T`                     | Low      | Not Implemented |
@@ -175,10 +173,7 @@ Before adding a new keyboard shortcut:
 ### Keys to Keep Available
 
 Reserve these keys for high-priority future features:
-- **`Ctrl+Z`** - Undo (highest priority)
 - **`Ctrl+Y`** - Redo (highest priority)
-- **`Ctrl+S`** - Save drawing
-- **`Delete`** - Delete selected element
 - **`Space`** - Pan/temporary tool toggle
 
 ---

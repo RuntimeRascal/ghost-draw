@@ -12,7 +12,7 @@ public class GlobalKeyboardHook : IDisposable
 
     // Only keep VK_ESCAPE constant (emergency exit)
     private const int VK_ESCAPE = 0x1B;    // 27
-    private const int VK_R = 0x52;         // 82 - 'R' key for clear canvas
+    private const int VK_DELETE = 0x2E;    // 46 - 'Delete' key for clear canvas
     private const int VK_L = 0x4C;         // 76 - 'L' key for line tool
     private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
     private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
@@ -216,11 +216,19 @@ public class GlobalKeyboardHook : IDisposable
                     EscapePressed?.Invoke(this, EventArgs.Empty);
                 }
 
-                // Check for R key press (clear canvas)
-                if (vkCode == VK_R && isKeyDown)
+                // Check for Delete key press (clear canvas - only when drawing mode is active)
+                if ((vkCode == VK_DELETE) && isKeyDown && _isDrawingModeActive)
                 {
-                    _logger.LogDebug("R key pressed - clear canvas request");
+                    _logger.LogDebug("Delete key pressed - clear canvas confirmation request");
                     ClearCanvasPressed?.Invoke(this, EventArgs.Empty);
+                    
+                    // INTENTIONAL: Suppress Delete key when drawing mode is active to prevent deleting 
+                    // content in underlying apps. This is different from other tool keys (P, L, E, etc.)
+                    // which are less likely to cause data loss in underlying applications.
+                    // The Delete key is specifically suppressed as per requirements to avoid accidental
+                    // deletion in text editors or other apps while the overlay is active.
+                    shouldSuppressKey = true;
+                    _logger.LogDebug("Delete key suppressed - drawing mode is active");
                 }
 
                 // Check for L key press (line tool)

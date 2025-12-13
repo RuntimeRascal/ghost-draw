@@ -35,4 +35,11 @@ public interface IOverlayWindow
     /// Undoes the last drawing action
     /// </summary>
     void UndoLastAction();
+
+    /// <summary>
+    /// Shows the clear canvas confirmation modal
+    /// </summary>
+    /// <param name="onConfirm">Action to call when user confirms (clicks Yes)</param>
+    /// <param name="onCancel">Action to call when user cancels (clicks No or closes modal)</param>
+    void ShowClearCanvasConfirmation(Action onConfirm, Action onCancel);
 }
