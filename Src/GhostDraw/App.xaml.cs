@@ -368,7 +368,7 @@ public partial class App : Application
             _logger?.LogInformation("====== OnScreenshotFullPressed CALLED ======");
             _logger?.LogInformation("DrawingManager null: {IsNull}", _drawingManager == null);
             _logger?.LogInformation("DrawingManager.IsDrawingMode: {IsDrawingMode}", _drawingManager?.IsDrawingMode);
-            
+
             // Capture full screenshot if drawing mode is active
             if (_drawingManager?.IsDrawingMode == true)
             {
@@ -394,7 +394,7 @@ public partial class App : Application
         try
         {
             _logger?.LogInformation("Ctrl+Z pressed - undoing last action");
-            
+
             // Undo last action if drawing mode is active
             if (_drawingManager?.IsDrawingMode == true)
             {

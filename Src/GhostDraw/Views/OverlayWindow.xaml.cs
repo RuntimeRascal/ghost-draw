@@ -66,7 +66,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     private readonly TimeSpan _screenshotToastFadeOutDuration = TimeSpan.FromMilliseconds(300);
 
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
-        DrawingHistory drawingHistory, PenTool penTool, LineTool lineTool, EraserTool eraserTool, 
+        DrawingHistory drawingHistory, PenTool penTool, LineTool lineTool, EraserTool eraserTool,
         RectangleTool rectangleTool, CircleTool circleTool)
     {
         _logger = logger;
@@ -81,7 +81,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
         _logger.LogDebug("OverlayWindow constructor called");
 
         InitializeComponent();
-        
+
         // Subscribe to tool events for history tracking
         _penTool.ActionCompleted += OnToolActionCompleted;
         _lineTool.ActionCompleted += OnToolActionCompleted;
@@ -208,7 +208,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
 
         // Clear canvas when exiting drawing mode too
         ClearDrawing();
-        
+
         // Clear history when exiting drawing mode
         _drawingHistory.Clear();
 
@@ -483,7 +483,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
             {
                 _logger.LogDebug("Canvas already empty, clear acknowledged");
             }
-            
+
             // Clear history when canvas is cleared
             _drawingHistory.Clear();
 

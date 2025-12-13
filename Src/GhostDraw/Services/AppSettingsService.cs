@@ -48,7 +48,7 @@ public class AppSettingsService
             if (settings != null)
             {
                 _logger.LogInformation("Settings loaded successfully");
-                
+
                 // Save to ensure latest format
                 _settingsStore.Save(settings);
                 return settings;
@@ -280,8 +280,8 @@ public class AppSettingsService
     /// </summary>
     public DrawTool ToggleTool()
     {
-        var newTool = _currentSettings.ActiveTool == DrawTool.Pen 
-            ? DrawTool.Line 
+        var newTool = _currentSettings.ActiveTool == DrawTool.Pen
+            ? DrawTool.Line
             : DrawTool.Pen;
         SetActiveTool(newTool);
         return newTool;

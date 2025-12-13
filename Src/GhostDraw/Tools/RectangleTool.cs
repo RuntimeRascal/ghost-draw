@@ -157,7 +157,7 @@ public class RectangleTool(ILogger<RectangleTool> logger) : IDrawingTool
             bool isShiftPressed = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
             UpdateRectangle(_rectangleStartPoint.Value, endPoint, isShiftPressed);
             _logger.LogInformation("Rectangle finished at ({X:F0}, {Y:F0})", endPoint.X, endPoint.Y);
-            
+
             // Fire ActionCompleted event for history tracking
             ActionCompleted?.Invoke(this, new DrawingActionCompletedEventArgs(_currentRectangle));
         }

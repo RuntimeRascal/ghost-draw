@@ -44,7 +44,7 @@ public class UndoFeatureTests
         // Arrange
         var hook = new GlobalKeyboardHook(_mockHookLogger.Object);
         var handlerCalled = false;
-        
+
         hook.UndoPressed += (s, e) =>
         {
             handlerCalled = true;

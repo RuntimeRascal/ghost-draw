@@ -87,7 +87,7 @@ public partial class HotkeySettingsControl : WpfUserControl
     private void StartRecording()
     {
         if (LoggerFactory == null || AppSettings == null) return;
-        
+
         _recordedKeys.Clear();
 
         // Show recorder UI
@@ -241,7 +241,7 @@ public partial class HotkeySettingsControl : WpfUserControl
     private void ApplyHotkey_Click(object sender, RoutedEventArgs e)
     {
         if (AppSettings == null) return;
-        
+
         AppSettings.SetHotkey([.. _recordedKeys]);
         CurrentHotkeyText.Text = RecorderPreviewText.Text;
 

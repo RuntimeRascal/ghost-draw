@@ -118,7 +118,7 @@ public class EraserToolTests
 
         // Assert - The setting should be retrievable
         Assert.Equal(DrawTool.Eraser, service.GetActiveTool());
-        
+
         // Create new service instance to verify persistence
         var newService = CreateService();
         Assert.Equal(DrawTool.Eraser, newService.GetActiveTool());
@@ -170,7 +170,7 @@ public class EraserToolTests
         var mockLogger = new Mock<ILogger<GlobalKeyboardHook>>();
         var hook = new GlobalKeyboardHook(mockLogger.Object);
         var handlerCalled = false;
-        
+
         hook.EraserToolPressed += (s, e) =>
         {
             handlerCalled = true;

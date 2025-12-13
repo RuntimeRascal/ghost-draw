@@ -18,37 +18,37 @@ public interface IDrawingTool
     /// Called when the mouse left button is pressed
     /// </summary>
     void OnMouseDown(Point position, Canvas canvas);
-    
+
     /// <summary>
     /// Called when the mouse moves
     /// </summary>
     void OnMouseMove(Point position, Canvas canvas, MouseButtonState leftButtonState);
-    
+
     /// <summary>
     /// Called when the mouse left button is released
     /// </summary>
     void OnMouseUp(Point position, Canvas canvas);
-    
+
     /// <summary>
     /// Called when the tool is activated
     /// </summary>
     void OnActivated();
-    
+
     /// <summary>
     /// Called when the tool is deactivated
     /// </summary>
     void OnDeactivated();
-    
+
     /// <summary>
     /// Called when the brush color changes
     /// </summary>
     void OnColorChanged(string colorHex);
-    
+
     /// <summary>
     /// Called when the brush thickness changes
     /// </summary>
     void OnThicknessChanged(double thickness);
-    
+
     /// <summary>
     /// Cancels any in-progress operation (e.g., line drawing)
     /// </summary>

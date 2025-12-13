@@ -119,7 +119,7 @@ public class RectangleToolTests
 
         // Assert - The setting should be retrievable
         Assert.Equal(DrawTool.Rectangle, service.GetActiveTool());
-        
+
         // Create new service instance to verify persistence
         var newService = CreateService();
         Assert.Equal(DrawTool.Rectangle, newService.GetActiveTool());
@@ -150,10 +150,10 @@ public class RectangleToolTests
     {
         // Arrange
         var values = Enum.GetValues<DrawTool>();
-        
+
         // Act
         var uniqueValues = values.Distinct().ToArray();
-        
+
         // Assert
         Assert.Equal(values.Length, uniqueValues.Length);
     }
@@ -163,7 +163,7 @@ public class RectangleToolTests
     {
         // Arrange & Act
         var toolCount = Enum.GetValues<DrawTool>().Length;
-        
+
         // Assert - Updated to 5 to include Circle tool
         Assert.Equal(5, toolCount);
     }

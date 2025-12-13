@@ -10,10 +10,10 @@ namespace GhostDraw.Services;
 public class DrawingHistory
 {
     private readonly ILogger<DrawingHistory> _logger;
-    
+
     // Stack of completed drawing actions (most recent at the top)
     private readonly Stack<HistoryEntry> _undoStack = new();
-    
+
     // Dictionary for O(1) lookup when eraser needs to remove history entries
     private readonly Dictionary<Guid, HistoryEntry> _elementIdToEntry = new();
 
@@ -46,7 +46,7 @@ public class DrawingHistory
                 _undoStack.Push(entry);
                 _elementIdToEntry[id] = entry;
 
-                _logger.LogDebug("Action recorded: ID={Id}, Type={Type}, StackSize={StackSize}", 
+                _logger.LogDebug("Action recorded: ID={Id}, Type={Type}, StackSize={StackSize}",
                     id, element.GetType().Name, _undoStack.Count);
             }
             else
@@ -71,7 +71,7 @@ public class DrawingHistory
             while (_undoStack.Count > 0)
             {
                 var entry = _undoStack.Pop();
-                
+
                 // Remove from dictionary
                 _elementIdToEntry.Remove(entry.Id);
 
@@ -115,7 +115,7 @@ public class DrawingHistory
                     // Mark the entry's element as null so it will be skipped during undo
                     entry.Element = null;
                     _elementIdToEntry.Remove(id);
-                    
+
                     _logger.LogDebug("Element removed from history: ID={Id}, Type={Type}",
                         id, element.GetType().Name);
                 }
@@ -145,7 +145,7 @@ public class DrawingHistory
             var count = _undoStack.Count;
             _undoStack.Clear();
             _elementIdToEntry.Clear();
-            
+
             if (count > 0)
             {
                 _logger.LogInformation("History cleared: {Count} entries removed", count);

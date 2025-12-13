@@ -30,7 +30,7 @@ public interface IOverlayWindow
     bool HandleEscapeKey();
 
     void ShowScreenshotSaved();
-    
+
     /// <summary>
     /// Undoes the last drawing action
     /// </summary>

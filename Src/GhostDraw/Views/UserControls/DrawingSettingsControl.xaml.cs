@@ -145,7 +145,7 @@ public partial class DrawingSettingsControl : WpfUserControl
         {
             UpdateActiveColorIndicators();
         }), System.Windows.Threading.DispatcherPriority.ContextIdle);
-        
+
         Dispatcher.BeginInvoke(new Action(() =>
         {
             UpdateActiveColorIndicators();
@@ -155,11 +155,11 @@ public partial class DrawingSettingsControl : WpfUserControl
     private void ColorSquare_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (AppSettings == null) return;
-        
+
         if (sender is Border border && border.Tag is string colorHex)
         {
             AppSettings.SetActiveBrush(colorHex);
-            
+
             // Update immediately since visual tree is already loaded
             Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -171,9 +171,9 @@ public partial class DrawingSettingsControl : WpfUserControl
     private void UpdateActiveColorIndicators()
     {
         if (AppSettings == null) return;
-        
+
         var activeColor = AppSettings.CurrentSettings.ActiveBrush;
-        
+
         // Try StackPanel first (default for ItemsControl without ItemsPanel specified)
         var itemsPanel = FindVisualChild<StackPanel>(PaletteColorsItemsControl);
         if (itemsPanel == null)
@@ -201,7 +201,7 @@ public partial class DrawingSettingsControl : WpfUserControl
         {
             // WPF wraps DataTemplate items in ContentPresenter, so we need to look inside
             Grid? grid = null;
-            
+
             if (child is ContentPresenter contentPresenter)
             {
                 // Find the Grid inside the ContentPresenter
@@ -211,14 +211,14 @@ public partial class DrawingSettingsControl : WpfUserControl
             {
                 grid = directGrid;
             }
-            
+
             if (grid != null && grid.Children.Count > 0 && grid.Children[0] is Border colorBorder)
             {
                 var colorHex = colorBorder.Tag as string;
                 var isActive = colorHex == activeColor;
 
                 // Update border style for active color
-                colorBorder.BorderBrush = isActive 
+                colorBorder.BorderBrush = isActive
                     ? new SolidColorBrush((WpfColor)WpfColorConverter.ConvertFromString("#FF0080"))
                     : new SolidColorBrush((WpfColor)WpfColorConverter.ConvertFromString("#00FFFF"));
                 colorBorder.BorderThickness = isActive ? new Thickness(3) : new Thickness(2);
@@ -238,7 +238,7 @@ public partial class DrawingSettingsControl : WpfUserControl
                                 positionText.Text = position.ToString();
                             }
                         }
-                        
+
                         // Find checkmark (second child - Viewbox containing TextBlock)
                         if (contentGrid.Children.Count > 1 && contentGrid.Children[1] is Viewbox vb && vb.Child is TextBlock checkmark)
                         {
@@ -248,11 +248,11 @@ public partial class DrawingSettingsControl : WpfUserControl
                 }
 
                 // Replace the drop shadow effect with a new one (can't modify frozen effects)
-                var shadowColor = isActive 
+                var shadowColor = isActive
                     ? (WpfColor)WpfColorConverter.ConvertFromString("#FF0080")
                     : (WpfColor)WpfColorConverter.ConvertFromString("#00FFFF");
                 var shadowOpacity = isActive ? 0.8 : 0.4;
-                
+
                 colorBorder.Effect = new DropShadowEffect
                 {
                     Color = shadowColor,
@@ -260,7 +260,7 @@ public partial class DrawingSettingsControl : WpfUserControl
                     BlurRadius = 8,
                     ShadowDepth = 0
                 };
-                
+
                 position++;
             }
         }
@@ -274,7 +274,7 @@ public partial class DrawingSettingsControl : WpfUserControl
             var child = VisualTreeHelper.GetChild(parent, i);
             if (child is T typedChild)
                 return typedChild;
-            
+
             var result = FindVisualChild<T>(child);
             if (result != null)
                 return result;
@@ -303,7 +303,7 @@ public partial class DrawingSettingsControl : WpfUserControl
     private void RemoveColorButton_Click(object sender, RoutedEventArgs e)
     {
         if (AppSettings == null) return;
-        
+
         if (sender is System.Windows.Controls.Button button && button.Tag is string colorHex)
         {
             // Show confirmation dialog
@@ -323,18 +323,18 @@ public partial class DrawingSettingsControl : WpfUserControl
     private void MoveColorUpButton_Click(object sender, RoutedEventArgs e)
     {
         if (AppSettings == null) return;
-        
+
         if (sender is System.Windows.Controls.Button button && button.Tag is string colorHex)
         {
             var palette = new List<string>(AppSettings.CurrentSettings.ColorPalette);
             var currentIndex = palette.IndexOf(colorHex);
-            
+
             if (currentIndex < 0)
                 return;
-            
+
             // Remove from current position
             palette.RemoveAt(currentIndex);
-            
+
             // If at the top, wrap to bottom
             if (currentIndex == 0)
             {
@@ -345,7 +345,7 @@ public partial class DrawingSettingsControl : WpfUserControl
                 // Move up one position
                 palette.Insert(currentIndex - 1, colorHex);
             }
-            
+
             AppSettings.SetColorPalette(palette);
         }
     }
@@ -353,18 +353,18 @@ public partial class DrawingSettingsControl : WpfUserControl
     private void MoveColorDownButton_Click(object sender, RoutedEventArgs e)
     {
         if (AppSettings == null) return;
-        
+
         if (sender is System.Windows.Controls.Button button && button.Tag is string colorHex)
         {
             var palette = new List<string>(AppSettings.CurrentSettings.ColorPalette);
             var currentIndex = palette.IndexOf(colorHex);
-            
+
             if (currentIndex < 0)
                 return;
-            
+
             // Remove from current position
             palette.RemoveAt(currentIndex);
-            
+
             // If at the bottom, wrap to top
             if (currentIndex >= palette.Count)
             {
@@ -375,7 +375,7 @@ public partial class DrawingSettingsControl : WpfUserControl
                 // Move down one position
                 palette.Insert(currentIndex + 1, colorHex);
             }
-            
+
             AppSettings.SetColorPalette(palette);
         }
     }
@@ -424,7 +424,7 @@ public partial class DrawingSettingsControl : WpfUserControl
     private void MinUpButton_Click(object sender, RoutedEventArgs e)
     {
         if (AppSettings == null) return;
-        
+
         if (double.TryParse(MinThicknessTextBox.Text, out double value))
         {
             var maxValue = AppSettings.CurrentSettings.MaxBrushThickness;
@@ -436,7 +436,7 @@ public partial class DrawingSettingsControl : WpfUserControl
     private void MinDownButton_Click(object sender, RoutedEventArgs e)
     {
         if (AppSettings == null) return;
-        
+
         if (double.TryParse(MinThicknessTextBox.Text, out double value))
         {
             if (value > 1)
@@ -456,7 +456,7 @@ public partial class DrawingSettingsControl : WpfUserControl
     private void MaxDownButton_Click(object sender, RoutedEventArgs e)
     {
         if (AppSettings == null) return;
-        
+
         if (double.TryParse(MaxThicknessTextBox.Text, out double value))
         {
             var minValue = AppSettings.CurrentSettings.MinBrushThickness;

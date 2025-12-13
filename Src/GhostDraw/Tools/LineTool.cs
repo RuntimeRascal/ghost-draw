@@ -127,7 +127,7 @@ public class LineTool(ILogger<LineTool> logger) : IDrawingTool
             _currentLine.Y2 = endPoint.Y;
 
             _logger.LogInformation("Line finished at ({X:F0}, {Y:F0})", endPoint.X, endPoint.Y);
-            
+
             // Fire ActionCompleted event for history tracking
             ActionCompleted?.Invoke(this, new DrawingActionCompletedEventArgs(_currentLine));
         }
