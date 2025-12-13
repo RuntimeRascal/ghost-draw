@@ -76,7 +76,7 @@ public class DrawingHistory
                 _elementIdToEntry.Remove(entry.Id);
 
                 // Check if element is still valid (not already removed)
-                if (entry.Element != null)
+                if (!entry.IsRemoved)
                 {
                     _logger.LogInformation("Undo: Removing element ID={Id}, Type={Type}, RemainingActions={Count}",
                         entry.Id, entry.Element.GetType().Name, _undoStack.Count);
@@ -85,7 +85,7 @@ public class DrawingHistory
                 else
                 {
                     // Element was already removed (e.g., by eraser), skip to next
-                    _logger.LogDebug("Undo: Skipping null element ID={Id} (already removed)", entry.Id);
+                    _logger.LogDebug("Undo: Skipping removed element ID={Id}", entry.Id);
                 }
             }
 
@@ -112,8 +112,8 @@ public class DrawingHistory
             {
                 if (_elementIdToEntry.TryGetValue(id, out var entry))
                 {
-                    // Mark the entry's element as null so it will be skipped during undo
-                    entry.Element = null;
+                    // Mark the entry as removed so it will be skipped during undo
+                    entry.IsRemoved = true;
                     _elementIdToEntry.Remove(id);
 
                     _logger.LogDebug("Element removed from history: ID={Id}, Type={Type}",
@@ -168,12 +168,14 @@ public class DrawingHistory
     private class HistoryEntry
     {
         public Guid Id { get; }
-        public UIElement? Element { get; set; }
+        public UIElement Element { get; }
+        public bool IsRemoved { get; set; }
 
         public HistoryEntry(Guid id, UIElement element)
         {
             Id = id;
             Element = element;
+            IsRemoved = false;
         }
     }
 }

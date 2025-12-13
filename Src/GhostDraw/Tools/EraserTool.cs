@@ -30,6 +30,9 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
     private double _currentThickness = 3.0;
     private readonly HashSet<UIElement> _erasedElements = new();
 
+    // ActionCompleted event required by IDrawingTool but not used by eraser.
+    // Eraser uses ElementErased event instead since it removes existing elements
+    // rather than creating new ones.
     public event EventHandler<DrawingActionCompletedEventArgs>? ActionCompleted;
 
     /// <summary>
