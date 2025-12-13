@@ -7,7 +7,8 @@
         Background="Transparent"
         Topmost="True"
         ShowInTaskbar="False"
-        WindowState="Maximized"
+    WindowState="Normal"
+    WindowStartupLocation="Manual"
         ResizeMode="NoResize">
     <Grid>
         <Canvas x:Name="DrawingCanvas">

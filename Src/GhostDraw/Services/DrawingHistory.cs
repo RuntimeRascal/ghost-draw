@@ -22,14 +22,23 @@ public class DrawingHistory
         _logger = logger;
     }
 
+    public sealed record UndoResult(string OverlayId, Guid ElementId, UIElement Element);
+
     /// <summary>
     /// Records a completed drawing action. Assigns a unique ID to the element.
     /// </summary>
+    /// <param name="overlayId">The overlay that owns the element</param>
     /// <param name="element">The UIElement that was added to the canvas</param>
-    public void RecordAction(UIElement element)
+    public void RecordAction(string overlayId, UIElement element)
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(overlayId))
+            {
+                _logger.LogWarning("Attempted to record action with missing overlayId");
+                return;
+            }
+
             if (element == null)
             {
                 _logger.LogWarning("Attempted to record null element");
@@ -42,7 +51,7 @@ public class DrawingHistory
                 var id = Guid.NewGuid();
                 frameworkElement.Tag = id;
 
-                var entry = new HistoryEntry(id, element);
+                var entry = new HistoryEntry(overlayId, id, element);
                 _undoStack.Push(entry);
                 _elementIdToEntry[id] = entry;
 
@@ -62,9 +71,9 @@ public class DrawingHistory
 
     /// <summary>
     /// Removes the most recent completed action from history.
-    /// Returns the element to be removed from the canvas, or null if history is empty.
+    /// Returns the element (and owning overlayId) to be removed from the canvas, or null if history is empty.
     /// </summary>
-    public UIElement? UndoLastAction()
+    public UndoResult? UndoLastAction()
     {
         try
         {
@@ -80,7 +89,7 @@ public class DrawingHistory
                 {
                     _logger.LogInformation("Undo: Removing element ID={Id}, Type={Type}, RemainingActions={Count}",
                         entry.Id, entry.Element.GetType().Name, _undoStack.Count);
-                    return entry.Element;
+                    return new UndoResult(entry.OverlayId, entry.Id, entry.Element);
                 }
                 else
                 {
@@ -167,12 +176,14 @@ public class DrawingHistory
     /// </summary>
     private class HistoryEntry
     {
+        public string OverlayId { get; }
         public Guid Id { get; }
         public UIElement Element { get; }
         public bool IsRemoved { get; set; }
 
-        public HistoryEntry(Guid id, UIElement element)
+        public HistoryEntry(string overlayId, Guid id, UIElement element)
         {
+            OverlayId = overlayId;
             Id = id;
             Element = element;
             IsRemoved = false;

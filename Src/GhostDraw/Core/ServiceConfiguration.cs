@@ -61,15 +61,16 @@ public static class ServiceConfiguration
         services.AddSingleton<DrawingHistory>();
 
         // Register drawing tools
-        services.AddSingleton<GhostDraw.Tools.PenTool>();
-        services.AddSingleton<GhostDraw.Tools.LineTool>();
-        services.AddSingleton<GhostDraw.Tools.ArrowTool>();
-        services.AddSingleton<GhostDraw.Tools.EraserTool>();
-        services.AddSingleton<GhostDraw.Tools.RectangleTool>();
-        services.AddSingleton<GhostDraw.Tools.CircleTool>();
+        services.AddTransient<GhostDraw.Tools.PenTool>();
+        services.AddTransient<GhostDraw.Tools.LineTool>();
+        services.AddTransient<GhostDraw.Tools.ArrowTool>();
+        services.AddTransient<GhostDraw.Tools.EraserTool>();
+        services.AddTransient<GhostDraw.Tools.RectangleTool>();
+        services.AddTransient<GhostDraw.Tools.CircleTool>();
 
-        services.AddSingleton<OverlayWindow>();
-        services.AddSingleton<IOverlayWindow>(sp => sp.GetRequiredService<OverlayWindow>());
+        services.AddTransient<OverlayWindow>();
+        services.AddSingleton<MultiOverlayWindowOrchestrator>();
+        services.AddSingleton<IOverlayWindow>(sp => sp.GetRequiredService<MultiOverlayWindowOrchestrator>());
         services.AddSingleton<GlobalKeyboardHook>();
         services.AddSingleton<DrawingManager>();
         services.AddSingleton<LoggingSettingsService>();

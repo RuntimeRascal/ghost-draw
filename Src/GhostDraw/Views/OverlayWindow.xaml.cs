@@ -31,6 +31,8 @@ public partial class OverlayWindow : Window, IOverlayWindow
     private readonly CircleTool _circleTool;
     private IDrawingTool? _activeTool;
 
+    public string OverlayId { get; }
+
     /// <summary>
     /// Gets the display name of the current hotkey combination for binding
     /// </summary>
@@ -68,7 +70,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
 
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
         DrawingHistory drawingHistory, PenTool penTool, LineTool lineTool, ArrowTool arrowTool, EraserTool eraserTool,
-        RectangleTool rectangleTool, CircleTool circleTool)
+        RectangleTool rectangleTool, CircleTool circleTool, string? overlayId = null, Rect? screenBounds = null)
     {
         _logger = logger;
         _appSettings = appSettings;
@@ -80,9 +82,14 @@ public partial class OverlayWindow : Window, IOverlayWindow
         _eraserTool = eraserTool;
         _rectangleTool = rectangleTool;
         _circleTool = circleTool;
+        OverlayId = string.IsNullOrWhiteSpace(overlayId) ? "VirtualScreen" : overlayId;
         _logger.LogDebug("OverlayWindow constructor called");
 
         InitializeComponent();
+
+        // Keep per-overlay tool instances in sync with the shared settings service
+        _appSettings.BrushColorChanged += AppSettings_BrushColorChanged;
+        _appSettings.BrushThicknessChanged += AppSettings_BrushThicknessChanged;
 
         // Subscribe to tool events for history tracking
         _penTool.ActionCompleted += OnToolActionCompleted;
@@ -122,11 +129,27 @@ public partial class OverlayWindow : Window, IOverlayWindow
         };
         _screenshotSavedToastTimer.Tick += ScreenshotSavedToastTimer_Tick;
 
-        // Make window span all monitors
-        Left = SystemParameters.VirtualScreenLeft;
-        Top = SystemParameters.VirtualScreenTop;
-        Width = SystemParameters.VirtualScreenWidth;
-        Height = SystemParameters.VirtualScreenHeight;
+        // Per-monitor overlays require manual positioning.
+        // If the window is Maximized, WPF will maximize it on a single monitor (typically primary).
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        WindowState = WindowState.Normal;
+
+        // Size this overlay to either a specific monitor or the full virtual desktop
+        if (screenBounds.HasValue)
+        {
+            Left = screenBounds.Value.Left;
+            Top = screenBounds.Value.Top;
+            Width = screenBounds.Value.Width;
+            Height = screenBounds.Value.Height;
+        }
+        else
+        {
+            // Fallback: virtual desktop spanning all monitors
+            Left = SystemParameters.VirtualScreenLeft;
+            Top = SystemParameters.VirtualScreenTop;
+            Width = SystemParameters.VirtualScreenWidth;
+            Height = SystemParameters.VirtualScreenHeight;
+        }
 
         _logger.LogInformation("Overlay dimensions - Left:{Left} Top:{Top} Size:{Width}x{Height}",
             Left, Top, Width, Height);
@@ -151,9 +174,59 @@ public partial class OverlayWindow : Window, IOverlayWindow
             _canvasClearedToastTimer.Stop();
             _drawingModeHintTimer.Stop();
             _screenshotSavedToastTimer.Stop();
+
+            _appSettings.BrushColorChanged -= AppSettings_BrushColorChanged;
+            _appSettings.BrushThicknessChanged -= AppSettings_BrushThicknessChanged;
         };
 
         _logger.LogDebug("Mouse events wired up");
+    }
+
+    private void AppSettings_BrushColorChanged(object? sender, string colorHex)
+    {
+        try
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(() => AppSettings_BrushColorChanged(sender, colorHex));
+                return;
+            }
+
+            if (!_isDrawing || _activeTool == null)
+            {
+                return;
+            }
+
+            _activeTool.OnColorChanged(colorHex);
+            UpdateCursor();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to apply brush color change to overlay");
+        }
+    }
+
+    private void AppSettings_BrushThicknessChanged(object? sender, double thickness)
+    {
+        try
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(() => AppSettings_BrushThicknessChanged(sender, thickness));
+                return;
+            }
+
+            if (!_isDrawing || _activeTool == null)
+            {
+                return;
+            }
+
+            _activeTool.OnThicknessChanged(thickness);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to apply brush thickness change to overlay");
+        }
     }
 
     public void EnableDrawing()
@@ -193,6 +266,11 @@ public partial class OverlayWindow : Window, IOverlayWindow
 
     public void DisableDrawing()
     {
+        DisableDrawingInternal(clearHistory: true);
+    }
+
+    public void DisableDrawingInternal(bool clearHistory)
+    {
         _logger.LogInformation("?? Drawing disabled");
         _isDrawing = false;
 
@@ -214,8 +292,11 @@ public partial class OverlayWindow : Window, IOverlayWindow
         // Clear canvas when exiting drawing mode too
         ClearDrawing();
 
-        // Clear history when exiting drawing mode
-        _drawingHistory.Clear();
+        if (clearHistory)
+        {
+            // Clear history when exiting drawing mode
+            _drawingHistory.Clear();
+        }
 
         this.Cursor = WpfCursors.Arrow;
     }
@@ -230,7 +311,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
             {
                 DrawTool.Pen => _cursorHelper.CreateColoredPencilCursor(settings.ActiveBrush),
                 DrawTool.Line => _cursorHelper.CreateLineCursor(settings.ActiveBrush),
-                DrawTool.Arrow => _cursorHelper.CreateLineCursor(settings.ActiveBrush),
+                DrawTool.Arrow => _cursorHelper.CreateArrowCursor(settings.ActiveBrush),
                 DrawTool.Eraser => _cursorHelper.CreateEraserCursor(),
                 DrawTool.Rectangle => _cursorHelper.CreateRectangleCursor(settings.ActiveBrush),
                 DrawTool.Circle => _cursorHelper.CreateCircleCursor(settings.ActiveBrush),
@@ -477,6 +558,11 @@ public partial class OverlayWindow : Window, IOverlayWindow
     /// </summary>
     public void ClearCanvas()
     {
+        ClearCanvasInternal(clearHistory: true);
+    }
+
+    public void ClearCanvasInternal(bool clearHistory)
+    {
         try
         {
             int strokeCount = DrawingCanvas.Children.Count;
@@ -491,8 +577,11 @@ public partial class OverlayWindow : Window, IOverlayWindow
                 _logger.LogDebug("Canvas already empty, clear acknowledged");
             }
 
-            // Clear history when canvas is cleared
-            _drawingHistory.Clear();
+            if (clearHistory)
+            {
+                // Clear history when canvas is cleared
+                _drawingHistory.Clear();
+            }
 
             // Always show feedback so user knows R key was recognized
             ShowCanvasClearedToast();
@@ -500,6 +589,51 @@ public partial class OverlayWindow : Window, IOverlayWindow
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to clear canvas");
+        }
+    }
+
+    public void HideClearCanvasConfirmation()
+    {
+        try
+        {
+            if (!_isClearCanvasModalVisible)
+            {
+                return;
+            }
+
+            HideClearCanvasModal();
+
+            // Clear callbacks to prevent memory leaks
+            _clearCanvasConfirmCallback = null;
+            _clearCanvasCancelCallback = null;
+
+            RestoreToolStateAfterModal();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to force-hide clear canvas confirmation modal");
+        }
+    }
+
+    public bool TryRemoveElementById(Guid elementId)
+    {
+        try
+        {
+            for (int i = DrawingCanvas.Children.Count - 1; i >= 0; i--)
+            {
+                if (DrawingCanvas.Children[i] is FrameworkElement fe && fe.Tag is Guid id && id == elementId)
+                {
+                    DrawingCanvas.Children.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to remove element by id from canvas");
+            return false;
         }
     }
 
@@ -686,6 +820,31 @@ public partial class OverlayWindow : Window, IOverlayWindow
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to toggle help popup");
+        }
+    }
+
+    public void SetHelpVisible(bool visible)
+    {
+        try
+        {
+            if (visible)
+            {
+                if (!_isHelpVisible)
+                {
+                    ShowHelp();
+                }
+            }
+            else
+            {
+                if (_isHelpVisible)
+                {
+                    HideHelp();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set help visibility");
         }
     }
 
@@ -1088,7 +1247,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            _drawingHistory.RecordAction(e.Element);
+            _drawingHistory.RecordAction(OverlayId, e.Element);
         }
         catch (Exception ex)
         {
@@ -1120,11 +1279,18 @@ public partial class OverlayWindow : Window, IOverlayWindow
         {
             if (_isDrawing)
             {
-                var elementToRemove = _drawingHistory.UndoLastAction();
-                if (elementToRemove != null)
+                var undo = _drawingHistory.UndoLastAction();
+                if (undo != null)
                 {
-                    DrawingCanvas.Children.Remove(elementToRemove);
-                    _logger.LogInformation("Undo: Removed element from canvas");
+                    if (string.Equals(undo.OverlayId, OverlayId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        DrawingCanvas.Children.Remove(undo.Element);
+                        _logger.LogInformation("Undo: Removed element from canvas");
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Undo: Overlay mismatch (Expected={Expected}, Actual={Actual})", OverlayId, undo.OverlayId);
+                    }
                 }
                 else
                 {

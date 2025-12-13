@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Logging;
-using Moq;
 using GhostDraw.Core;
 using GhostDraw.Services;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace GhostDraw.Tests;
 
@@ -137,7 +137,19 @@ public class UndoFeatureTests
         var history = new DrawingHistory(_mockHistoryLogger.Object);
 
         // Act & Assert
-        var exception = Record.Exception(() => history.RecordAction(null!));
+        var exception = Record.Exception(() => history.RecordAction("TestOverlay", null!));
+        Assert.Null(exception);
+        Assert.Equal(0, history.Count);
+    }
+
+    [Fact]
+    public void DrawingHistory_RecordAction_ShouldNotThrowWithMissingOverlayId()
+    {
+        // Arrange
+        var history = new DrawingHistory(_mockHistoryLogger.Object);
+
+        // Act & Assert
+        var exception = Record.Exception(() => history.RecordAction("", null!));
         Assert.Null(exception);
         Assert.Equal(0, history.Count);
     }
