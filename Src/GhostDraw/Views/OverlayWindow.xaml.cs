@@ -29,6 +29,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     private readonly EraserTool _eraserTool;
     private readonly RectangleTool _rectangleTool;
     private readonly CircleTool _circleTool;
+    private readonly TextTool _textTool;
     private IDrawingTool? _activeTool;
 
     public string OverlayId { get; }
@@ -70,7 +71,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
 
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
         DrawingHistory drawingHistory, PenTool penTool, LineTool lineTool, ArrowTool arrowTool, EraserTool eraserTool,
-        RectangleTool rectangleTool, CircleTool circleTool, string? overlayId = null, Rect? screenBounds = null)
+        RectangleTool rectangleTool, CircleTool circleTool, TextTool textTool, string? overlayId = null, Rect? screenBounds = null)
     {
         _logger = logger;
         _appSettings = appSettings;
@@ -82,6 +83,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
         _eraserTool = eraserTool;
         _rectangleTool = rectangleTool;
         _circleTool = circleTool;
+        _textTool = textTool;
         OverlayId = string.IsNullOrWhiteSpace(overlayId) ? "VirtualScreen" : overlayId;
         _logger.LogDebug("OverlayWindow constructor called");
 
@@ -98,6 +100,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
         _rectangleTool.ActionCompleted += OnToolActionCompleted;
         _circleTool.ActionCompleted += OnToolActionCompleted;
         _eraserTool.ElementErased += OnElementErased;
+        _textTool.ActionCompleted += OnToolActionCompleted;
 
         // Initialize thickness indicator timer
         _thicknessIndicatorTimer = new DispatcherTimer
@@ -248,6 +251,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
             DrawTool.Eraser => _eraserTool,
             DrawTool.Rectangle => _rectangleTool,
             DrawTool.Circle => _circleTool,
+            DrawTool.Text => _textTool,
             _ => _penTool
         };
 
@@ -315,6 +319,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
                 DrawTool.Eraser => _cursorHelper.CreateEraserCursor(),
                 DrawTool.Rectangle => _cursorHelper.CreateRectangleCursor(settings.ActiveBrush),
                 DrawTool.Circle => _cursorHelper.CreateCircleCursor(settings.ActiveBrush),
+                DrawTool.Text => WpfCursors.IBeam,
                 _ => WpfCursors.Cross
             };
 
@@ -447,6 +452,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
                 DrawTool.Eraser => _eraserTool,
                 DrawTool.Rectangle => _rectangleTool,
                 DrawTool.Circle => _circleTool,
+                DrawTool.Text => _textTool,
                 _ => _penTool
             };
 

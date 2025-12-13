@@ -80,6 +80,7 @@ public partial class App : Application
             _keyboardHook.EraserToolPressed += OnEraserToolPressed;
             _keyboardHook.RectangleToolPressed += OnRectangleToolPressed;
             _keyboardHook.CircleToolPressed += OnCircleToolPressed;
+            _keyboardHook.TextToolPressed += OnTextToolPressed;
             _keyboardHook.HelpPressed += OnHelpPressed;
             _keyboardHook.ScreenshotFullPressed += OnScreenshotFullPressed;
             _keyboardHook.UndoPressed += OnUndoPressed;
@@ -356,6 +357,23 @@ public partial class App : Application
         catch (Exception ex)
         {
             _exceptionHandler?.HandleException(ex, "Circle tool handler");
+        }
+    }
+
+    private void OnTextToolPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Only switch to text tool if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("T pressed - selecting text tool");
+                _drawingManager?.SetTextTool();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Text tool handler");
         }
     }
 

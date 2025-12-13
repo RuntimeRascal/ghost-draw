@@ -387,6 +387,31 @@ public class DrawingManager
     }
 
     /// <summary>
+    /// Sets the active tool to Text
+    /// </summary>
+    public void SetTextTool()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _appSettings.SetActiveTool(DrawTool.Text);
+                _overlayWindow.OnToolChanged(DrawTool.Text);
+                _logger.LogInformation("Tool set to Text");
+            }
+            else
+            {
+                _logger.LogDebug("SetTextTool ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set text tool");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
     /// Toggles the help popup with keyboard shortcuts
     /// </summary>
     public void ToggleHelp()

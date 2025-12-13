@@ -67,6 +67,7 @@ public static class ServiceConfiguration
         services.AddTransient<GhostDraw.Tools.EraserTool>();
         services.AddTransient<GhostDraw.Tools.RectangleTool>();
         services.AddTransient<GhostDraw.Tools.CircleTool>();
+        services.AddTransient<GhostDraw.Tools.TextTool>();
 
         services.AddTransient<OverlayWindow>();
         services.AddSingleton<MultiOverlayWindowOrchestrator>();

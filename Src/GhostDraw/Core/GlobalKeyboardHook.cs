@@ -19,6 +19,7 @@ public class GlobalKeyboardHook : IDisposable
     private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
     private const int VK_U = 0x55;         // 85 - 'U' key for rectangle tool
     private const int VK_C = 0x43;         // 67 - 'C' key for circle tool
+    private const int VK_T = 0x54;         // 84 - 'T' key for text tool
     private const int VK_F1 = 0x70;        // 112 - 'F1' key for help
     private const int VK_S = 0x53;         // 83 - 'S' key for screenshot (Ctrl+S only)
     private const int VK_Z = 0x5A;         // 90 - 'Z' key for undo (Ctrl+Z only)
@@ -42,6 +43,7 @@ public class GlobalKeyboardHook : IDisposable
     public event EventHandler? EraserToolPressed;
     public event EventHandler? RectangleToolPressed;
     public event EventHandler? CircleToolPressed;
+    public event EventHandler? TextToolPressed;
     public event EventHandler? HelpPressed;
     public event EventHandler? ScreenshotFullPressed;
     public event EventHandler? UndoPressed;
@@ -58,6 +60,9 @@ public class GlobalKeyboardHook : IDisposable
 
     // Drawing mode state - used to determine if we should suppress keys
     private volatile bool _isDrawingModeActive = false;
+
+    // Text entry session state - when active, GhostDraw must not steal/suppress typing keys
+    private volatile bool _isTextSessionActive = false;
 
     public GlobalKeyboardHook(ILogger<GlobalKeyboardHook> logger)
     {
@@ -218,6 +223,24 @@ public class GlobalKeyboardHook : IDisposable
                     EscapePressed?.Invoke(this, EventArgs.Empty);
                 }
 
+                // While a text session is active, do not fire tool/action shortcuts
+                // and do not suppress keys needed for typing. Still allow:
+                // - ESC (emergency exit)
+                // - F1 (help)
+                // - activation hotkey (HotkeyPressed/Released)
+                if (_isTextSessionActive)
+                {
+                    if (vkCode == VK_F1 && isKeyDown)
+                    {
+                        _logger.LogDebug("F1 key pressed - help request (text session active)");
+                        HelpPressed?.Invoke(this, EventArgs.Empty);
+                    }
+
+                    // Skip the rest of GhostDraw key handling (Delete/Ctrl+Z/Ctrl+S/tool keys)
+                    // so normal typing works inside the overlay text box.
+                    goto TrackHotkeyState;
+                }
+
                 // Check for Delete key press (clear canvas - only when drawing mode is active)
                 if ((vkCode == VK_DELETE) && isKeyDown && _isDrawingModeActive)
                 {
@@ -275,6 +298,13 @@ public class GlobalKeyboardHook : IDisposable
                     CircleToolPressed?.Invoke(this, EventArgs.Empty);
                 }
 
+                // Check for T key press (text tool)
+                if (vkCode == VK_T && isKeyDown)
+                {
+                    _logger.LogDebug("T key pressed - text tool request");
+                    TextToolPressed?.Invoke(this, EventArgs.Empty);
+                }
+
                 // Check for F1 key press (help)
                 if (vkCode == VK_F1 && isKeyDown)
                 {
@@ -320,6 +350,7 @@ public class GlobalKeyboardHook : IDisposable
                 }
 
                 // Track hotkey state
+            TrackHotkeyState:
                 if (_hotkeyVKs.Contains(vkCode))
                 {
                     _keyStates[vkCode] = isKeyDown;
@@ -401,6 +432,26 @@ public class GlobalKeyboardHook : IDisposable
             _logger.LogDebug("Drawing mode state set to: {IsActive} (no change)", isActive);
         }
     }
+
+    /// <summary>
+    /// Sets whether a text entry session is active. When active, GhostDraw won't trigger
+    /// most shortcuts (tool keys, clear, undo, screenshot) and won't suppress typing keys.
+    /// </summary>
+    public void SetTextSessionActive(bool isActive)
+    {
+        _isTextSessionActive = isActive;
+        _logger.LogInformation("Text session active: {IsActive}", isActive);
+    }
+
+    // Internal helpers for unit tests
+    public static bool ShouldSuppressDelete(bool isKeyDown, bool isDrawingModeActive, bool isTextSessionActive)
+        => isKeyDown && isDrawingModeActive && !isTextSessionActive;
+
+    public static bool ShouldSuppressCtrlS(bool isKeyDown, bool isControlPressed, bool isDrawingModeActive, bool isTextSessionActive)
+        => isKeyDown && isControlPressed && isDrawingModeActive && !isTextSessionActive;
+
+    public static bool ShouldSuppressCtrlZ(bool isKeyDown, bool isControlPressed, bool isDrawingModeActive, bool isTextSessionActive)
+        => isKeyDown && isControlPressed && isDrawingModeActive && !isTextSessionActive;
 
     // P/Invoke declarations
     private delegate nint LowLevelKeyboardProc(int nCode, nint wParam, nint lParam);

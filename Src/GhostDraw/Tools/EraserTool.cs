@@ -219,6 +219,22 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
                         _logger.LogDebug(ex, "Failed to compute Path bounds for erasing");
                     }
                 }
+                else if (element is TextBlock textBlock)
+                {
+                    double left = Canvas.GetLeft(textBlock);
+                    double top = Canvas.GetTop(textBlock);
+                    double width = textBlock.ActualWidth > 0 ? textBlock.ActualWidth : textBlock.Width;
+                    double height = textBlock.ActualHeight > 0 ? textBlock.ActualHeight : textBlock.FontSize * 1.5;
+
+                    if (!double.IsNaN(left) && !double.IsNaN(top) && width > 0 && height > 0)
+                    {
+                        Rect textRect = new Rect(left, top, width, height);
+                        if (eraserRect.IntersectsWith(textRect))
+                        {
+                            shouldErase = true;
+                        }
+                    }
+                }
 
                 if (shouldErase)
                 {
