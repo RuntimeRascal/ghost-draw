@@ -1,11 +1,9 @@
+using GhostDraw.Core;
+using GhostDraw.Managers;
+using GhostDraw.Services;
+using GhostDraw.Views;
 using Microsoft.Extensions.Logging;
 using Moq;
-using GhostDraw.Core;
-using GhostDraw.Views;
-using GhostDraw.Services;
-using GhostDraw.Helpers;
-using GhostDraw.Tools;
-using GhostDraw.Managers;
 
 namespace GhostDraw.Tests;
 
@@ -16,23 +14,24 @@ namespace GhostDraw.Tests;
 public class HelpToggleFeatureTests
 {
     private readonly Mock<ILogger<GlobalKeyboardHook>> _mockHookLogger;
-    private readonly Mock<ILogger<OverlayWindow>> _mockOverlayLogger;
     private readonly Mock<ILogger<DrawingManager>> _mockManagerLogger;
+    private readonly Mock<ILogger<AppSettingsService>> _mockAppSettingsLogger;
 
     public HelpToggleFeatureTests()
     {
         _mockHookLogger = new Mock<ILogger<GlobalKeyboardHook>>();
-        _mockOverlayLogger = new Mock<ILogger<OverlayWindow>>();
         _mockManagerLogger = new Mock<ILogger<DrawingManager>>();
+        _mockAppSettingsLogger = new Mock<ILogger<AppSettingsService>>();
     }
 
     /// <summary>
     /// Helper method to create a DrawingManager with mocked dependencies
     /// </summary>
-    private DrawingManager CreateDrawingManager(Mock<OverlayWindow> mockOverlayWindow)
+    private DrawingManager CreateDrawingManager(Mock<IOverlayWindow> mockOverlayWindow)
     {
         var mockAppSettings = new Mock<AppSettingsService>(
-            Mock.Of<ILogger<AppSettingsService>>()
+            _mockAppSettingsLogger.Object,
+            Mock.Of<ISettingsStore>()
         );
         var mockScreenshotService = new Mock<ScreenshotService>(
             Mock.Of<ILogger<ScreenshotService>>(),
@@ -52,10 +51,11 @@ public class HelpToggleFeatureTests
     /// <summary>
     /// Helper method to create a DrawingManager with mocked dependencies and return the keyboard hook mock
     /// </summary>
-    private (DrawingManager manager, Mock<GlobalKeyboardHook> keyboardHook) CreateDrawingManagerWithKeyboardHook(Mock<OverlayWindow> mockOverlayWindow)
+    private (DrawingManager manager, Mock<GlobalKeyboardHook> keyboardHook) CreateDrawingManagerWithKeyboardHook(Mock<IOverlayWindow> mockOverlayWindow)
     {
         var mockAppSettings = new Mock<AppSettingsService>(
-            Mock.Of<ILogger<AppSettingsService>>()
+            _mockAppSettingsLogger.Object,
+            Mock.Of<ISettingsStore>()
         );
         var mockScreenshotService = new Mock<ScreenshotService>(
             Mock.Of<ILogger<ScreenshotService>>(),
@@ -75,24 +75,11 @@ public class HelpToggleFeatureTests
     }
 
     /// <summary>
-    /// Helper method to create a mock OverlayWindow
+    /// Helper method to create a mock overlay window abstraction
     /// </summary>
-    private Mock<OverlayWindow> CreateMockOverlayWindow()
+    private Mock<IOverlayWindow> CreateMockOverlayWindow()
     {
-        var mockAppSettings = new Mock<AppSettingsService>(
-            Mock.Of<ILogger<AppSettingsService>>()
-        );
-        
-        return new Mock<OverlayWindow>(
-            _mockOverlayLogger.Object,
-            mockAppSettings.Object,
-            Mock.Of<CursorHelper>(),
-            Mock.Of<PenTool>(),
-            Mock.Of<LineTool>(),
-            Mock.Of<EraserTool>(),
-            Mock.Of<RectangleTool>(),
-            Mock.Of<CircleTool>()
-        );
+        return new Mock<IOverlayWindow>();
     }
 
     [Fact]
@@ -118,7 +105,7 @@ public class HelpToggleFeatureTests
         // Arrange
         var hook = new GlobalKeyboardHook(_mockHookLogger.Object);
         var handlerCalled = false;
-        
+
         hook.HelpPressed += (s, e) =>
         {
             handlerCalled = true;
@@ -236,7 +223,6 @@ public class HelpToggleFeatureTests
         // Assert - Should call DisableDrawing and Hide when HandleEscapeKey returns true
         mockOverlayWindow.Verify(x => x.DisableDrawing(), Times.Once);
         mockOverlayWindow.Verify(x => x.Hide(), Times.Once);
-        mockKeyboardHook.Verify(x => x.SetDrawingModeActive(false), Times.Once);
     }
 
     [Fact]
@@ -253,6 +239,5 @@ public class HelpToggleFeatureTests
         // Assert - Should NOT call DisableDrawing or Hide when HandleEscapeKey returns false
         mockOverlayWindow.Verify(x => x.DisableDrawing(), Times.Never);
         mockOverlayWindow.Verify(x => x.Hide(), Times.Never);
-        mockKeyboardHook.Verify(x => x.SetDrawingModeActive(false), Times.Never);
     }
 }

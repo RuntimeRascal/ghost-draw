@@ -24,11 +24,12 @@ public class ScreenshotService
     }
 
     /// <summary>
-    /// Captures a fullscreen screenshot including the overlay drawing
+    /// Captures a fullscreen screenshot including the overlay drawing.
+    /// The capture is taken for the entire virtual screen and does not
+    /// depend on a specific window instance.
     /// </summary>
-    /// <param name="overlayWindow">The overlay window containing the drawing</param>
     /// <returns>Path to saved screenshot file, or null if failed</returns>
-    public string? CaptureFullScreen(Window overlayWindow)
+    public string? CaptureFullScreen()
     {
         try
         {
@@ -42,13 +43,13 @@ public class ScreenshotService
                 (int)SystemParameters.VirtualScreenWidth,
                 (int)SystemParameters.VirtualScreenHeight);
 
-            _logger.LogInformation("Screen bounds: X={X}, Y={Y}, Width={Width}, Height={Height}", 
+            _logger.LogInformation("Screen bounds: X={X}, Y={Y}, Width={Width}, Height={Height}",
                 bounds.X, bounds.Y, bounds.Width, bounds.Height);
 
             // Create bitmap for screen capture
             _logger.LogInformation("Creating bitmap for screen capture");
             using var bitmap = new System.Drawing.Bitmap(bounds.Width, bounds.Height);
-            
+
             _logger.LogInformation("Copying screen to bitmap using Graphics.CopyFromScreen");
             using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
             {
@@ -67,7 +68,7 @@ public class ScreenshotService
                 var settings = _appSettings.CurrentSettings;
                 _logger.LogInformation("Screenshot settings - CopyToClipboard: {Copy}, OpenFolder: {Open}, PlaySound: {Sound}",
                     settings.CopyScreenshotToClipboard, settings.OpenFolderAfterScreenshot, settings.PlayShutterSound);
-                
+
                 // Copy to clipboard if enabled
                 if (settings.CopyScreenshotToClipboard)
                 {
@@ -114,7 +115,7 @@ public class ScreenshotService
             _logger.LogInformation("====== SaveScreenshot CALLED ======");
             var settings = _appSettings.CurrentSettings;
             var savePath = settings.ScreenshotSavePath;
-            
+
             _logger.LogInformation("Screenshot save path from settings: {SavePath}", savePath);
             _logger.LogInformation("Bitmap dimensions: {Width}x{Height}", bitmap.Width, bitmap.Height);
 
@@ -134,7 +135,7 @@ public class ScreenshotService
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var fileName = $"GhostDraw_{timestamp}.png";
             var filePath = Path.Combine(savePath, fileName);
-            
+
             _logger.LogInformation("Generated filename: {FileName}", fileName);
             _logger.LogInformation("Full file path: {FilePath}", filePath);
 
@@ -142,7 +143,7 @@ public class ScreenshotService
             _logger.LogInformation("Saving bitmap to file as PNG...");
             bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
             _logger.LogInformation("Bitmap saved successfully!");
-            
+
             // Verify file exists
             if (File.Exists(filePath))
             {

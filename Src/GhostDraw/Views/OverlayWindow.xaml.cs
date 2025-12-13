@@ -13,7 +13,7 @@ using WpfCursors = System.Windows.Input.Cursors;
 
 namespace GhostDraw.Views;
 
-public partial class OverlayWindow : Window
+public partial class OverlayWindow : Window, IOverlayWindow
 {
     private readonly ILogger<OverlayWindow> _logger;
     private readonly AppSettingsService _appSettings;
@@ -53,7 +53,7 @@ public partial class OverlayWindow : Window
     /// Duration for help popup fade-out animation (used when hiding help)
     /// </summary>
     private readonly TimeSpan _helpFadeOutDuration = TimeSpan.FromMilliseconds(500);
-    
+
     /// <summary>
     /// Duration for help popup fade-in animation (used when showing help)
     /// </summary>
@@ -169,10 +169,10 @@ public partial class OverlayWindow : Window
         _activeTool.OnThicknessChanged(settings.BrushThickness);
 
         UpdateCursor();
-        
+
         // Show the drawing mode hint
         ShowDrawingModeHint();
-        
+
         _logger.LogDebug("IsHitTestVisible={IsHitTestVisible}, Focusable={Focusable}",
             IsHitTestVisible, Focusable);
     }
@@ -207,7 +207,7 @@ public partial class OverlayWindow : Window
         try
         {
             var settings = _appSettings.CurrentSettings;
-            
+
             this.Cursor = settings.ActiveTool switch
             {
                 DrawTool.Pen => _cursorHelper.CreateColoredPencilCursor(settings.ActiveBrush),
@@ -217,7 +217,7 @@ public partial class OverlayWindow : Window
                 DrawTool.Circle => _cursorHelper.CreateCircleCursor(settings.ActiveBrush),
                 _ => WpfCursors.Cross
             };
-            
+
             _logger.LogDebug("Updated cursor for tool {Tool} with color {Color}", settings.ActiveTool, settings.ActiveBrush);
         }
         catch (Exception ex)
@@ -240,7 +240,7 @@ public partial class OverlayWindow : Window
     private void OverlayWindow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         _logger.LogDebug("MouseLeftButtonUp - isDrawing:{IsDrawing}", _isDrawing);
-        
+
         if (_isDrawing && _activeTool != null)
         {
             var position = e.GetPosition(DrawingCanvas);
@@ -337,7 +337,7 @@ public partial class OverlayWindow : Window
                 _activeTool.Cancel(DrawingCanvas);
                 _activeTool.OnDeactivated();
             }
-            
+
             // Switch to new tool
             _activeTool = newTool switch
             {
@@ -354,10 +354,10 @@ public partial class OverlayWindow : Window
             _activeTool.OnActivated();
             _activeTool.OnColorChanged(settings.ActiveBrush);
             _activeTool.OnThicknessChanged(settings.BrushThickness);
-            
+
             // Update cursor for new tool
             UpdateCursor();
-            
+
             _logger.LogInformation("Tool changed to {Tool}", newTool);
         }
         catch (Exception ex)
@@ -460,7 +460,7 @@ public partial class OverlayWindow : Window
         try
         {
             int strokeCount = DrawingCanvas.Children.Count;
-            
+
             if (strokeCount > 0)
             {
                 _logger.LogInformation("Clearing {StrokeCount} strokes from canvas via R key", strokeCount);
@@ -470,7 +470,7 @@ public partial class OverlayWindow : Window
             {
                 _logger.LogDebug("Canvas already empty, clear acknowledged");
             }
-            
+
             // Always show feedback so user knows R key was recognized
             ShowCanvasClearedToast();
         }
@@ -686,7 +686,7 @@ public partial class OverlayWindow : Window
             };
 
             HelpPopupBorder.BeginAnimation(OpacityProperty, fadeInAnimation);
-            
+
             _isHelpVisible = true;
 
             _logger.LogDebug("Help popup shown (toggle mode)");
@@ -717,7 +717,7 @@ public partial class OverlayWindow : Window
             };
 
             HelpPopupBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
-            
+
             _isHelpVisible = false;
 
             _logger.LogDebug("Help popup hidden");

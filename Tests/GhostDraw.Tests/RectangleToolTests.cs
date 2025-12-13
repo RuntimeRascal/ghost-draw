@@ -159,12 +159,12 @@ public class RectangleToolTests
     }
 
     [Fact]
-    public void DrawTool_ShouldHaveFourTools()
+    public void DrawTool_ShouldHaveFiveTools()
     {
         // Arrange & Act
         var toolCount = Enum.GetValues<DrawTool>().Length;
         
-        // Assert
-        Assert.Equal(4, toolCount);
+        // Assert - Updated to 5 to include Circle tool
+        Assert.Equal(5, toolCount);
     }
 }

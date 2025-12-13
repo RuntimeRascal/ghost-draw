@@ -8,7 +8,7 @@ namespace GhostDraw.Managers;
 public class DrawingManager
 {
     private readonly ILogger<DrawingManager> _logger;
-    private readonly OverlayWindow _overlayWindow;
+    private readonly IOverlayWindow _overlayWindow;
     private readonly AppSettingsService _appSettings;
     private readonly ScreenshotService _screenshotService;
     private readonly GlobalKeyboardHook _keyboardHook;
@@ -19,7 +19,7 @@ public class DrawingManager
 
     public bool IsDrawingMode => _overlayWindow.IsVisible || _isDrawingLocked;
 
-    public DrawingManager(ILogger<DrawingManager> logger, OverlayWindow overlayWindow, 
+    public DrawingManager(ILogger<DrawingManager> logger, IOverlayWindow overlayWindow,
         AppSettingsService appSettings, ScreenshotService screenshotService,
         GlobalKeyboardHook keyboardHook)
     {
@@ -50,7 +50,7 @@ public class DrawingManager
                     _isDrawingLocked = false;
                     _overlayWindow.DisableDrawing();
                     _overlayWindow.Hide();
-                    
+
                     // Notify hook that drawing mode is inactive
                     _keyboardHook.SetDrawingModeActive(false);
                 }
@@ -62,7 +62,7 @@ public class DrawingManager
                     _overlayWindow.Show();
                     _overlayWindow.Activate();
                     _overlayWindow.Focus();
-                    
+
                     // Notify hook that drawing mode is active
                     _keyboardHook.SetDrawingModeActive(true);
                 }
@@ -75,7 +75,7 @@ public class DrawingManager
                 _overlayWindow.Show();
                 _overlayWindow.Activate();
                 _overlayWindow.Focus();
-                
+
                 // Notify hook that drawing mode is active
                 _keyboardHook.SetDrawingModeActive(true);
             }
@@ -121,10 +121,10 @@ public class DrawingManager
             _logger.LogInformation("Disabling drawing mode (hold released)");
             _overlayWindow.DisableDrawing();
             _overlayWindow.Hide();
-            
+
             // Notify hook that drawing mode is inactive
             _keyboardHook.SetDrawingModeActive(false);
-            
+
             _logger.LogDebug("Overlay hidden");
         }
         catch (Exception ex)
@@ -149,10 +149,10 @@ public class DrawingManager
         try
         {
             _logger.LogInformation("ESC pressed - checking help visibility");
-            
+
             // Check if help is visible and handle accordingly
             bool shouldExitDrawingMode = _overlayWindow.HandleEscapeKey();
-            
+
             if (shouldExitDrawingMode)
             {
                 // Help was not visible, or user wants to exit - force disable drawing mode
@@ -160,10 +160,10 @@ public class DrawingManager
                 _isDrawingLocked = false;
                 _overlayWindow.DisableDrawing();
                 _overlayWindow.Hide();
-                
+
                 // Notify hook that drawing mode is inactive
                 _keyboardHook.SetDrawingModeActive(false);
-                
+
                 _logger.LogDebug("Drawing mode force disabled");
             }
             else
@@ -200,7 +200,7 @@ public class DrawingManager
             _isDrawingLocked = false;
             _overlayWindow.DisableDrawing();
             _overlayWindow.Hide();
-            
+
             // Notify hook that drawing mode is inactive
             _keyboardHook.SetDrawingModeActive(false);
         }
@@ -418,13 +418,13 @@ public class DrawingManager
         {
             _logger.LogInformation("====== CaptureFullScreenshot CALLED ======");
             _logger.LogInformation("Overlay visible: {IsVisible}", _overlayWindow.IsVisible);
-            
+
             if (_overlayWindow.IsVisible)
             {
                 _logger.LogInformation("Capturing full screenshot (Ctrl+S) - calling ScreenshotService");
-                var filePath = _screenshotService.CaptureFullScreen(_overlayWindow);
+                var filePath = _screenshotService.CaptureFullScreen();
                 _logger.LogInformation("ScreenshotService returned file path: {FilePath}", filePath ?? "(null)");
-                
+
                 if (filePath != null)
                 {
                     _logger.LogInformation("Screenshot saved successfully, showing toast notification");

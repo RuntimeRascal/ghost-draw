@@ -1,13 +1,13 @@
+using System.IO;
+using GhostDraw.Helpers;
+using GhostDraw.Managers;
+using GhostDraw.Services;
+using GhostDraw.ViewModels;
+using GhostDraw.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
-using System.IO;
-using GhostDraw.Services;
-using GhostDraw.Managers;
-using GhostDraw.Helpers;
-using GhostDraw.Views;
-using GhostDraw.ViewModels;
 
 namespace GhostDraw.Core;
 
@@ -58,15 +58,16 @@ public static class ServiceConfiguration
         services.AddSingleton<AppSettingsService>();
         services.AddSingleton<CursorHelper>();
         services.AddSingleton<ScreenshotService>();
-        
+
         // Register drawing tools
         services.AddSingleton<GhostDraw.Tools.PenTool>();
         services.AddSingleton<GhostDraw.Tools.LineTool>();
         services.AddSingleton<GhostDraw.Tools.EraserTool>();
         services.AddSingleton<GhostDraw.Tools.RectangleTool>();
         services.AddSingleton<GhostDraw.Tools.CircleTool>();
-        
+
         services.AddSingleton<OverlayWindow>();
+        services.AddSingleton<IOverlayWindow>(sp => sp.GetRequiredService<OverlayWindow>());
         services.AddSingleton<GlobalKeyboardHook>();
         services.AddSingleton<DrawingManager>();
         services.AddSingleton<LoggingSettingsService>();
