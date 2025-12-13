@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## v1.0.15
+
+### Added
+- **Arrow Tool**
+  - Press `A` while drawing mode is active to select the Arrow tool
+  - Click two points to draw a line with an arrowhead
+  - Works with undo (`Ctrl+Z`) and can be erased with the Eraser tool
+
+
 ## v1.0.14
 
 ### Added
