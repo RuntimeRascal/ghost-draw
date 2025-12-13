@@ -25,6 +25,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     // Tool instances
     private readonly PenTool _penTool;
     private readonly LineTool _lineTool;
+    private readonly ArrowTool _arrowTool;
     private readonly EraserTool _eraserTool;
     private readonly RectangleTool _rectangleTool;
     private readonly CircleTool _circleTool;
@@ -66,7 +67,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     private readonly TimeSpan _screenshotToastFadeOutDuration = TimeSpan.FromMilliseconds(300);
 
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
-        DrawingHistory drawingHistory, PenTool penTool, LineTool lineTool, EraserTool eraserTool,
+        DrawingHistory drawingHistory, PenTool penTool, LineTool lineTool, ArrowTool arrowTool, EraserTool eraserTool,
         RectangleTool rectangleTool, CircleTool circleTool)
     {
         _logger = logger;
@@ -75,6 +76,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
         _drawingHistory = drawingHistory;
         _penTool = penTool;
         _lineTool = lineTool;
+        _arrowTool = arrowTool;
         _eraserTool = eraserTool;
         _rectangleTool = rectangleTool;
         _circleTool = circleTool;
@@ -85,6 +87,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
         // Subscribe to tool events for history tracking
         _penTool.ActionCompleted += OnToolActionCompleted;
         _lineTool.ActionCompleted += OnToolActionCompleted;
+        _arrowTool.ActionCompleted += OnToolActionCompleted;
         _rectangleTool.ActionCompleted += OnToolActionCompleted;
         _circleTool.ActionCompleted += OnToolActionCompleted;
         _eraserTool.ElementErased += OnElementErased;
@@ -168,6 +171,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
         {
             DrawTool.Pen => _penTool,
             DrawTool.Line => _lineTool,
+            DrawTool.Arrow => _arrowTool,
             DrawTool.Eraser => _eraserTool,
             DrawTool.Rectangle => _rectangleTool,
             DrawTool.Circle => _circleTool,
@@ -226,6 +230,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
             {
                 DrawTool.Pen => _cursorHelper.CreateColoredPencilCursor(settings.ActiveBrush),
                 DrawTool.Line => _cursorHelper.CreateLineCursor(settings.ActiveBrush),
+                DrawTool.Arrow => _cursorHelper.CreateLineCursor(settings.ActiveBrush),
                 DrawTool.Eraser => _cursorHelper.CreateEraserCursor(),
                 DrawTool.Rectangle => _cursorHelper.CreateRectangleCursor(settings.ActiveBrush),
                 DrawTool.Circle => _cursorHelper.CreateCircleCursor(settings.ActiveBrush),
@@ -357,6 +362,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
             {
                 DrawTool.Pen => _penTool,
                 DrawTool.Line => _lineTool,
+                DrawTool.Arrow => _arrowTool,
                 DrawTool.Eraser => _eraserTool,
                 DrawTool.Rectangle => _rectangleTool,
                 DrawTool.Circle => _circleTool,
@@ -783,11 +789,11 @@ public partial class OverlayWindow : Window, IOverlayWindow
                 _logger.LogDebug("ESC pressed while confirmation modal visible - canceling clear");
                 HideClearCanvasModal();
                 _clearCanvasCancelCallback?.Invoke();
-                
+
                 // Clear callbacks to prevent memory leaks
                 _clearCanvasConfirmCallback = null;
                 _clearCanvasCancelCallback = null;
-                
+
                 RestoreToolStateAfterModal();
                 return false; // Don't exit drawing mode
             }
@@ -907,26 +913,26 @@ public partial class OverlayWindow : Window, IOverlayWindow
         try
         {
             _logger.LogInformation("Showing clear canvas confirmation modal");
-            
+
             // Store callbacks
             _clearCanvasConfirmCallback = onConfirm;
             _clearCanvasCancelCallback = onCancel;
-            
+
             // Store current tool and drawing state
             _toolBeforeModal = _activeTool;
             _wasDrawingBeforeModal = _isDrawing;
-            
+
             // Cancel any in-progress drawing
             CancelActiveToolSafely();
-            
+
             // Temporarily disable drawing and reset cursor
             _isDrawing = false;
             this.Cursor = WpfCursors.Arrow;
-            
+
             // Show the modal
             ClearCanvasModalGrid.Visibility = Visibility.Visible;
             _isClearCanvasModalVisible = true;
-            
+
             _logger.LogDebug("Clear canvas confirmation modal shown");
         }
         catch (Exception ex)
@@ -945,17 +951,17 @@ public partial class OverlayWindow : Window, IOverlayWindow
         try
         {
             _logger.LogInformation("User confirmed clear canvas");
-            
+
             // Hide the modal
             HideClearCanvasModal();
-            
+
             // Call the confirm callback
             _clearCanvasConfirmCallback?.Invoke();
-            
+
             // Clear callbacks to prevent memory leaks
             _clearCanvasConfirmCallback = null;
             _clearCanvasCancelCallback = null;
-            
+
             // Restore tool state
             RestoreToolStateAfterModal();
         }
@@ -978,17 +984,17 @@ public partial class OverlayWindow : Window, IOverlayWindow
         try
         {
             _logger.LogInformation("User canceled clear canvas");
-            
+
             // Hide the modal
             HideClearCanvasModal();
-            
+
             // Call the cancel callback
             _clearCanvasCancelCallback?.Invoke();
-            
+
             // Clear callbacks to prevent memory leaks
             _clearCanvasConfirmCallback = null;
             _clearCanvasCancelCallback = null;
-            
+
             // Restore tool state
             RestoreToolStateAfterModal();
         }
@@ -1029,19 +1035,19 @@ public partial class OverlayWindow : Window, IOverlayWindow
         {
             // Restore drawing state
             _isDrawing = _wasDrawingBeforeModal;
-            
+
             // Restore active tool
             if (_toolBeforeModal != null)
             {
                 _activeTool = _toolBeforeModal;
             }
-            
+
             // Restore cursor
             if (_isDrawing)
             {
                 UpdateCursor();
             }
-            
+
             _logger.LogDebug("Tool state restored after modal - Drawing: {IsDrawing}, Tool: {Tool}",
                 _isDrawing, _activeTool?.GetType().Name ?? "null");
         }

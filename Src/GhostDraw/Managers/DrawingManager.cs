@@ -287,6 +287,31 @@ public class DrawingManager
     }
 
     /// <summary>
+    /// Sets the active tool to Arrow
+    /// </summary>
+    public void SetArrowTool()
+    {
+        try
+        {
+            if (_overlayWindow.IsVisible)
+            {
+                _appSettings.SetActiveTool(DrawTool.Arrow);
+                _overlayWindow.OnToolChanged(DrawTool.Arrow);
+                _logger.LogInformation("Tool set to Arrow");
+            }
+            else
+            {
+                _logger.LogDebug("SetArrowTool ignored - overlay not visible");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set arrow tool");
+            // Don't re-throw - not critical
+        }
+    }
+
+    /// <summary>
     /// Sets the active tool to Eraser
     /// </summary>
     public void SetEraserTool()
@@ -395,7 +420,7 @@ public class DrawingManager
             if (_overlayWindow.IsVisible)
             {
                 _logger.LogInformation("Requesting clear canvas confirmation (Delete key)");
-                
+
                 // Show confirmation modal with callbacks
                 _overlayWindow.ShowClearCanvasConfirmation(
                     onConfirm: () =>

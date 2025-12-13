@@ -63,6 +63,7 @@ public static class ServiceConfiguration
         // Register drawing tools
         services.AddSingleton<GhostDraw.Tools.PenTool>();
         services.AddSingleton<GhostDraw.Tools.LineTool>();
+        services.AddSingleton<GhostDraw.Tools.ArrowTool>();
         services.AddSingleton<GhostDraw.Tools.EraserTool>();
         services.AddSingleton<GhostDraw.Tools.RectangleTool>();
         services.AddSingleton<GhostDraw.Tools.CircleTool>();

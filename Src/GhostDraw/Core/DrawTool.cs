@@ -31,5 +31,10 @@ public enum DrawTool
     /// <summary>
     /// Circle tool - click two points to draw a circle/ellipse
     /// </summary>
-    Circle
+    Circle,
+
+    /// <summary>
+    /// Arrow tool - click two points to draw a line with an arrowhead
+    /// </summary>
+    Arrow
 }

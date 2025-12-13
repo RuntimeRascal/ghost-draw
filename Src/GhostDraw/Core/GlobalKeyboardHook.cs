@@ -13,6 +13,7 @@ public class GlobalKeyboardHook : IDisposable
     // Only keep VK_ESCAPE constant (emergency exit)
     private const int VK_ESCAPE = 0x1B;    // 27
     private const int VK_DELETE = 0x2E;    // 46 - 'Delete' key for clear canvas
+    private const int VK_A = 0x41;         // 65 - 'A' key for arrow tool
     private const int VK_L = 0x4C;         // 76 - 'L' key for line tool
     private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
     private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
@@ -37,6 +38,7 @@ public class GlobalKeyboardHook : IDisposable
     public event EventHandler? ClearCanvasPressed;
     public event EventHandler? PenToolPressed;
     public event EventHandler? LineToolPressed;
+    public event EventHandler? ArrowToolPressed;
     public event EventHandler? EraserToolPressed;
     public event EventHandler? RectangleToolPressed;
     public event EventHandler? CircleToolPressed;
@@ -221,7 +223,7 @@ public class GlobalKeyboardHook : IDisposable
                 {
                     _logger.LogDebug("Delete key pressed - clear canvas confirmation request");
                     ClearCanvasPressed?.Invoke(this, EventArgs.Empty);
-                    
+
                     // INTENTIONAL: Suppress Delete key when drawing mode is active to prevent deleting 
                     // content in underlying apps. This is different from other tool keys (P, L, E, etc.)
                     // which are less likely to cause data loss in underlying applications.
@@ -236,6 +238,13 @@ public class GlobalKeyboardHook : IDisposable
                 {
                     _logger.LogDebug("L key pressed - line tool request");
                     LineToolPressed?.Invoke(this, EventArgs.Empty);
+                }
+
+                // Check for A key press (arrow tool)
+                if (vkCode == VK_A && isKeyDown)
+                {
+                    _logger.LogDebug("A key pressed - arrow tool request");
+                    ArrowToolPressed?.Invoke(this, EventArgs.Empty);
                 }
 
                 // Check for P key press (pen tool)

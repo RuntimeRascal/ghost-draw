@@ -1,8 +1,8 @@
+using System.Text.Json;
 using GhostDraw.Core;
 using GhostDraw.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Text.Json;
 
 namespace GhostDraw.Tests;
 
@@ -164,7 +164,7 @@ public class RectangleToolTests
         // Arrange & Act
         var toolCount = Enum.GetValues<DrawTool>().Length;
 
-        // Assert - Updated to 5 to include Circle tool
-        Assert.Equal(5, toolCount);
+        // Assert - Updated to 6 to include Arrow tool
+        Assert.Equal(6, toolCount);
     }
 }

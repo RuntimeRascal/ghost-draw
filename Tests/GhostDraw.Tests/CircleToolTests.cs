@@ -1,8 +1,8 @@
+using System.Text.Json;
 using GhostDraw.Core;
 using GhostDraw.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Text.Json;
 
 namespace GhostDraw.Tests;
 
@@ -31,6 +31,7 @@ public class CircleToolTests
         Assert.Equal(2, (int)DrawTool.Eraser);
         Assert.Equal(3, (int)DrawTool.Rectangle);
         Assert.Equal(4, (int)DrawTool.Circle);
+        Assert.Equal(5, (int)DrawTool.Arrow);
     }
 
     [Fact]
@@ -166,7 +167,7 @@ public class CircleToolTests
         var toolCount = Enum.GetValues<DrawTool>().Length;
 
         // Assert
-        Assert.Equal(5, toolCount);
+        Assert.Equal(6, toolCount);
     }
 
     [Fact]
@@ -179,6 +180,6 @@ public class CircleToolTests
         var lastTool = values[values.Length - 1];
 
         // Assert
-        Assert.Equal(DrawTool.Circle, lastTool);
+        Assert.Equal(DrawTool.Arrow, lastTool);
     }
 }

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Shapes;
 using Microsoft.Extensions.Logging;
 using Point = System.Windows.Point;
@@ -193,6 +194,29 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
                         {
                             shouldErase = true;
                         }
+                    }
+                }
+                else if (element is Path path)
+                {
+                    try
+                    {
+                        if (path.Data != null)
+                        {
+                            // Use the path's own stroke thickness to approximate hit bounds.
+                            var thickness = path.StrokeThickness;
+                            var strokeBrush = path.Stroke ?? System.Windows.Media.Brushes.Transparent;
+                            var pen = new System.Windows.Media.Pen(strokeBrush, thickness);
+
+                            Rect pathBounds = path.Data.GetRenderBounds(pen);
+                            if (eraserRect.IntersectsWith(pathBounds))
+                            {
+                                shouldErase = true;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Failed to compute Path bounds for erasing");
                     }
                 }
 

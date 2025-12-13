@@ -1,12 +1,12 @@
 ﻿using System.Windows;
+using GhostDraw.Core;
+using GhostDraw.Managers;
+using GhostDraw.Services;
+using GhostDraw.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog.Events;
-using GhostDraw.Services;
 using Application = System.Windows.Application;
-using GhostDraw.Managers;
-using GhostDraw.Core;
-using GhostDraw.Views;
 
 namespace GhostDraw;
 
@@ -76,6 +76,7 @@ public partial class App : Application
             _keyboardHook.ClearCanvasPressed += OnClearCanvasPressed;
             _keyboardHook.PenToolPressed += OnPenToolPressed;
             _keyboardHook.LineToolPressed += OnLineToolPressed;
+            _keyboardHook.ArrowToolPressed += OnArrowToolPressed;
             _keyboardHook.EraserToolPressed += OnEraserToolPressed;
             _keyboardHook.RectangleToolPressed += OnRectangleToolPressed;
             _keyboardHook.CircleToolPressed += OnCircleToolPressed;
@@ -287,6 +288,23 @@ public partial class App : Application
         catch (Exception ex)
         {
             _exceptionHandler?.HandleException(ex, "Line tool handler");
+        }
+    }
+
+    private void OnArrowToolPressed(object? sender, EventArgs e)
+    {
+        try
+        {
+            // Only switch to arrow tool if drawing mode is active
+            if (_drawingManager?.IsDrawingMode == true)
+            {
+                _logger?.LogInformation("A pressed - selecting arrow tool");
+                _drawingManager?.SetArrowTool();
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.HandleException(ex, "Arrow tool handler");
         }
     }
 

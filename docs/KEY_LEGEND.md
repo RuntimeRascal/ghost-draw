@@ -25,17 +25,18 @@ This document serves as the **single source of truth** for all keyboard and mous
 | --- | ---------------- | ---------------------------------- | ---------- | --------------------------------- |
 | `P` | `0x50` (80)      | Select Pen Tool (freehand drawing) | **IN USE** | `VK_P` in `GlobalKeyboardHook.cs` |
 | `L` | `0x4C` (76)      | Select Line Tool (straight lines)  | **IN USE** | `VK_L` in `GlobalKeyboardHook.cs` |
+| `A` | `0x41` (65)      | Select Arrow Tool (line + arrow)   | **IN USE** | `VK_A` in `GlobalKeyboardHook.cs` |
 | `E` | `0x45` (69)      | Select Eraser Tool                 | **IN USE** | `VK_E` in `GlobalKeyboardHook.cs` |
 | `U` | `0x55` (85)      | Select Rectangle Tool              | **IN USE** | `VK_U` in `GlobalKeyboardHook.cs` |
 | `C` | `0x43` (67)      | Select Circle Tool                 | **IN USE** | `VK_C` in `GlobalKeyboardHook.cs` |
 
 ### Drawing Mode - Actions
 
-| Key      | Virtual Key Code | Action                                      | Status     | Implementation                            |
-| -------- | ---------------- | ------------------------------------------- | ---------- | ----------------------------------------- |
-| `Delete` | `0x2E` (46)      | Clear entire canvas (with confirmation)     | **IN USE** | `VK_DELETE` in `GlobalKeyboardHook.cs`    |
-| `ESC`    | `0x1B` (27)      | Close modal/help or exit from drawing mode  | **IN USE** | `VK_ESCAPE` in `GlobalKeyboardHook.cs`    |
-| `F1`     | `0x70` (112)     | Show keyboard shortcuts help overlay        | **IN USE** | `VK_F1` in `GlobalKeyboardHook.cs`        |
+| Key      | Virtual Key Code | Action                                     | Status     | Implementation                         |
+| -------- | ---------------- | ------------------------------------------ | ---------- | -------------------------------------- |
+| `Delete` | `0x2E` (46)      | Clear entire canvas (with confirmation)    | **IN USE** | `VK_DELETE` in `GlobalKeyboardHook.cs` |
+| `ESC`    | `0x1B` (27)      | Close modal/help or exit from drawing mode | **IN USE** | `VK_ESCAPE` in `GlobalKeyboardHook.cs` |
+| `F1`     | `0x70` (112)     | Show keyboard shortcuts help overlay       | **IN USE** | `VK_F1` in `GlobalKeyboardHook.cs`     |
 
 ### Reserved Keys (Do Not Use)
 
@@ -83,16 +84,16 @@ These keys are **reserved** for future functionality or should be avoided to pre
 
 This table shows which inputs are active in different application states:
 
-| Input                       | System Tray    | Settings Window  | Drawing Mode Inactive | Drawing Mode Active |
-| --------------------------- | -------------- | ---------------- | --------------------- | ------------------- |
-| Activation Hotkey           | ✓ Triggers     | ✗ Disabled       | ✓ Triggers            | ✓ Toggles Off       |
-| `P`, `L`, `E`, `U`, `C` keys | ✗              | ✗                | ✗                     | ✓ Tool Selection    |
-| `Delete` key                | ✗              | ✗                | ✗                     | ✓ Clear Canvas      |
-| `ESC` key               | ✗              | ✓ Closes Window  | ✗                     | ✓ Close Modal/Help or Exit Drawing      |
-| `F1` key                | ✗              | ✗                | ✗                     | ✓ Show Help         |
-| Left Click              | ✗              | ✓ UI Interaction | ✗                     | ✓ Draw              |
-| Right Click             | ✓ Context Menu | ✓ UI Interaction | ✗                     | ✓ Cycle Color       |
-| Mouse Wheel             | ✗              | ✓ Scroll         | ✗                     | ✓ Adjust Thickness  |
+| Input                             | System Tray    | Settings Window  | Drawing Mode Inactive | Drawing Mode Active                |
+| --------------------------------- | -------------- | ---------------- | --------------------- | ---------------------------------- |
+| Activation Hotkey                 | ✓ Triggers     | ✗ Disabled       | ✓ Triggers            | ✓ Toggles Off                      |
+| `P`, `L`, `A`, `E`, `U`, `C` keys | ✗              | ✗                | ✗                     | ✓ Tool Selection                   |
+| `Delete` key                      | ✗              | ✗                | ✗                     | ✓ Clear Canvas                     |
+| `ESC` key                         | ✗              | ✓ Closes Window  | ✗                     | ✓ Close Modal/Help or Exit Drawing |
+| `F1` key                          | ✗              | ✗                | ✗                     | ✓ Show Help                        |
+| Left Click                        | ✗              | ✓ UI Interaction | ✗                     | ✓ Draw                             |
+| Right Click                       | ✓ Context Menu | ✓ UI Interaction | ✗                     | ✓ Cycle Color                      |
+| Mouse Wheel                       | ✗              | ✓ Scroll         | ✗                     | ✓ Adjust Thickness                 |
 
 ---
 
@@ -108,6 +109,7 @@ Src\GhostDraw\Core\GlobalKeyboardHook.cs
 ```csharp
 private const int VK_ESCAPE = 0x1B;    // 27
 private const int VK_DELETE = 0x2E;    // 46 - 'Delete' key for clear canvas
+private const int VK_A = 0x41;         // 65 - 'A' key for arrow tool
 private const int VK_L = 0x4C;         // 76 - 'L' key for line tool
 private const int VK_P = 0x50;         // 80 - 'P' key for pen tool
 private const int VK_E = 0x45;         // 69 - 'E' key for eraser tool
@@ -158,17 +160,17 @@ Before adding a new keyboard shortcut:
 
 ### Potential Features Requiring New Keys
 
-| Feature             | Suggested Key           | Priority | Status        |
-| ------------------- | ----------------------- | -------- | ------------- |
-| Undo Last Stroke    | `Ctrl+Z`                | High     | ✅ **Implemented** |
-| Redo Stroke         | `Ctrl+Y`                | High     | Not Implemented |
-| Save Drawing        | `Ctrl+S`                | Medium   | ✅ **Implemented** (Screenshot) |
-| Load Drawing        | `Ctrl+O`                | Medium   | Not Implemented |
-| Circle/Ellipse Tool | `C`                     | Low      | ✅ **Implemented** |
-| Text Tool           | `T`                     | Low      | Not Implemented |
-| Color Picker        | Middle Click or `I`     | Low      | Not Implemented |
-| Toggle Grid/Snap    | `G`                     | Low      | Not Implemented |
-| Zoom In/Out         | `Ctrl+Mouse Wheel`      | Low      | Not Implemented |
+| Feature             | Suggested Key       | Priority | Status                         |
+| ------------------- | ------------------- | -------- | ------------------------------ |
+| Undo Last Stroke    | `Ctrl+Z`            | High     | ✅ **Implemented**              |
+| Redo Stroke         | `Ctrl+Y`            | High     | Not Implemented                |
+| Save Drawing        | `Ctrl+S`            | Medium   | ✅ **Implemented** (Screenshot) |
+| Load Drawing        | `Ctrl+O`            | Medium   | Not Implemented                |
+| Circle/Ellipse Tool | `C`                 | Low      | ✅ **Implemented**              |
+| Text Tool           | `T`                 | Low      | Not Implemented                |
+| Color Picker        | Middle Click or `I` | Low      | Not Implemented                |
+| Toggle Grid/Snap    | `G`                 | Low      | Not Implemented                |
+| Zoom In/Out         | `Ctrl+Mouse Wheel`  | Low      | Not Implemented                |
 
 ### Keys to Keep Available
 
@@ -182,7 +184,7 @@ Reserve these keys for high-priority future features:
 
 | Version | Date | Changes                                                       |
 | ------- | ---- | ------------------------------------------------------------- |
-| v1.0.9  | 2024 | Added Circle tool (`C` key) with Shift for perfect circles   |
+| v1.0.9  | 2024 | Added Circle tool (`C` key) with Shift for perfect circles    |
 | v1.0.7  | 2024 | Added Rectangle tool (`U` key)                                |
 | v1.0.6  | 2024 | Initial key legend. Added Eraser tool (`E` key)               |
 | v1.0.5  | 2024 | Added Line tool (`L` key), Pen tool (`P` key), F1 help        |
