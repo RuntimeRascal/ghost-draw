@@ -284,6 +284,20 @@
                                FontSize="16"
                                FontWeight="Bold"
                                Foreground="#FFAA00"
+                               Text="Ctrl+Z"
+                               MinWidth="120"
+                               Margin="0,0,16,0"/>
+                    <TextBlock FontFamily="Segoe UI"
+                               FontSize="16"
+                               Foreground="#B0B0B0"
+                               Text="Undo Last Action"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#FFAA00"
                                Text="Ctrl+S"
                                MinWidth="120"
                                Margin="0,0,16,0"/>

@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## v1.0.13
+
+### Added
+- **Undo (Ctrl+Z) with Permanent Eraser Semantics**
+  - Press `Ctrl+Z` while drawing mode is active to undo the most recent **completed** action (pen stroke, line, rectangle, circle)
+  - Erased items are permanently deleted and are never restored by undo
+  - New `DrawingHistory` service tracks completed actions using stable element IDs
+  - Added unit tests covering undo behavior and eraser permanence
+
+### Changed
+- **Tool Completion Events**
+  - Tools report completed actions (pen on mouse-up; shapes on second click) so undo is per-action instead of per-mouse-move
+  - Eraser reports erased elements so history entries are marked removed
+- **Keyboard Hook Handling for Ctrl+Z**
+  - Detects `Ctrl+Z` only when drawing mode is active
+  - Suppresses `Ctrl+Z` during drawing mode to prevent pass-through to underlying apps
+- **History Reset Behavior**
+  - Undo history is cleared when clearing the canvas and when exiting drawing mode
+
+
 ## v1.0.12
 
 ### Added
