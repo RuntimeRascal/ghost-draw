@@ -1,9 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using System.Windows.Threading;
 using GhostDraw.Core;
 using GhostDraw.Helpers;
 using GhostDraw.Services;
@@ -39,36 +37,6 @@ public partial class OverlayWindow : Window, IOverlayWindow
     /// </summary>
     public string HotkeyDisplayName => _appSettings.CurrentSettings.HotkeyDisplayName;
 
-    // Thickness indicator animation
-    private readonly DispatcherTimer _thicknessIndicatorTimer;
-    private readonly TimeSpan _indicatorDisplayDuration = TimeSpan.FromSeconds(1.5);
-    private readonly TimeSpan _fadeOutDuration = TimeSpan.FromMilliseconds(300);
-
-    // Canvas cleared toast animation
-    private readonly DispatcherTimer _canvasClearedToastTimer;
-    private readonly TimeSpan _toastDisplayDuration = TimeSpan.FromSeconds(1.0);
-    private readonly TimeSpan _toastFadeOutDuration = TimeSpan.FromMilliseconds(200);
-
-    // Drawing mode hint animation
-    private readonly DispatcherTimer _drawingModeHintTimer;
-    private readonly TimeSpan _hintDisplayDuration = TimeSpan.FromSeconds(3.0);
-    private readonly TimeSpan _hintFadeOutDuration = TimeSpan.FromMilliseconds(500);
-
-    /// <summary>
-    /// Duration for help popup fade-out animation (used when hiding help)
-    /// </summary>
-    private readonly TimeSpan _helpFadeOutDuration = TimeSpan.FromMilliseconds(500);
-
-    /// <summary>
-    /// Duration for help popup fade-in animation (used when showing help)
-    /// </summary>
-    private readonly TimeSpan _helpFadeInDuration = TimeSpan.FromMilliseconds(200);
-
-    // Screenshot saved toast animation
-    private readonly DispatcherTimer _screenshotSavedToastTimer;
-    private readonly TimeSpan _screenshotToastDisplayDuration = TimeSpan.FromSeconds(1.5);
-    private readonly TimeSpan _screenshotToastFadeOutDuration = TimeSpan.FromMilliseconds(300);
-
     public OverlayWindow(ILogger<OverlayWindow> logger, AppSettingsService appSettings, CursorHelper cursorHelper,
         DrawingHistory drawingHistory, PenTool penTool, LineTool lineTool, ArrowTool arrowTool, EraserTool eraserTool,
         RectangleTool rectangleTool, CircleTool circleTool, TextTool textTool, string? overlayId = null, Rect? screenBounds = null)
@@ -102,35 +70,21 @@ public partial class OverlayWindow : Window, IOverlayWindow
         _eraserTool.ElementErased += OnElementErased;
         _textTool.ActionCompleted += OnToolActionCompleted;
 
-        // Initialize thickness indicator timer
-        _thicknessIndicatorTimer = new DispatcherTimer
-        {
-            Interval = _indicatorDisplayDuration
-        };
-        _thicknessIndicatorTimer.Tick += ThicknessIndicatorTimer_Tick;
+        // Configure overlay user controls
+        ThicknessIndicator.DisplayDuration = TimeSpan.FromSeconds(1.5);
+        ThicknessIndicator.FadeOutDuration = TimeSpan.FromMilliseconds(300);
 
-        // Initialize canvas cleared toast timer
-        _canvasClearedToastTimer = new DispatcherTimer
-        {
-            Interval = _toastDisplayDuration
-        };
-        _canvasClearedToastTimer.Tick += CanvasClearedToastTimer_Tick;
+        CanvasClearedToast.DisplayDuration = TimeSpan.FromSeconds(1.0);
+        CanvasClearedToast.FadeOutDuration = TimeSpan.FromMilliseconds(200);
 
-        // Initialize drawing mode hint timer
-        _drawingModeHintTimer = new DispatcherTimer
-        {
-            Interval = _hintDisplayDuration
-        };
-        _drawingModeHintTimer.Tick += DrawingModeHintTimer_Tick;
+        DrawingModeHint.DisplayDuration = TimeSpan.FromSeconds(3.0);
+        DrawingModeHint.FadeOutDuration = TimeSpan.FromMilliseconds(500);
 
-        // Note: Help popup timer removed - help now stays visible until manually toggled
+        ScreenshotSavedToast.DisplayDuration = TimeSpan.FromSeconds(1.5);
+        ScreenshotSavedToast.FadeOutDuration = TimeSpan.FromMilliseconds(300);
 
-        // Initialize screenshot saved toast timer
-        _screenshotSavedToastTimer = new DispatcherTimer
-        {
-            Interval = _screenshotToastDisplayDuration
-        };
-        _screenshotSavedToastTimer.Tick += ScreenshotSavedToastTimer_Tick;
+        ClearCanvasConfirmation.Confirmed += ClearCanvasConfirmation_OnConfirmed;
+        ClearCanvasConfirmation.Cancelled += ClearCanvasConfirmation_OnCancelled;
 
         // Per-monitor overlays require manual positioning.
         // If the window is Maximized, WPF will maximize it on a single monitor (typically primary).
@@ -173,11 +127,6 @@ public partial class OverlayWindow : Window, IOverlayWindow
         // Ensure timers are stopped when window is closed
         Closed += (s, e) =>
         {
-            _thicknessIndicatorTimer.Stop();
-            _canvasClearedToastTimer.Stop();
-            _drawingModeHintTimer.Stop();
-            _screenshotSavedToastTimer.Stop();
-
             _appSettings.BrushColorChanged -= AppSettings_BrushColorChanged;
             _appSettings.BrushThicknessChanged -= AppSettings_BrushThicknessChanged;
         };
@@ -491,54 +440,12 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            // Update the text
-            ThicknessIndicatorText.Text = $"{thickness:0} px";
-
-            // Stop any existing animations and timer
-            _thicknessIndicatorTimer.Stop();
-            ThicknessIndicatorBorder.BeginAnimation(OpacityProperty, null);
-
-            // Show the indicator immediately
-            ThicknessIndicatorBorder.Opacity = 1.0;
-
-            // Start the timer for fade-out
-            _thicknessIndicatorTimer.Start();
-
+            ThicknessIndicator.Show(thickness);
             _logger.LogDebug("Thickness indicator shown: {Thickness} px", thickness);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to show thickness indicator");
-        }
-    }
-
-    /// <summary>
-    /// Timer tick handler that starts the fade-out animation
-    /// </summary>
-    private void ThicknessIndicatorTimer_Tick(object? sender, EventArgs e)
-    {
-        try
-        {
-            _thicknessIndicatorTimer.Stop();
-
-            // Create and start fade-out animation
-            var fadeOutAnimation = new DoubleAnimation
-            {
-                From = 1.0,
-                To = 0.0,
-                Duration = new Duration(_fadeOutDuration),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            ThicknessIndicatorBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
-
-            _logger.LogDebug("Thickness indicator fade-out started");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to fade out thickness indicator");
-            // Ensure indicator is hidden even if animation fails
-            ThicknessIndicatorBorder.Opacity = 0;
         }
     }
 
@@ -549,9 +456,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            _thicknessIndicatorTimer.Stop();
-            ThicknessIndicatorBorder.BeginAnimation(OpacityProperty, null);
-            ThicknessIndicatorBorder.Opacity = 0;
+            ThicknessIndicator.HideImmediate();
         }
         catch (Exception ex)
         {
@@ -652,51 +557,12 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            // Stop any existing animations and timer
-            _canvasClearedToastTimer.Stop();
-            CanvasClearedToastBorder.BeginAnimation(OpacityProperty, null);
-
-            // Show the toast immediately
-            CanvasClearedToastBorder.Opacity = 1.0;
-
-            // Start the timer for fade-out
-            _canvasClearedToastTimer.Start();
-
+            CanvasClearedToast.Show();
             _logger.LogDebug("Canvas cleared toast shown");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to show canvas cleared toast");
-        }
-    }
-
-    /// <summary>
-    /// Timer tick handler that starts the fade-out animation for the toast
-    /// </summary>
-    private void CanvasClearedToastTimer_Tick(object? sender, EventArgs e)
-    {
-        try
-        {
-            _canvasClearedToastTimer.Stop();
-
-            // Create and start fade-out animation
-            var fadeOutAnimation = new DoubleAnimation
-            {
-                From = 1.0,
-                To = 0.0,
-                Duration = new Duration(_toastFadeOutDuration),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            CanvasClearedToastBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
-
-            _logger.LogDebug("Canvas cleared toast fade-out started");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to fade out canvas cleared toast");
-            // Ensure toast is hidden even if animation fails
-            CanvasClearedToastBorder.Opacity = 0;
         }
     }
 
@@ -707,9 +573,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            _canvasClearedToastTimer.Stop();
-            CanvasClearedToastBorder.BeginAnimation(OpacityProperty, null);
-            CanvasClearedToastBorder.Opacity = 0;
+            CanvasClearedToast.HideImmediate();
         }
         catch (Exception ex)
         {
@@ -728,59 +592,12 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            // Stop any existing animations and timer
-            _drawingModeHintTimer.Stop();
-            DrawingModeHintBorder.BeginAnimation(OpacityProperty, null);
-
-            // Show the hint with fade-in animation
-            var fadeInAnimation = new DoubleAnimation
-            {
-                From = 0.0,
-                To = 0.8,
-                Duration = new Duration(TimeSpan.FromMilliseconds(200)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            DrawingModeHintBorder.BeginAnimation(OpacityProperty, fadeInAnimation);
-
-            // Start the timer for fade-out
-            _drawingModeHintTimer.Start();
-
+            DrawingModeHint.Show("Press Delete to clear canvas  |  ESC to exit");
             _logger.LogDebug("Drawing mode hint shown");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to show drawing mode hint");
-        }
-    }
-
-    /// <summary>
-    /// Timer tick handler that starts the fade-out animation for the hint
-    /// </summary>
-    private void DrawingModeHintTimer_Tick(object? sender, EventArgs e)
-    {
-        try
-        {
-            _drawingModeHintTimer.Stop();
-
-            // Create and start fade-out animation
-            var fadeOutAnimation = new DoubleAnimation
-            {
-                From = 0.8,
-                To = 0.0,
-                Duration = new Duration(_hintFadeOutDuration),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            DrawingModeHintBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
-
-            _logger.LogDebug("Drawing mode hint fade-out started");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to fade out drawing mode hint");
-            // Ensure hint is hidden even if animation fails
-            DrawingModeHintBorder.Opacity = 0;
         }
     }
 
@@ -791,9 +608,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            _drawingModeHintTimer.Stop();
-            DrawingModeHintBorder.BeginAnimation(OpacityProperty, null);
-            DrawingModeHintBorder.Opacity = 0;
+            DrawingModeHint.HideImmediate();
         }
         catch (Exception ex)
         {
@@ -861,20 +676,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            // Stop any existing animations
-            HelpPopupBorder.BeginAnimation(OpacityProperty, null);
-
-            // Show the help with fade-in animation
-            var fadeInAnimation = new DoubleAnimation
-            {
-                From = 0.0,
-                To = 0.95,
-                Duration = new Duration(_helpFadeInDuration),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            HelpPopupBorder.BeginAnimation(OpacityProperty, fadeInAnimation);
-
+            HelpPopup.Show();
             _isHelpVisible = true;
 
             _logger.LogDebug("Help popup shown (toggle mode)");
@@ -892,20 +694,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            // Stop any existing animations
-            HelpPopupBorder.BeginAnimation(OpacityProperty, null);
-
-            // Create and start fade-out animation
-            var fadeOutAnimation = new DoubleAnimation
-            {
-                From = 0.95,
-                To = 0.0,
-                Duration = new Duration(_helpFadeOutDuration),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            HelpPopupBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
-
+            HelpPopup.Hide();
             _isHelpVisible = false;
 
             _logger.LogDebug("Help popup hidden");
@@ -913,8 +702,6 @@ public partial class OverlayWindow : Window, IOverlayWindow
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to hide help popup");
-            // Ensure popup is hidden even if animation fails
-            HelpPopupBorder.Opacity = 0;
             _isHelpVisible = false;
         }
     }
@@ -926,8 +713,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            HelpPopupBorder.BeginAnimation(OpacityProperty, null);
-            HelpPopupBorder.Opacity = 0;
+            HelpPopup.HideImmediate();
             _isHelpVisible = false;
         }
         catch (Exception ex)
@@ -995,51 +781,12 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            // Stop any existing animations and timer
-            _screenshotSavedToastTimer.Stop();
-            ScreenshotSavedToastBorder.BeginAnimation(OpacityProperty, null);
-
-            // Show the toast immediately
-            ScreenshotSavedToastBorder.Opacity = 1.0;
-
-            // Start the timer for fade-out
-            _screenshotSavedToastTimer.Start();
-
+            ScreenshotSavedToast.Show("Screenshot saved", string.Empty);
             _logger.LogDebug("Screenshot saved toast shown");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to show screenshot saved toast");
-        }
-    }
-
-    /// <summary>
-    /// Timer tick handler that starts the fade-out animation for the screenshot toast
-    /// </summary>
-    private void ScreenshotSavedToastTimer_Tick(object? sender, EventArgs e)
-    {
-        try
-        {
-            _screenshotSavedToastTimer.Stop();
-
-            // Create and start fade-out animation
-            var fadeOutAnimation = new DoubleAnimation
-            {
-                From = 1.0,
-                To = 0.0,
-                Duration = new Duration(_screenshotToastFadeOutDuration),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            ScreenshotSavedToastBorder.BeginAnimation(OpacityProperty, fadeOutAnimation);
-
-            _logger.LogDebug("Screenshot saved toast fade-out started");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to fade out screenshot saved toast");
-            // Ensure toast is hidden even if animation fails
-            ScreenshotSavedToastBorder.Opacity = 0;
         }
     }
 
@@ -1050,9 +797,7 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            _screenshotSavedToastTimer.Stop();
-            ScreenshotSavedToastBorder.BeginAnimation(OpacityProperty, null);
-            ScreenshotSavedToastBorder.Opacity = 0;
+            ScreenshotSavedToast.HideImmediate();
         }
         catch (Exception ex)
         {
@@ -1095,7 +840,8 @@ public partial class OverlayWindow : Window, IOverlayWindow
             this.Cursor = WpfCursors.Arrow;
 
             // Show the modal
-            ClearCanvasModalGrid.Visibility = Visibility.Visible;
+            ClearCanvasModalHost.Visibility = Visibility.Visible;
+            ClearCanvasConfirmation.Show();
             _isClearCanvasModalVisible = true;
 
             _logger.LogDebug("Clear canvas confirmation modal shown");
@@ -1109,9 +855,9 @@ public partial class OverlayWindow : Window, IOverlayWindow
     }
 
     /// <summary>
-    /// Handles Yes button click in confirmation modal
+    /// Handles confirmation
     /// </summary>
-    private void ClearCanvasYesButton_Click(object sender, RoutedEventArgs e)
+    private void ClearCanvasConfirmation_OnConfirmed(object? sender, EventArgs e)
     {
         try
         {
@@ -1142,9 +888,9 @@ public partial class OverlayWindow : Window, IOverlayWindow
     }
 
     /// <summary>
-    /// Handles No button click in confirmation modal
+    /// Handles cancel
     /// </summary>
-    private void ClearCanvasNoButton_Click(object sender, RoutedEventArgs e)
+    private void ClearCanvasConfirmation_OnCancelled(object? sender, EventArgs e)
     {
         try
         {
@@ -1181,7 +927,8 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         try
         {
-            ClearCanvasModalGrid.Visibility = Visibility.Collapsed;
+            ClearCanvasConfirmation.Hide();
+            ClearCanvasModalHost.Visibility = Visibility.Collapsed;
             _isClearCanvasModalVisible = false;
             _logger.LogDebug("Clear canvas confirmation modal hidden");
         }
