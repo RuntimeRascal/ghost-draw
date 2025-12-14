@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Windows Store Package**
   - Added windows store package project and publish first version to windows store.
   - Added new custom splash screen.
+  - Add activation and tool change hint popup center bottom screen that fades away.
 
 ### Changed
 - Versioning semantics to 4-part

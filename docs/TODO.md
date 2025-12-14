@@ -46,11 +46,11 @@
 	- [X] openFolderAfterScreenshot default to `true`
 - [X] Splash screen uses `docs\hero-orig.png` (WPF splash + MSIX SplashScreen.png)
 - [X] Tray about screen update with accurate info
-- [ ] Tool change toast bottom center screen fades away
-- [ ] Activation toast bottom center screen
-  - [ ] Show current tool
-  - [ ] How to exit. Depending on activation hotkey
-  - [ ] F1 for help
+- [X] Tool change toast bottom center screen fades away
+- [X] Activation toast bottom center screen
+  - [X] Show current tool
+  - [X] How to exit. Depending on activation hotkey
+  - [X] F1 for help
 - [X] Ensure setting dir work in both msi version and win store version
 - [X] All project build warnings, messages and errors are resolved
 - [ ] All documents updated with correct information. Not needed documents removed.

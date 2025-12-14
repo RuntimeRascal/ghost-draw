@@ -25,6 +25,8 @@
                    FontFamily="Segoe UI"
                    FontSize="16"
                    Foreground="#B0B0B0"
-                   Text="Press Delete to clear canvas  |  ESC to exit"/>
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   Text="Current tool: Pen&#x0a;Press F1 for help&#x0a;Press Delete to clear canvas&#x0a;Press Esc or hotkey to exit draw mode"/>
     </Border>
 </UserControl>
