@@ -5,6 +5,18 @@ All notable changes to GhostDraw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.0.0.0
+
+### Added
+- **Windows Store Package**
+  - Added windows store package project and publish first version to windows store
+
+### Changed
+- Versioning semantics to 4-part
+
+### Fixed
+- 
+
 ## v1.0.17
 
 ### Added
@@ -232,7 +244,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Drawing Mode Activation**
-  - Configurable hotkey combination (default: Ctrl+Alt+D)
+  - Configurable hotkey combination (default: Ctrl+Alt+X)
   - Toggle or hold mode options
 - **Pen Tool** - Freehand drawing with mouse
   - Click and drag to draw smooth polylines

@@ -11,7 +11,7 @@ public class AppSettings
     /// Active brush color from the palette in hex format (e.g., "#FF0000" for red)
     /// </summary>
     [JsonPropertyName("activeBrush")]
-    public string ActiveBrush { get; set; } = "#FF0000";
+    public string ActiveBrush { get; set; } = "#000000";
 
     /// <summary>
     /// Brush thickness in pixels
@@ -41,7 +41,7 @@ public class AppSettings
     /// Virtual key codes for the hotkey combination
     /// </summary>
     [JsonPropertyName("hotkeyVirtualKeys")]
-    public List<int> HotkeyVirtualKeys { get; set; } = new() { 0xA2, 0xA4, 0x44 }; // Default: Ctrl+Alt+D
+    public List<int> HotkeyVirtualKeys { get; set; } = new() { 0xA2, 0xA4, 0x58 }; // Default: Ctrl+Alt+X
 
     /// <summary>
     /// Gets the user-friendly display name of the hotkey combination
@@ -55,13 +55,13 @@ public class AppSettings
     /// If false, drawing mode is active only while hotkey is held down
     /// </summary>
     [JsonPropertyName("lockDrawingMode")]
-    public bool LockDrawingMode { get; set; } = false;
+    public bool LockDrawingMode { get; set; } = true;
 
     /// <summary>
     /// Log level (Verbose, Debug, Information, Warning, Error, Fatal)
     /// </summary>
     [JsonPropertyName("logLevel")]
-    public string LogLevel { get; set; } = "Information";
+    public string LogLevel { get; set; } = "Error";
 
     /// <summary>
     /// Available color palette for quick cycling
@@ -69,15 +69,15 @@ public class AppSettings
     [JsonPropertyName("colorPalette")]
     public List<string> ColorPalette { get; set; } = new()
     {
-        "#FF0000", // Red
-        "#00FF00", // Green
+        "#000000", // Black
+        "#FFFFFF", // White
+        "#00FFFF", // Cyan
         "#0000FF", // Blue
+        "#00FF00", // Green
+        "#FFA500", // Orange
         "#FFFF00", // Yellow
         "#FF00FF", // Magenta
-        "#00FFFF", // Cyan
-        "#FFFFFF", // White
-        "#000000", // Black
-        "#FFA500", // Orange
+        "#FF0000", // Red
         "#800080"  // Purple
     };
 
@@ -99,13 +99,13 @@ public class AppSettings
     /// If true, plays a shutter sound when screenshot is captured
     /// </summary>
     [JsonPropertyName("playShutterSound")]
-    public bool PlayShutterSound { get; set; } = false;
+    public bool PlayShutterSound { get; set; } = true;
 
     /// <summary>
     /// If true, opens the folder after screenshot is saved
     /// </summary>
     [JsonPropertyName("openFolderAfterScreenshot")]
-    public bool OpenFolderAfterScreenshot { get; set; } = false;
+    public bool OpenFolderAfterScreenshot { get; set; } = true;
 
     /// <summary>
     /// Creates a deep copy of the settings

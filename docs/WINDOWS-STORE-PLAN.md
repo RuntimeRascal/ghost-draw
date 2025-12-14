@@ -543,7 +543,7 @@ Get-AppxPackage -Name "*GhostDraw*" | Remove-AppxPackage
 ### 5.2 Critical Functionality Tests ✅
 
 **MUST verify:**
-- ✅ Global keyboard hook (Ctrl+Alt+D) works across all applications
+- ✅ Global keyboard hook (Ctrl+Alt+X) works across all applications
 - ✅ Drawing tools function identically to MSI version
 - ✅ Settings persist at: `%LocalAppData%\Packages\RuntimeRascal.GhostDraw_*\LocalCache\Local\GhostDraw\settings.json`
 - ✅ Logging works in virtualized path
@@ -813,7 +813,7 @@ User Experience:
 • Help overlay (F1 key)
 
 ⌨️ DEFAULT SHORTCUTS
-• Ctrl+Alt+D - Activate drawing mode
+• Ctrl+Alt+X - Activate drawing mode
 • P - Pen tool
 • L - Line tool
 • E - Eraser tool
@@ -900,7 +900,7 @@ IMPORTANT NOTES FOR CERTIFICATION:
 2. TESTING INSTRUCTIONS:
    - Launch application (minimizes to system tray)
    - Right-click tray icon → Settings (verify settings window opens)
-   - Press Ctrl+Alt+D to activate drawing mode
+  - Press Ctrl+Alt+X to activate drawing mode
    - Draw on screen with left mouse button
    - Press ESC to exit drawing mode
    - Verify hotkey works from any application (e.g., activate from Notepad)

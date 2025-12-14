@@ -15,10 +15,10 @@ cd Package
 .\install-cert.ps1
 
 # 3. Build MSIX package
-.\build-msix.ps1 -Version "1.0.17" -Configuration Debug
+.\build-msix.ps1 -Version "2.0.0.0" -Configuration Debug
 
 # 4. Install locally for testing
-Add-AppxPackage -Path "AppPackages\GhostDraw.Package_1.0.17.0_x64_Debug_Test\GhostDraw.Package_1.0.17.0_x64_Debug.msix"
+Add-AppxPackage -Path "AppPackages\GhostDraw.Package_2.0.0.0_x64_Debug_Test\GhostDraw.Package_2.0.0.0_x64_Debug.msix"
 
 # 5. Remove the installed package
 Get-AppxPackage -Name "*GhostDraw*" | Remove-AppxPackage
@@ -70,7 +70,7 @@ Current assets are auto-generated placeholders from the main app icon. For produ
 
 After installing the MSIX package locally, verify:
 
-- ✅ Global keyboard hook (Ctrl+Alt+D) works
+- ✅ Global keyboard hook (Ctrl+Alt+X) works
 - ✅ All drawing tools function correctly
 - ✅ Settings persist in MSIX virtualized path
 - ✅ System tray integration works

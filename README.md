@@ -91,7 +91,7 @@ Customize every aspect of GhostDraw with the intuitive settings panel:
 ### Basic Drawing
 
 1. **Activate Drawing Mode**
-   Press your configured hotkey (default: `Ctrl+Alt+D`)
+   Press your configured hotkey (default: `Ctrl+Alt+X`)
 
 2. **Start Drawing**
    Click and drag with your **left mouse button** to draw

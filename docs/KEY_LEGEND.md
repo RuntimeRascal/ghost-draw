@@ -17,7 +17,7 @@ This document serves as the **single source of truth** for all keyboard and mous
 
 | Key Combination   | Default      | Action                     | Status     | Notes                                                                                                                   |
 | ----------------- | ------------ | -------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Activation Hotkey | `Ctrl+Alt+D` | Toggle drawing mode on/off | **IN USE** | User-configurable via Settings → Hotkey. Can use multiple modifier keys (Ctrl, Alt, Shift, Win) + any letter/number key |
+| Activation Hotkey | `Ctrl+Alt+X` | Toggle drawing mode on/off | **IN USE** | User-configurable via Settings → Hotkey. Can use multiple modifier keys (Ctrl, Alt, Shift, Win) + any letter/number key |
 
 ### Drawing Mode - Tool Selection
 
