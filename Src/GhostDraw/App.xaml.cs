@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
+using System.Windows.Threading;
 using GhostDraw.Core;
 using GhostDraw.Managers;
 using GhostDraw.Services;
@@ -21,6 +23,8 @@ public partial class App : Application
     private AppSettingsService? _appSettings;
     private GlobalExceptionHandler? _exceptionHandler;
     private static Mutex? _singleInstanceMutex;
+    private SplashWindow? _splashWindow;
+    private Stopwatch? _splashStopwatch;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -44,6 +48,11 @@ public partial class App : Application
 
         try
         {
+            // Show splash immediately to cover startup work
+            _splashWindow = new SplashWindow();
+            _splashWindow.Show();
+            _splashStopwatch = Stopwatch.StartNew();
+
             // Initialize DI container and logging
             _serviceProvider = ServiceConfiguration.ConfigureServices();
             _logger = _serviceProvider.GetRequiredService<ILogger<App>>();
@@ -191,6 +200,43 @@ public partial class App : Application
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             Shutdown();
+        }
+        finally
+        {
+            // Ensure splash stays visible briefly, then close
+            if (_splashWindow != null && _splashStopwatch != null)
+            {
+                const int minSplashMs = 2500;
+                var remaining = minSplashMs - (int)_splashStopwatch.ElapsedMilliseconds;
+
+                void CloseSplash()
+                {
+                    try
+                    {
+                        _splashWindow.Close();
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+                    _splashWindow = null;
+                }
+
+                if (remaining > 0)
+                {
+                    var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(remaining) };
+                    timer.Tick += (s, args) =>
+                    {
+                        timer.Stop();
+                        CloseSplash();
+                    };
+                    timer.Start();
+                }
+                else
+                {
+                    CloseSplash();
+                }
+            }
         }
     }
 

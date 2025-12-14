@@ -3,6 +3,7 @@
 
 param(
     [string]$SourceImage = "..\Src\GhostDraw\Assets\ghost-draw-icon.png",
+    [string]$SplashSourceImage = "..\docs\hero-orig.png",
     [string]$OutputDir = "Images"
 )
 
@@ -23,6 +24,15 @@ Add-Type -AssemblyName System.Drawing
 Write-Host "Loading source image: $SourceImage" -ForegroundColor Yellow
 $sourceImg = [System.Drawing.Image]::FromFile((Resolve-Path $SourceImage))
 Write-Host "Source image size: $($sourceImg.Width)x$($sourceImg.Height)" -ForegroundColor Green
+
+$splashSourceImg = $null
+if (Test-Path $SplashSourceImage) {
+    Write-Host "Loading splash source image: $SplashSourceImage" -ForegroundColor Yellow
+    $splashSourceImg = [System.Drawing.Image]::FromFile((Resolve-Path $SplashSourceImage))
+    Write-Host "Splash source size: $($splashSourceImg.Width)x$($splashSourceImg.Height)" -ForegroundColor Green
+} else {
+    Write-Host "Splash source not found; falling back to default source" -ForegroundColor DarkYellow
+}
 Write-Host ""
 
 # Define required assets
@@ -44,6 +54,14 @@ foreach ($asset in $assets) {
 
     $outputPath = Join-Path $OutputDir $asset.Name
 
+    # Choose image source per asset
+    $assetSource = $sourceImg
+    $useCoverFill = $false
+    if ($asset.Name -eq "SplashScreen.png" -and $splashSourceImg) {
+        $assetSource = $splashSourceImg
+        $useCoverFill = $true
+    }
+
     # Create new bitmap with target size
     $newImg = New-Object System.Drawing.Bitmap($asset.Width, $asset.Height)
 
@@ -57,25 +75,41 @@ foreach ($asset in $assets) {
     $graphics.Clear([System.Drawing.Color]::Transparent)
 
     # Calculate scaling to fit while maintaining aspect ratio
-    $srcAspect = $sourceImg.Width / $sourceImg.Height
+    $srcAspect = $assetSource.Width / $assetSource.Height
     $dstAspect = $asset.Width / $asset.Height
 
-    if ($srcAspect -gt $dstAspect) {
-        # Source is wider - fit to width
-        $scaledWidth = $asset.Width
-        $scaledHeight = [int]($asset.Width / $srcAspect)
-        $x = 0
-        $y = [int](($asset.Height - $scaledHeight) / 2)
+    if ($useCoverFill) {
+        # Cover the destination without letterboxing (crop overflow)
+        if ($srcAspect -gt $dstAspect) {
+            $scaledHeight = $asset.Height
+            $scaledWidth = [int]($asset.Height * $srcAspect)
+            $x = [int](($asset.Width - $scaledWidth) / 2)
+            $y = 0
+        } else {
+            $scaledWidth = $asset.Width
+            $scaledHeight = [int]($asset.Width / $srcAspect)
+            $x = 0
+            $y = [int](($asset.Height - $scaledHeight) / 2)
+        }
     } else {
-        # Source is taller - fit to height
-        $scaledHeight = $asset.Height
-        $scaledWidth = [int]($asset.Height * $srcAspect)
-        $x = [int](($asset.Width - $scaledWidth) / 2)
-        $y = 0
+        # Fit within destination while preserving aspect ratio (letterbox)
+        if ($srcAspect -gt $dstAspect) {
+            # Source is wider - fit to width
+            $scaledWidth = $asset.Width
+            $scaledHeight = [int]($asset.Width / $srcAspect)
+            $x = 0
+            $y = [int](($asset.Height - $scaledHeight) / 2)
+        } else {
+            # Source is taller - fit to height
+            $scaledHeight = $asset.Height
+            $scaledWidth = [int]($asset.Height * $srcAspect)
+            $x = [int](($asset.Width - $scaledWidth) / 2)
+            $y = 0
+        }
     }
 
     # Draw resized image
-    $graphics.DrawImage($sourceImg, $x, $y, $scaledWidth, $scaledHeight)
+    $graphics.DrawImage($assetSource, $x, $y, $scaledWidth, $scaledHeight)
 
     # Save as PNG
     $newImg.Save($outputPath, [System.Drawing.Imaging.ImageFormat]::Png)
@@ -90,6 +124,9 @@ foreach ($asset in $assets) {
 
 # Cleanup
 $sourceImg.Dispose()
+if ($splashSourceImg) {
+    $splashSourceImg.Dispose()
+}
 
 Write-Host ""
 Write-Host "=====================================" -ForegroundColor Cyan

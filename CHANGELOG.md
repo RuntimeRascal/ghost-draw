@@ -9,13 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Windows Store Package**
-  - Added windows store package project and publish first version to windows store
+  - Added windows store package project and publish first version to windows store.
+  - Added new custom splash screen.
 
 ### Changed
 - Versioning semantics to 4-part
 
 ### Fixed
-- 
+- App settings and logging paths work in both win store package and msi or standalone.
 
 ## v1.0.17
 

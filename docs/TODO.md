@@ -44,7 +44,7 @@
 	- [X] copyScreenshotToClipboard default to `true`
 	- [X] playShutterSound default to `true`
 	- [X] openFolderAfterScreenshot default to `true`
-- [ ] Slash screen. Does it make sense? Will it be on screen long enough to look at? Should use the `docs\hero-orig.png`
+- [X] Splash screen uses `docs\hero-orig.png` (WPF splash + MSIX SplashScreen.png)
 - [ ] Tray about screen update with accurate info
 - [ ] Tool change toast bottom center screen fades away
 - [ ] Activation toast bottom center screen

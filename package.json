@@ -24,7 +24,9 @@
         "format": "dotnet format GhostDraw.sln",
         "format:check": "dotnet format GhostDraw.sln --verify-no-changes",
         "version:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -UpdateProjFiles -Bump revision -DryRun",
-        "version:bump": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -UpdateProjFiles -Bump revision"
+        "version:bump": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -UpdateProjFiles -Bump revision",
+        "install:package": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Package/Build-And-Install-MSIX.ps1",
+        "install:package:v": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Package/Build-And-Install-MSIX.ps1 -Version 2.0.0.0"
     },
     "engines": {
         "node": ">=18.0.0",
