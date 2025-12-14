@@ -13,7 +13,7 @@
 
 [**Download Latest Release**](https://github.com/RuntimeRascal/ghost-draw/releases) | [**Report Bug**](https://github.com/RuntimeRascal/ghost-draw/issues) | [**Request Feature**](https://github.com/RuntimeRascal/ghost-draw/issues)
 
-![GhostDraw Demo](docs/GhostDrawDemo.gif)
+![GhostDrawHero](docs/hero-orig.png)
 
 </div>
 
