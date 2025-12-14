@@ -32,3 +32,38 @@
 **New plan**
 - Create MSIX and publish to MS Store. This will prevent needing a expensive software sign cert in order to self sign the product and prevent looking like a sus product from win security messaging during download and install. Publishing to ms store is a 1-time $10 charge.
 
+## Pre Win Store Deployment Fixes/Changes
+- [ ] Update default settings
+  - [ ] active brush default `#000000`:
+  - [ ] Color palette default:
+	```json
+	"colorPalette": [
+		"#000000",
+		"#FFFFFF",
+		"#00FFFF",
+		"#0000FF",
+		"#00FF00",
+		"#FFA500",
+		"#FFFF00",
+		"#FF00FF",
+		"#FF0000",
+		"#800080"
+	],
+	```
+  - [ ] lock mode on
+  - [ ] activation hotkey default to `ctrl`+`alt`+`x`
+  - [ ] log level default to `Error`
+  - [ ] copyScreenshotToClipboard default to `true`
+  - [ ] playShutterSound default to `true`
+  - [ ] openFolderAfterScreenshot default to `true`
+- [ ] Slash screen. Does it make sense? Will it be on screen long enough to look at? Should use the `docs\hero-orig.png`
+- [ ] Tray about screen update with accurate info
+- [ ] Tool change toast bottom center screen fades away
+- [ ] Activation toast bottom center screen
+  - [ ] Show current tool
+  - [ ] How to exit. Depending on activation hotkey
+  - [ ] F1 for help
+- [ ] Ensure setting dir work in both msi version and win store version
+- [ ] All project build warnings, messages and errors are resolved
+- [ ] All documents updated with correct information. Not needed documents removed.
+- [X] Update versioning scripts to use 4 part version (Major.Minor.Build.Revision). The first release will use 2.0.0.0 and future revisions will bump the revision instead of patch. `Update-Version.ps1` needs to be updated.

@@ -5,6 +5,20 @@ param(
     [switch]$CreateUploadPackage = $false
 )
 
+function Get-NormalizedVersion {
+    param([string]$InputVersion)
+
+    if ($InputVersion -match '^\d+\.\d+\.\d+\.\d+$') {
+        return $InputVersion
+    }
+
+    if ($InputVersion -match '^\d+\.\d+\.\d+$') {
+        return "$InputVersion.0"
+    }
+
+    throw "Version must be 3- or 4-part (Major.Minor.Build.Revision)"
+}
+
 $ErrorActionPreference = "Stop"
 
 Write-Host "=====================================" -ForegroundColor Cyan
@@ -12,13 +26,16 @@ Write-Host " Building GhostDraw MSIX v$Version" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host ""
 
+# Normalize to 4-part version for MSIX
+$normalizedVersion = Get-NormalizedVersion -InputVersion $Version
+
 # Update version in manifest
 Write-Host "[1/4] Updating package version in manifest..." -ForegroundColor Yellow
 $manifestPath = "Package.appxmanifest"
 [xml]$manifest = Get-Content $manifestPath
-$manifest.Package.Identity.Version = "$Version.0"
+$manifest.Package.Identity.Version = $normalizedVersion
 $manifest.Save($manifestPath)
-Write-Host "Manifest version updated to $Version.0" -ForegroundColor Green
+Write-Host "Manifest version updated to $normalizedVersion" -ForegroundColor Green
 Write-Host ""
 
 # Build the application
@@ -45,6 +62,27 @@ if ($CreateUploadPackage) {
 
 $msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
 
+# Resolve signing certificate details for sideload builds so the thumbprint always matches the PFX we actually have
+if (-not $CreateUploadPackage) {
+    $pfxPath = Join-Path $PSScriptRoot "GhostDraw_TestCert.pfx"
+
+    if (-not (Test-Path $pfxPath)) {
+        Write-Host "ERROR: Signing certificate not found at $pfxPath" -ForegroundColor Red
+        Write-Host "Run .\\create-test-cert.ps1 then .\\install-cert.ps1 (as Administrator) and try again." -ForegroundColor Yellow
+        exit 1
+    }
+
+    $certPassword = ConvertTo-SecureString "GhostDrawTest123!" -AsPlainText -Force
+    $cert = Get-PfxCertificate -FilePath $pfxPath -Password $certPassword
+    if (-not $cert) {
+        Write-Host "ERROR: Unable to read signing certificate from $pfxPath" -ForegroundColor Red
+        exit 1
+    }
+
+    $certThumbprint = $cert.Thumbprint
+    Write-Host "Using signing certificate thumbprint: $certThumbprint" -ForegroundColor Green
+}
+
 # Set signing based on build mode
 if ($CreateUploadPackage) {
     # Store upload packages must be unsigned (Store will sign them)
@@ -54,6 +92,7 @@ if ($CreateUploadPackage) {
         /p:AppxBundle=$bundle `
         /p:UapAppxPackageBuildMode=$buildMode `
         /p:AppxPackageSigningEnabled=false `
+        /p:PackageCertificateThumbprint="" `
         /p:PackageCertificateKeyFile="" `
         /p:GenerateAppInstallerFile=false
 } else {
@@ -63,6 +102,9 @@ if ($CreateUploadPackage) {
         /p:Platform=x64 `
         /p:AppxBundle=$bundle `
         /p:UapAppxPackageBuildMode=$buildMode `
+        /p:PackageCertificateKeyFile=$pfxPath `
+        /p:PackageCertificateThumbprint=$certThumbprint `
+        /p:PackageCertificatePassword="GhostDrawTest123!" `
         /p:GenerateAppInstallerFile=false
 }
 
@@ -80,7 +122,7 @@ Write-Host "=====================================" -ForegroundColor Cyan
 
 # Show output location
 if ($CreateUploadPackage) {
-    $outputPath = "AppPackages\GhostDraw.Package_${Version}.0"
+    $outputPath = "AppPackages\GhostDraw.Package_${normalizedVersion}"
     if (Test-Path $outputPath) {
         Write-Host "Output: $outputPath" -ForegroundColor White
         Get-ChildItem $outputPath -Filter "*.msixupload" | ForEach-Object {
@@ -91,7 +133,7 @@ if ($CreateUploadPackage) {
         Write-Host "Upload this .msixupload file to Partner Center for Store submission" -ForegroundColor Cyan
     }
 } else {
-    $outputPath = "AppPackages\GhostDraw.Package_${Version}.0_Test"
+    $outputPath = "AppPackages\GhostDraw.Package_${normalizedVersion}_Test"
     if (Test-Path $outputPath) {
         Write-Host "Output: $outputPath" -ForegroundColor White
         Get-ChildItem $outputPath -Filter "*.msix" | ForEach-Object {
@@ -99,6 +141,6 @@ if ($CreateUploadPackage) {
             Write-Host "  - $($_.Name) ($size MB)" -ForegroundColor Gray
         }
         Write-Host ""
-        Write-Host "Install locally with: Add-AppxPackage -Path '$outputPath\GhostDraw.Package_${Version}.0_x64.msix'" -ForegroundColor Cyan
+        Write-Host "Install locally with: Add-AppxPackage -Path '$outputPath\GhostDraw.Package_${normalizedVersion}_x64.msix'" -ForegroundColor Cyan
     }
 }
