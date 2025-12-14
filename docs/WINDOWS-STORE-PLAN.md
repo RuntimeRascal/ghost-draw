@@ -28,7 +28,7 @@ This plan outlines the complete process to create an MSIX package for GhostDraw 
 
 ## Phase 1: Prerequisites & Setup (1 hour)
 
-### 1.1 Development Tools
+### 1.1 Development Tools ✅
 
 **Install Windows Application Packaging Support:**
 - Visual Studio 2022 with "Universal Windows Platform development" workload
@@ -38,7 +38,7 @@ This plan outlines the complete process to create an MSIX package for GhostDraw 
 ```powershell
 Get-Command MakeAppx.exe
 Get-Command SignTool.exe
-dotnet --version  # Should show 8.0.x
+dotnet --version  # 9.0.308
 ```
 
 ### 1.2 Microsoft Partner Center Account
@@ -50,19 +50,20 @@ dotnet --version  # Should show 8.0.x
 4. Complete registration form (contact info, tax info, payout account)
 5. Wait for approval (24-48 hours)
 
-**Prepare:**
-- Publisher display name: "RuntimeRascal" (or preferred - this is permanent)
-- Privacy policy URL (required - see Phase 7.1)
-- Support email address
-- Website URL (GitHub repo)
+**Your Account Details:**
+- Publisher display name: **RuntimeRascal2** ✅
+- App name reserved: **Ghost Draw** ✅
+- Support email: **runtimerascal@outlook.com** ✅
+- Privacy policy URL: https://github.com/RuntimeRascal/ghost-draw/blob/main/docs/PRIVACY-POLICY.md ✅
+- Website URL: https://github.com/RuntimeRascal/ghost-draw ✅
 
 ---
 
-## Phase 2: MSIX Packaging Project (2 hours)
+## Phase 2: MSIX Packaging Project (2 hours) ✅
 
-### 2.1 Create Packaging Project Structure
+### 2.1 Create Packaging Project Structure ✅
 
-**Directory to create:** `c:\code\github\ghost-draw\Package\`
+**Directory to create:** `c:\code\github\ghost-draw\Package\` ✅
 
 **Files to create:**
 
@@ -202,11 +203,11 @@ Core MSIX manifest declaring app identity, capabilities, and visual elements.
 </Package>
 ```
 
-### 2.2 Update Solution File
+### 2.2 Update Solution File ✅
 
-**Modify:** `GhostDraw.sln`
+**Modify:** `GhostDraw.sln` ✅
 
-Add new packaging project reference with Debug|x64 and Release|x64 configurations.
+Add new packaging project reference with Debug|x64 and Release|x64 configurations. ✅
 
 ```
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "GhostDraw.Package", "Package\GhostDraw.Package.wapproj", "{F7D8E1A2-3B4C-5D6E-7F8A-9B0C1D2E3F4A}"
@@ -219,7 +220,7 @@ EndProject
 
 ### 3.1 Required Asset Sizes
 
-**Create directory:** `Package\Images\`
+**Create directory:** `Package\Images\` ✅
 
 **Required images (all PNG format):**
 1. **Square44x44Logo.png** (44×44px) - App list icon
@@ -253,11 +254,11 @@ EndProject
 
 ---
 
-## Phase 4: Build Configuration (2 hours)
+## Phase 4: Build Configuration (2 hours) ✅
 
-### 4.1 Version Synchronization Script
+### 4.1 Version Synchronization Script ✅
 
-**Create:** `Scripts\Sync-Version.ps1`
+**Create:** `Scripts\Sync-Version.ps1` ✅
 
 PowerShell script to sync version from `package.json` (source of truth) to:
 - `Src\GhostDraw\GhostDraw.csproj` (3-part: 1.0.17)
@@ -367,9 +368,9 @@ Write-Host "=====================================" -ForegroundColor Cyan
 .\Scripts\Sync-Version.ps1 -Verify  # Check only
 ```
 
-### 4.2 MSIX Build Script
+### 4.2 MSIX Build Script ✅
 
-**Create:** `Package\build-msix.ps1`
+**Create:** `Package\build-msix.ps1` ✅
 
 Build script with parameters:
 - `$Configuration` (Debug/Release)
@@ -462,9 +463,9 @@ if (Test-Path $outputPath) {
 }
 ```
 
-### 4.3 Test Certificate Creation
+### 4.3 Test Certificate Creation ✅
 
-**Create:** `Package\create-test-cert.ps1`
+**Create:** `Package\create-test-cert.ps1` ✅
 
 Generates self-signed certificate for local MSIX testing:
 
@@ -513,9 +514,9 @@ Write-Host "  6. Finish" -ForegroundColor White
 
 ---
 
-## Phase 5: Testing & Validation (3-4 hours)
+## Phase 5: Testing & Validation (3-4 hours) ✅
 
-### 5.1 Local Build & Install Testing
+### 5.1 Local Build & Install Testing ✅
 
 **Build steps:**
 ```powershell
@@ -539,19 +540,19 @@ Add-AppxPackage -Path "AppPackages\GhostDraw.Package_1.0.17.0_x64_Test\*.msix"
 Get-AppxPackage -Name "*GhostDraw*" | Remove-AppxPackage
 ```
 
-### 5.2 Critical Functionality Tests
+### 5.2 Critical Functionality Tests ✅
 
 **MUST verify:**
-- ✓ Global keyboard hook (Ctrl+Alt+D) works across all applications
-- ✓ Drawing tools function identically to MSI version
-- ✓ Settings persist at: `%LocalAppData%\Packages\RuntimeRascal.GhostDraw_*\LocalCache\Local\GhostDraw\settings.json`
-- ✓ Logging works in virtualized path
-- ✓ Single-instance mutex works
-- ✓ System tray icon and menu function correctly
-- ✓ All tool shortcuts (L, E, U, C, T, A) work
-- ✓ Screenshot (Ctrl+S), Undo (Ctrl+Z), Clear (Delete) work
+- ✅ Global keyboard hook (Ctrl+Alt+D) works across all applications
+- ✅ Drawing tools function identically to MSI version
+- ✅ Settings persist at: `%LocalAppData%\Packages\RuntimeRascal.GhostDraw_*\LocalCache\Local\GhostDraw\settings.json`
+- ✅ Logging works in virtualized path
+- ✅ Single-instance mutex works
+- ✅ System tray icon and menu function correctly
+- ✅ All tool shortcuts (L, E, U, C, T, A) work
+- ✅ Screenshot (Ctrl+S), Undo (Ctrl+Z), Clear (Delete) work
 
-### 5.3 Windows App Certification Kit (WACK)
+### 5.3 Windows App Certification Kit (WACK) (Optional for now)
 
 **Required for Store submission:**
 ```powershell
@@ -578,13 +579,15 @@ Get-AppxPackage -Name "*GhostDraw*" | Remove-AppxPackage
 
 ---
 
-## Phase 6: CI/CD Integration (2-3 hours)
+## Phase 6: CI/CD Integration (2-3 hours) ✅
 
-### 6.1 Update GitHub Actions Workflow
+### 6.1 Update GitHub Actions Workflow ✅
 
-**Modify:** `.github\workflows\ci.yml`
+**Modify:** `.github\workflows\ci.yml` ✅
 
-**Add MSIX build steps after MSI build:**
+**MSIX build is now integrated with an easy toggle!** Set `BUILD_MSIX: 'true'` in the workflow env to enable.
+
+**Implementation:**
 
 ```yaml
 - name: Build MSIX package
@@ -626,14 +629,29 @@ Get-AppxPackage -Name "*GhostDraw*" | Remove-AppxPackage
 
 **Note:** CI builds unsigned MSIX for testing. Store submission uses different build mode (see Phase 7.3).
 
-### 6.2 Version Increment Workflow
+**Toggle MSIX builds:**
+```yaml
+env:
+    VERSION: ''
+    BUILD_MSIX: 'false' # Change to 'true' to enable MSIX builds
+```
+
+When enabled:
+- ✅ Builds unsigned MSIX package (Microsoft Store will sign it)
+- ✅ Uploads MSIX as build artifact
+- ✅ Includes MSIX in draft releases
+
+**Documentation:** See [Package/README.md](../Package/README.md) for detailed usage instructions.
+
+### 6.2 Version Increment Workflow ✅
 
 **For new releases:**
 1. Update `package.json` version (e.g., 1.0.17 → 1.0.18)
 2. Run `Scripts\Sync-Version.ps1`
 3. Commit changes
 4. Push to trigger CI/CD
-5. Build Store package manually for Partner Center submission
+5. (Optional) Enable MSIX build by setting `BUILD_MSIX: 'true'`
+6. Build Store package manually for Partner Center submission when ready
 
 ---
 
