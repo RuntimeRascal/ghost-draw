@@ -165,8 +165,15 @@ public partial class App : Application
                 try
                 {
                     _logger?.LogDebug("System tray icon double-clicked");
+                    var settings = _appSettings?.CurrentSettings;
+                    var hotkeyDisplay = settings?.HotkeyDisplayName ?? "Ctrl+Alt+X";
+                    var lockMode = settings?.LockDrawingMode ?? false;
+                    var activeTool = settings?.ActiveTool.ToString() ?? "Pen";
+                    var modeLine = lockMode
+                        ? $"Press {hotkeyDisplay} to toggle drawing on/off (lock mode)."
+                        : $"Hold {hotkeyDisplay} while drawing; release to exit (hold mode).";
                     System.Windows.MessageBox.Show(
-                        $"GhostDraw is running!\n\nPress and hold Ctrl+Alt+D, then click and drag with left mouse button to draw on screen.\nRelease Ctrl+Alt+D to clear the drawing.\n\nLog Level: {_loggingSettings?.CurrentLevel}\nLog Folder: {_loggingSettings?.GetLogDirectory()}",
+                        $"GhostDraw is running!\n\nHotkey: {hotkeyDisplay}\n{modeLine}\nCurrent tool: {activeTool}\n\nLog Level: {_loggingSettings?.CurrentLevel}\nLog Folder: {_loggingSettings?.GetLogDirectory()}",
                         "GhostDraw",
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);

@@ -45,7 +45,7 @@
 	- [X] playShutterSound default to `true`
 	- [X] openFolderAfterScreenshot default to `true`
 - [X] Splash screen uses `docs\hero-orig.png` (WPF splash + MSIX SplashScreen.png)
-- [ ] Tray about screen update with accurate info
+- [X] Tray about screen update with accurate info
 - [ ] Tool change toast bottom center screen fades away
 - [ ] Activation toast bottom center screen
   - [ ] Show current tool
