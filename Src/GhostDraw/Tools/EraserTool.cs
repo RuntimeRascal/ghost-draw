@@ -34,7 +34,9 @@ public class EraserTool(ILogger<EraserTool> logger) : IDrawingTool
     // ActionCompleted event required by IDrawingTool but not used by eraser.
     // Eraser uses ElementErased event instead since it removes existing elements
     // rather than creating new ones.
+#pragma warning disable CS0067 // Event is required by interface but intentionally not raised
     public event EventHandler<DrawingActionCompletedEventArgs>? ActionCompleted;
+#pragma warning restore CS0067
 
     /// <summary>
     /// Event fired when elements are erased (for history removal)

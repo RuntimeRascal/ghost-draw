@@ -51,7 +51,7 @@
   - [ ] Show current tool
   - [ ] How to exit. Depending on activation hotkey
   - [ ] F1 for help
-- [ ] Ensure setting dir work in both msi version and win store version
-- [ ] All project build warnings, messages and errors are resolved
+- [X] Ensure setting dir work in both msi version and win store version
+- [X] All project build warnings, messages and errors are resolved
 - [ ] All documents updated with correct information. Not needed documents removed.
 - [X] Update versioning scripts to use 4 part version (Major.Minor.Build.Revision). The first release will use 2.0.0.0 and future revisions will bump the revision instead of patch. `Update-Version.ps1` needs to be updated.

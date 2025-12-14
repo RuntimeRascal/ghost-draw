@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - App settings and logging paths work in both win store package and msi or standalone.
+- Tray double-click about modal now shows accurate messaging based on current settings.
 
 ## v1.0.17
 
