@@ -6,22 +6,9 @@ This directory contains the Windows Application Packaging Project for building M
 
 ### Local Development Build
 
-```powershell
-# 1. Generate test certificate (one-time)
-cd Package
-.\create-test-cert.ps1
-
-# 2. Install certificate as Administrator (one-time)
-.\install-cert.ps1
-
-# 3. Build MSIX package
-.\build-msix.ps1 -Version "2.0.0.0" -Configuration Debug
-
-# 4. Install locally for testing
-Add-AppxPackage -Path "AppPackages\GhostDraw.Package_2.0.0.0_x64_Debug_Test\GhostDraw.Package_2.0.0.0_x64_Debug.msix"
-
-# 5. Remove the installed package
-Get-AppxPackage -Name "*GhostDraw*" | Remove-AppxPackage
+```shell
+# Execute the npm script. Will ensure local certs, clean, build and install package locally for testing.
+npm run install:package
 ```
 
 ## Files
@@ -29,6 +16,7 @@ Get-AppxPackage -Name "*GhostDraw*" | Remove-AppxPackage
 - **GhostDraw.Package.wapproj** - Windows Application Packaging Project
 - **Package.appxmanifest** - App manifest with identity, capabilities, and visual elements
 - **build-msix.ps1** - Build automation script
+- **Package\Build-And-Install-MSIX.ps1** - Cleans builds and installs local package for testing
 - **create-test-cert.ps1** - Generates self-signed certificate for local testing
 - **install-cert.ps1** - Installs test certificate to Trusted Root (requires Admin)
 - **Generate-Assets.ps1** - Creates visual assets from source icon
@@ -54,7 +42,7 @@ Current assets are auto-generated placeholders from the main app icon. For produ
 
 1. **Build Store upload package**:
    ```powershell
-   .\build-msix.ps1 -Version "1.0.17" -Configuration Release -CreateUploadPackage
+   .\build-msix.ps1 -Version "1.0.0.0" -Configuration Release -CreateUploadPackage
    ```
 
 2. **Upload to Partner Center**:

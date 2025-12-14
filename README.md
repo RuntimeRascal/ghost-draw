@@ -22,8 +22,8 @@
 ## ✨ Features
 
 ### 🎨 **Drawing Tools**
-- **Multiple Drawing Tools** - Switch between Pen (freehand), Line (straight lines), Rectangle (boxes), Circle/Ellipse, and Eraser tools with keyboard shortcuts
-- **Perfect Shapes** - Hold Shift while using Circle tool to draw perfect circles
+- **Multiple Drawing Tools** - Switch between Pen (freehand), Line (straight lines), Rectangle (boxes), Circle/Ellipse, text, and Eraser tools with keyboard shortcuts
+- **Perfect Shapes** - Hold Shift while using Circle or Rectangle tool to draw perfect circles/rectangles
 - **Customizable Color Palette** - Create your own color collection and cycle through them while drawing
 - **Variable Brush Thickness** - Adjust brush size from 1-100px with configurable min/max ranges
 - **Smooth Drawing** - High-performance rendering for fluid strokes
@@ -41,7 +41,6 @@
 - **System Tray Integration** - Runs quietly in the background
 - **Emergency Exit** - Press `ESC` to instantly hide the overlay
 - **Right-Click Color Cycling** - Quickly switch between your palette colors
-- **Position-Numbered Palette** - Easily organize and reorder your favorite colors
 
 ---
 
