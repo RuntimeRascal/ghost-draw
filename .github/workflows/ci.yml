@@ -10,7 +10,8 @@ permissions:
     contents: write # Required for creating draft releases
 
 env:
-    VERSION: '' # Will be set from package.json
+    VERSION: '' # Will be set from package.json (expects 4-part Major.Minor.Build.Revision)
+    BUILD_MSIX: 'false' # Set to 'true' to enable MSIX package build
 
 jobs:
     build:
@@ -103,6 +104,55 @@ jobs:
                     exit 1
                   }
 
+            # ============================================================
+            # MSIX Package Build (Optional - Controlled by BUILD_MSIX env var)
+            # ============================================================
+
+            - name: Setup MSBuild
+              if: env.BUILD_MSIX == 'true'
+              uses: microsoft/setup-msbuild@v2
+
+            - name: Build MSIX package
+              if: env.BUILD_MSIX == 'true'
+              shell: pwsh
+              run: |
+                  Write-Host "Building MSIX package for Microsoft Store..." -ForegroundColor Cyan
+
+                  # MSBuild is now in PATH thanks to setup-msbuild action
+                  # Build MSIX (unsigned for CI - Store will sign it)
+                  msbuild Package\GhostDraw.Package.wapproj `
+                    /p:Configuration=Release `
+                    /p:Platform=x64 `
+                    /p:AppxBundle=Never `
+                    /p:UapAppxPackageBuildMode=SideloadOnly `
+                    /p:AppxPackageSigningEnabled=false `
+                    /p:GenerateAppInstallerFile=false
+
+                  if ($LASTEXITCODE -ne 0) {
+                    Write-Error "MSIX build failed"
+                    exit 1
+                  }
+
+            - name: Verify MSIX build output
+              if: env.BUILD_MSIX == 'true'
+              shell: pwsh
+              run: |
+                  $msixPath = "Package\AppPackages\GhostDraw.Package_${{ env.VERSION }}_Test\GhostDraw.Package_${{ env.VERSION }}_x64.msix"
+
+                  if (Test-Path $msixPath) {
+                    $size = (Get-Item $msixPath).Length / 1MB
+                    Write-Host "✓ MSIX package built successfully" -ForegroundColor Green
+                    Write-Host "  Path: $msixPath" -ForegroundColor Gray
+                    Write-Host "  Size: $([math]::Round($size, 2)) MB" -ForegroundColor Gray
+                  } else {
+                    Write-Error "MSIX package not found at $msixPath"
+                    exit 1
+                  }
+
+            # ============================================================
+            # End MSIX Build
+            # ============================================================
+
             - name: Create portable zip
               shell: pwsh
               run: |
@@ -119,6 +169,7 @@ jobs:
                   name: |
                       GhostDrawSetup-*
                       GhostDraw-*-portable
+                      GhostDraw-*-MSIX
                   failOnError: false
 
             - name: Upload installer artifact
@@ -134,6 +185,14 @@ jobs:
                   name: GhostDraw-${{ env.VERSION }}-portable
                   path: GhostDraw-${{ env.VERSION }}-portable.zip
                   retention-days: 30
+
+            # - name: Upload MSIX artifact
+            #   if: env.BUILD_MSIX == 'true'
+            #   uses: actions/upload-artifact@v4
+            #   with:
+            #       name: GhostDraw-${{ env.VERSION }}-MSIX
+            #   path: Package/AppPackages/GhostDraw.Package_${{ env.VERSION }}_Test/*.msix
+            #       retention-days: 30
 
             # Check if a PUBLISHED (non-draft) release exists for this version
             # If only a draft exists, we should update it with new assets
@@ -170,6 +229,25 @@ jobs:
                   # Always exit successfully
                   exit 0
 
+            - name: Prepare release files list
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_release.outputs.skip_release == 'false'
+              id: release_files
+              shell: pwsh
+              run: |
+                  $files = @(
+                    "Installer/bin/x64/Release/GhostDrawSetup-${{ env.VERSION }}.msi",
+                    "GhostDraw-${{ env.VERSION }}-portable.zip"
+                  )
+
+                  if ($env:BUILD_MSIX -eq 'true') {
+                    $files += "Package/AppPackages/GhostDraw.Package_${{ env.VERSION }}_Test/GhostDraw.Package_${{ env.VERSION }}_x64.msix"
+                  }
+
+                  $filesList = $files -join "`n"
+                  "files<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+                  $filesList | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+                  "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
             - name: Create or update draft release
               if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_release.outputs.skip_release == 'false'
               uses: softprops/action-gh-release@v2
@@ -179,15 +257,14 @@ jobs:
                   draft: true
                   prerelease: false
                   generate_release_notes: true
-                  files: |
-                      Installer/bin/x64/Release/GhostDrawSetup-${{ env.VERSION }}.msi
-                      GhostDraw-${{ env.VERSION }}-portable.zip
+                  files: ${{ steps.release_files.outputs.files }}
                   body: |
                       ## GhostDraw v${{ env.VERSION }}
 
                       ### Downloads
-                      - **GhostDrawSetup-${{ env.VERSION }}.msi** - Windows installer
+                      - **GhostDrawSetup-${{ env.VERSION }}.msi** - Windows installer (recommended)
                       - **GhostDraw-${{ env.VERSION }}-portable.zip** - Portable version (no installation required)
+                      ${{ env.BUILD_MSIX == 'true' && format('- **GhostDraw.Package_{0}_x64.msix** - Microsoft Store package (unsigned - for testing only)', env.VERSION) || '' }}
 
                       ### Installation
                       1. Download the MSI installer or portable ZIP

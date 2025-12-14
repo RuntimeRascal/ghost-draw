@@ -1,8 +1,8 @@
+using System.Text.Json;
+using GhostDraw.Core;
+using GhostDraw.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Text.Json;
-using GhostDraw.Services;
-using GhostDraw.Core;
 
 namespace GhostDraw.Tests;
 
@@ -40,9 +40,9 @@ public class AppSettingsServiceTests
         // Assert
         var settings = service.CurrentSettings;
         Assert.NotNull(settings);
-        Assert.Equal("#FF0000", settings.ActiveBrush);
+        Assert.Equal("#000000", settings.ActiveBrush);
         Assert.Equal(3.0, settings.BrushThickness);
-        Assert.False(settings.LockDrawingMode);
+        Assert.True(settings.LockDrawingMode);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class AppSettingsServiceTests
 
         // Assert - Verify they are different instances
         Assert.NotSame(settings1, settings2);
-        Assert.Equal("#FF0000", settings2.ActiveBrush); // settings2 should still have default
+        Assert.Equal("#000000", settings2.ActiveBrush); // settings2 should still have default
     }
 
     [Theory]
@@ -170,13 +170,13 @@ public class AppSettingsServiceTests
 
         // Assert
         var settings = service.CurrentSettings;
-        Assert.Equal("#FF0000", settings.ActiveBrush);
+        Assert.Equal("#000000", settings.ActiveBrush);
         Assert.Equal(3.0, settings.BrushThickness);
-        Assert.False(settings.LockDrawingMode);
+        Assert.True(settings.LockDrawingMode);
     }
 
     [Theory]
-    [InlineData(new int[] { 0xA2, 0xA4, 0x44 })]  // Ctrl + Alt + D
+    [InlineData(new int[] { 0xA2, 0xA4, 0x58 })]  // Ctrl + Alt + X
     [InlineData(new int[] { 0xA2, 0xA0, 0x46 })]  // Ctrl + Shift + F
     [InlineData(new int[] { 0xA4, 0xA0, 0x58 })]  // Alt + Shift + X
     public void SetHotkey_ShouldUpdateHotkeyConfiguration(int[] vkArray)

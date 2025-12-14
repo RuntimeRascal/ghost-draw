@@ -1,6 +1,6 @@
 {
     "name": "ghost-draw",
-    "version": "1.0.17",
+    "version": "2.0.0.0",
     "description": "Draw directly on your screen with a transparent overlay",
     "repository": {
         "type": "git",
@@ -23,9 +23,11 @@
         "dev:watch": "dotnet watch run --project Src/GhostDraw/GhostDraw.csproj",
         "format": "dotnet format GhostDraw.sln",
         "format:check": "dotnet format GhostDraw.sln --verify-no-changes",
-        "version:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -UpdateProjFiles -Bump patch -DryRun",
-        "version:tag": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -Bump patch -DryRun",
-        "version:bump": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -UpdateProjFiles -Bump patch"
+        "version:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -UpdateProjFiles -Bump revision -DryRun",
+        "version:bump": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Scripts/Update-Version.ps1 -CreateTag -PushTag -UpdateProjFiles -Bump revision",
+        "install:package": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Package/Build-And-Install-MSIX.ps1",
+        "install:package:v": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File Package/Build-And-Install-MSIX.ps1 -Version 2.0.0.0",
+        "package:store": "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Set-Location Package; ./build-msix.ps1 -Configuration Release -CreateUploadPackage -Version $env:npm_package_version\""
     },
     "engines": {
         "node": ">=18.0.0",

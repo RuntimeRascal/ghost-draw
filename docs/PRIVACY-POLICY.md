@@ -46,7 +46,7 @@ GhostDraw stores the following data locally on your device only:
 GhostDraw requires the following system permissions:
 
 ### Global Keyboard Hook
-- **Purpose:** To activate the drawing overlay with the Ctrl+Alt+D hotkey from any application
+- **Purpose:** To activate the drawing overlay with the Ctrl+Alt+X hotkey from any application
 - **Scope:** Monitors keyboard input only for the activation hotkey
 - **Data Usage:** Not stored or transmitted; used only for hotkey detection
 

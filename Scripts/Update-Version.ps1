@@ -5,14 +5,15 @@
 .DESCRIPTION
     This script provides flexible version management:
     - Fetches and displays the latest git tag version
-    - Optionally bumps the version (patch, minor, or major)
-    - Optionally updates version in project files (package.json, .csproj, .wixproj)
+    - Optionally bumps the version (revision/build/minor/major) using 4-part versions
+    - Optionally updates version in project files (package.json, .csproj, .wixproj, appxmanifest)
     - Optionally creates and pushes git tags
 
     Files that can be updated:
     - package.json
     - Src/GhostDraw/GhostDraw.csproj
     - Installer/GhostDraw.Installer.wixproj
+    - Package/Package.appxmanifest
 
 .PARAMETER DryRun
     If specified, shows what would be changed without making any modifications.
@@ -71,7 +72,7 @@
 param(
     [switch]$DryRun,
     [string]$Tag,
-    [ValidateSet("patch", "minor", "major")]
+    [ValidateSet("revision", "patch", "build", "minor", "major")]
     [string]$Bump,
     [switch]$UpdateProjFiles,
     [switch]$CreateTag,
@@ -87,7 +88,8 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $filesToUpdate = @(
     "package.json",
     "Src/GhostDraw/GhostDraw.csproj",
-    "Installer/GhostDraw.Installer.wixproj"
+    "Installer/GhostDraw.Installer.wixproj",
+    "Package/Package.appxmanifest"
 )
 
 #region Helper Functions
@@ -114,11 +116,30 @@ function Get-VersionFromTag {
     $version = $TagName -replace "^v", ""
     
     # Validate version format (basic semver)
-    if ($version -notmatch "^\d+\.\d+\.\d+") {
-        throw "Tag '$TagName' does not appear to be a valid semantic version"
+    if ($version -notmatch "^\d+\.\d+\.\d+(\.\d+)?$") {
+        throw "Tag '$TagName' does not appear to be a valid 3- or 4-part version"
     }
-    
+
+    # Normalize to 4-part version (Major.Minor.Build.Revision)
+    if ($version -notmatch "^\d+\.\d+\.\d+\.\d+$") {
+        $version = "$version.0"
+    }
+
     return $version
+}
+
+function Get-FourPartVersion {
+    param([string]$Version)
+
+    if ($Version -notmatch "^\d+\.\d+\.\d+(\.\d+)?$") {
+        throw "Version must be 3- or 4-part (Major.Minor.Build.Revision)"
+    }
+
+    if ($Version -notmatch "^\d+\.\d+\.\d+\.\d+$") {
+        return "$Version.0"
+    }
+
+    return $Version
 }
 
 function Get-BumpedVersion {
@@ -128,26 +149,39 @@ function Get-BumpedVersion {
     )
     
     $parts = $CurrentVersion -split "\."
+    # Ensure 4 parts
+    while ($parts.Count -lt 4) { $parts += 0 }
+
     $major = [int]$parts[0]
     $minor = [int]$parts[1]
-    $patch = [int]$parts[2]
+    $build = [int]$parts[2]
+    $revision = [int]$parts[3]
     
     switch ($BumpType) {
         "major" {
             $major++
             $minor = 0
-            $patch = 0
+            $build = 0
+            $revision = 0
         }
         "minor" {
             $minor++
-            $patch = 0
+            $build = 0
+            $revision = 0
         }
-        "patch" {
-            $patch++
+        "build" {
+            $build++
+            $revision = 0
+        }
+        "patch" { # backward compat maps to revision
+            $revision++
+        }
+        "revision" {
+            $revision++
         }
     }
     
-    return "$major.$minor.$patch"
+    return "$major.$minor.$build.$revision"
 }
 
 function New-GitTag {
@@ -278,6 +312,33 @@ function Update-WixVersion {
     }
 }
 
+function Update-AppxManifestVersion {
+    param(
+        [string]$FilePath,
+        [string]$NewVersion,
+        [switch]$DryRun
+    )
+
+    [xml]$manifest = Get-Content $FilePath
+    $current = $manifest.Package.Identity.Version
+
+    if ($current -eq $NewVersion) {
+        Write-Host "    Already at version $NewVersion" -ForegroundColor Gray
+        return
+    }
+
+    Write-Host "    Current: $current" -ForegroundColor Red
+    Write-Host "    Expected: $NewVersion" -ForegroundColor Green
+
+    if ($DryRun) {
+        Write-Host "    [DRY-RUN] Would update appxmanifest" -ForegroundColor Cyan
+    } else {
+        $manifest.Package.Identity.Version = $NewVersion
+        $manifest.Save($FilePath)
+        Write-Host "    Updated" -ForegroundColor Green
+    }
+}
+
 #endregion
 
 #region Main Execution
@@ -311,7 +372,7 @@ if ($Bump) {
 }
 
 Write-Host ""
-Write-Host "Resolved version: $targetVersion" -ForegroundColor White
+Write-Host "Resolved version (Major.Minor.Build.Revision): $targetVersion" -ForegroundColor White
 Write-Host ""
 
 # Step 3: Update project files if requested
@@ -337,6 +398,10 @@ if ($UpdateProjFiles) {
             }
             "*.wixproj" {
                 Update-WixVersion -FilePath $fullPath -NewVersion $targetVersion -DryRun:$DryRun
+            }
+            "*.appxmanifest" {
+                $fourPart = Get-FourPartVersion -Version $targetVersion
+                Update-AppxManifestVersion -FilePath $fullPath -NewVersion $fourPart -DryRun:$DryRun
             }
         }
     }

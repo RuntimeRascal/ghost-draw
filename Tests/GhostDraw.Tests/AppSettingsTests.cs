@@ -11,13 +11,13 @@ public class AppSettingsTests
         var settings = new AppSettings();
 
         // Assert
-        Assert.Equal("#FF0000", settings.ActiveBrush);
+        Assert.Equal("#000000", settings.ActiveBrush);
         Assert.Equal(3.0, settings.BrushThickness);
         Assert.Equal(1.0, settings.MinBrushThickness);
         Assert.Equal(20.0, settings.MaxBrushThickness);
-        Assert.Equal(new List<int> { 0xA2, 0xA4, 0x44 }, settings.HotkeyVirtualKeys); // Ctrl+Alt+D
-        Assert.Equal("Ctrl + Alt + D", settings.HotkeyDisplayName);
-        Assert.False(settings.LockDrawingMode);
+        Assert.Equal(new List<int> { 0xA2, 0xA4, 0x58 }, settings.HotkeyVirtualKeys); // Ctrl+Alt+X
+        Assert.Equal("Ctrl + Alt + X", settings.HotkeyDisplayName);
+        Assert.True(settings.LockDrawingMode);
         Assert.Equal(10, settings.ColorPalette.Count);
     }
 

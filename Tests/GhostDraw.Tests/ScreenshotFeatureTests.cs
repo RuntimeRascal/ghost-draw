@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Logging;
-using Moq;
 using GhostDraw.Core;
 using GhostDraw.Services;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace GhostDraw.Tests;
 
@@ -134,7 +134,7 @@ public class ScreenshotFeatureTests
         var settings = new AppSettings();
 
         // Assert
-        Assert.False(settings.PlayShutterSound); // Default should be false
+        Assert.True(settings.PlayShutterSound); // Default should be true
     }
 
     [Fact]
@@ -144,7 +144,7 @@ public class ScreenshotFeatureTests
         var settings = new AppSettings();
 
         // Assert
-        Assert.False(settings.OpenFolderAfterScreenshot); // Default should be false
+        Assert.True(settings.OpenFolderAfterScreenshot); // Default should be true
     }
 
     [Fact]

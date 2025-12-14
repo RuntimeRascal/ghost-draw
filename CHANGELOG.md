@@ -5,6 +5,21 @@ All notable changes to GhostDraw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.0.0.0
+
+### Added
+- **Windows Store Package**
+  - Added windows store package project and publish first version to windows store.
+  - Added new custom splash screen.
+  - Add activation and tool change hint popup center bottom screen that fades away.
+
+### Changed
+- Versioning semantics to 4-part
+
+### Fixed
+- App settings and logging paths work in both win store package and msi or standalone.
+- Tray double-click about modal now shows accurate messaging based on current settings.
+
 ## v1.0.17
 
 ### Added
@@ -232,7 +247,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Drawing Mode Activation**
-  - Configurable hotkey combination (default: Ctrl+Alt+D)
+  - Configurable hotkey combination (default: Ctrl+Alt+X)
   - Toggle or hold mode options
 - **Pen Tool** - Freehand drawing with mouse
   - Click and drag to draw smooth polylines

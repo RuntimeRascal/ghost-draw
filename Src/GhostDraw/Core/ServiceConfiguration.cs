@@ -20,9 +20,7 @@ public static class ServiceConfiguration
     public static ServiceProvider ConfigureServices()
     {
         // Setup Serilog
-        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string logDirectory = Path.Combine(appData, "GhostDraw");
-        Directory.CreateDirectory(logDirectory);
+        string logDirectory = AppDataPathProvider.GetLocalAppDataDirectory();
 
         string logFilePath = Path.Combine(logDirectory, "ghostdraw-.log");
 
@@ -123,8 +121,7 @@ public static class ServiceConfiguration
 
     public static string GetLogDirectory()
     {
-        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        return Path.Combine(appData, "GhostDraw");
+        return AppDataPathProvider.GetLocalAppDataDirectory();
     }
 
     public static void Shutdown()

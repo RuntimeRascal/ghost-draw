@@ -20,6 +20,9 @@ public partial class OverlayWindow : Window, IOverlayWindow
     private readonly DrawingHistory _drawingHistory;
     private bool _isDrawing = false;
     private bool _isHelpVisible = false;
+    private bool _hasShownDrawingHint = false;
+    private DateTimeOffset _lastDrawingHintShownAt = DateTimeOffset.MinValue;
+    private static readonly TimeSpan DrawingHintDebounce = TimeSpan.FromMilliseconds(400);
 
     // Tool instances
     private readonly PenTool _penTool;
@@ -190,6 +193,8 @@ public partial class OverlayWindow : Window, IOverlayWindow
         ClearDrawing();
 
         _isDrawing = true;
+        _hasShownDrawingHint = false;
+        _lastDrawingHintShownAt = DateTimeOffset.MinValue;
 
         // Initialize active tool based on current settings
         var settings = _appSettings.CurrentSettings;
@@ -227,6 +232,8 @@ public partial class OverlayWindow : Window, IOverlayWindow
     {
         _logger.LogInformation("?? Drawing disabled");
         _isDrawing = false;
+        _hasShownDrawingHint = false;
+        _lastDrawingHintShownAt = DateTimeOffset.MinValue;
 
         // Deactivate current tool and cancel any in-progress operations
         if (_activeTool != null)
@@ -414,6 +421,11 @@ public partial class OverlayWindow : Window, IOverlayWindow
 
             // Update cursor for new tool
             UpdateCursor();
+
+            if (_isDrawing)
+            {
+                ShowDrawingModeHint(fromToolChange: true);
+            }
 
             _logger.LogInformation("Tool changed to {Tool}", newTool);
         }
@@ -612,12 +624,34 @@ public partial class OverlayWindow : Window, IOverlayWindow
     /// <summary>
     /// Shows the drawing mode hint with animation (displayed when entering drawing mode)
     /// </summary>
-    private void ShowDrawingModeHint()
+    private void ShowDrawingModeHint(bool fromToolChange = false)
     {
         try
         {
-            DrawingModeHint.Show("Press Delete to clear canvas  |  ESC to exit");
-            _logger.LogDebug("Drawing mode hint shown");
+            if (fromToolChange && !_hasShownDrawingHint)
+            {
+                // Avoid double-show during initial activation when tool change events fire
+                return;
+            }
+
+            var now = DateTimeOffset.UtcNow;
+            if (fromToolChange && (now - _lastDrawingHintShownAt) < DrawingHintDebounce)
+            {
+                _logger.LogDebug("Drawing mode hint throttled (from tool change)");
+                return;
+            }
+
+            var settings = _appSettings.CurrentSettings;
+            var message = DrawingModeHintMessageBuilder.Build(
+                settings.ActiveTool,
+                settings.HotkeyVirtualKeys,
+                settings.LockDrawingMode);
+
+            DrawingModeHint.Show(message);
+            _hasShownDrawingHint = true;
+            _lastDrawingHintShownAt = now;
+            _logger.LogDebug("Drawing mode hint shown with tool {Tool} and hotkey {Hotkey} (LockMode={LockMode})",
+                settings.ActiveTool, settings.HotkeyDisplayName, settings.LockDrawingMode);
         }
         catch (Exception ex)
         {

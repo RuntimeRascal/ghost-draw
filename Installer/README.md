@@ -61,34 +61,21 @@ msiexec /i GhostDrawSetup-v1.1.0.msi /l*v upgrade.log
 ## Features
 
 The installer supports:
-- ? Install to Program Files
-- ? Optional Start Menu shortcut (default: yes)
-- ? Optional Desktop shortcut (default: no)
-- ? Optional Run at Startup (default: no)
-- ? Clean uninstall (removes files, shortcuts, registry)
-- ? In-place upgrades (preserves user settings)
-- ? Downgrade prevention
-- ? Launch app after installation
+- ✅ Install to Program Files
+- ✅ Clean uninstall (removes files, shortcuts, registry)
+- ✅ In-place upgrades (preserves user settings)
+- ✅ Downgrade prevention
+- ✅ Launch app after installation
 
 ## Upgrade Code
 
-?? **CRITICAL**: The UpgradeCode GUID in `Product.wxs` must **NEVER** change across versions:
+⚠️ **CRITICAL**: The UpgradeCode GUID in `Product.wxs` must **NEVER** change across versions:
 
 ```xml
 <?define UpgradeCode="A8B9C0D1-2E3F-4A5B-6C7D-8E9F0A1B2C3D" ?>
 ```
 
 Changing this GUID will break upgrade detection.
-
-## Versioning
-
-Update the version in `Product.wxs`:
-
-```xml
-<?define ProductVersion="1.0.0" ?>
-```
-
-Use semantic versioning: `MAJOR.MINOR.PATCH`
 
 ## Troubleshooting
 
@@ -116,4 +103,3 @@ Common issues:
 
 - [WiX Documentation](https://wixtoolset.org/docs/)
 - [WiX Tutorial](https://www.firegiant.com/wix/tutorial/)
-- [Implementation Plan](../docs/installer-implementation-plan.md)

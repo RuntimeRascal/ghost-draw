@@ -1,7 +1,8 @@
-using GhostDraw.Core;
-using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Text.Json;
+using GhostDraw.Core;
+using GhostDraw.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace GhostDraw.Services;
 
@@ -17,10 +18,8 @@ public class FileSettingsStore : ISettingsStore
     {
         _logger = logger;
 
-        // Store settings in LocalApplicationData folder
-        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string settingsDirectory = Path.Combine(appData, "GhostDraw");
-        Directory.CreateDirectory(settingsDirectory);
+        // Store settings in app data that respects MSIX packaged location when applicable
+        string settingsDirectory = AppDataPathProvider.GetLocalAppDataDirectory();
 
         _settingsFilePath = Path.Combine(settingsDirectory, "settings.json");
         _logger.LogInformation("Settings file path: {SettingsPath}", _settingsFilePath);

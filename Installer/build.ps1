@@ -3,13 +3,29 @@
 
 param(
     [string]$Configuration = "Release",
-    [string]$Version = "1.0.0"
+    [string]$Version = "2.0.0.0"
 )
+
+function Get-NormalizedVersion {
+    param([string]$InputVersion)
+
+    if ($InputVersion -match '^\d+\.\d+\.\d+\.\d+$') {
+        return $InputVersion
+    }
+
+    if ($InputVersion -match '^\d+\.\d+\.\d+$') {
+        return "$InputVersion.0"
+    }
+
+    throw "Version must be 3- or 4-part (Major.Minor.Build.Revision)"
+}
+
+$normalizedVersion = Get-NormalizedVersion -InputVersion $Version
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "=====================================" -ForegroundColor Cyan
-Write-Host " Building GhostDraw Installer v$Version" -ForegroundColor Cyan
+Write-Host " Building GhostDraw Installer v$normalizedVersion" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -20,7 +36,7 @@ dotnet publish ..\Src\GhostDraw\GhostDraw.csproj `
     -r win-x64 `
     --self-contained true `
     -p:PublishSingleFile=false `
-    -p:Version=$Version
+    -p:Version=$normalizedVersion
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Failed to build application" -ForegroundColor Red
@@ -50,7 +66,7 @@ Write-Host ""
 Write-Host "[3/4] Building installer MSI..." -ForegroundColor Yellow
 dotnet build GhostDraw.Installer.wixproj `
     -c $Configuration `
-    -p:Version=$Version `
+    -p:Version=$normalizedVersion `
     -p:PublishDir="..\Src\GhostDraw\bin\Release\net8.0-windows\win-x64\publish\"
 
 if ($LASTEXITCODE -ne 0) {
@@ -62,7 +78,7 @@ Write-Host "Installer built successfully" -ForegroundColor Green
 Write-Host ""
 
 # Step 4: Show output location
-$OutputPath = "bin\x64\$Configuration\GhostDrawSetup-$Version.msi"
+$OutputPath = "bin\x64\$Configuration\GhostDrawSetup-$normalizedVersion.msi"
 Write-Host "[4/4] Installer created:" -ForegroundColor Yellow
 Write-Host "  $OutputPath" -ForegroundColor White
 Write-Host ""
